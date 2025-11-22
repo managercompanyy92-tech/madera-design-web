@@ -1,199 +1,84 @@
-// public/chat.js (или src/chat.js — куда у тебя подключено)
-'use strict';
+// api/chat.js — серверная функция Vercel для Madera AI
 
-const API_URL = '/api/chat';
+export default async function handler(req, res) {
+  console.log('[Madera AI] Incoming request:', req.method, req.url);
 
-const FALLBACK_ANSWER =
-  'Спасибо за вопрос! Сейчас AI-ассистент в демо-режиме. ' +
-  'Менеджер свяжется с вами после отправки заявки в разделе «Заказ».';
-
-function $(selectors) {
-  for (const sel of selectors) {
-    const el = document.querySelector(sel);
-    if (el) return el;
+  // Разрешаем только POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
-  return null;
+
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    console.error('[Madera AI] OPENAI_API_KEY is not set in environment variables');
+    return res.status(500).json({ error: 'Server configuration error: missing OPENAI_API_KEY' });
+  }
+
+  try {
+    const { message, history } = req.body || {};
+
+    if (!message || typeof message !== 'string') {
+      console.warn('[Madera AI] Invalid message in request body:', req.body);
+      return res.status(400).json({ error: 'Invalid "message" field' });
+    }
+
+    const systemPrompt = `
+Ты — AI-ассистент студии мебельного дизайна Madera в Душанбе.
+Твоя задача — помогать клиентам с ориентировочной оценкой стоимости корпусной мебели,
+подсказками по материалам, фурнитуре и планировке.
+
+Важные правила:
+1. ВСЕГДА отвечай по-русски.
+2. Всегда напоминай, что расчёт ориентировочный, а окончательную цену и замер делает менеджер.
+3. Если не хватает данных (размер, форма, материалы, фурнитура) — задавай уточняющие вопросы.
+4. Не давай юридических советов и не обсуждай темы, не связанные с мебелью или ремонтом.
+5. Цены давай примерно, в сомони, с нормальной человеческой формулировкой.
+6. В конце ответа мягко предложи оставить заявку в разделе «Заказ» на сайте.
+
+Если пользователь отходит от темы мебели и ремонта, вежливо верни диалог обратно к теме
+мебели на заказ и услуг студии Madera.
+    `.trim();
+
+    // Формируем сообщения для Chat Completions
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...(Array.isArray(history) ? history : []),
+      { role: 'user', content: message }
+    ];
+
+    console.log('[Madera AI] Sending request to OpenAI...');
+
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',           // можно заменить на gpt-4.1-mini при желании
+        messages,
+        temperature: 0.4,
+        max_tokens: 600
+      })
+    });
+
+    const data = await openaiResponse.json();
+
+    if (!openaiResponse.ok) {
+      console.error('[Madera AI] OpenAI API error:', openaiResponse.status, data);
+      return res.status(500).json({ error: 'AI request failed', details: data });
+    }
+
+    const reply =
+      data?.choices?.[0]?.message?.content?.trim() ||
+      'Извините, сейчас не удалось получить ответ от модели. Попробуйте ещё раз.';
+
+    console.log('[Madera AI] Reply ready');
+
+    return res.status(200).json({ reply });
+  } catch (error) {
+    console.error('[Madera AI] Unexpected server error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const openBtn = $([
-    '[data-ai-assistant-toggle]',
-    '#ai-assistant-toggle',
-    '.ai-assistant-toggle',
-    '.ai-assistant-button',
-    'button[aria-label="AI-ассистент"]'
-  ]);
-
-  const widget = $([
-    '[data-ai-assistant]',
-    '#ai-assistant',
-    '.ai-assistant-widget'
-  ]);
-
-  const closeBtn = $([
-    '[data-ai-assistant-close]',
-    '.ai-assistant-close',
-    '.ai-close'
-  ]);
-
-  const messagesContainer = $([
-    '[data-ai-messages]',
-    '.ai-messages',
-    '#ai-messages'
-  ]);
-
-  const form = $([
-    '[data-ai-form]',
-    '#ai-form',
-    '.ai-form'
-  ]);
-
-  const input = $([
-    '[data-ai-input]',
-    '#ai-input',
-    '.ai-input',
-    'textarea[name="ai-question"]',
-    'input[name="ai-question"]'
-  ]);
-
-  const sendButton = $([
-    '[data-ai-send]',
-    '.ai-send-button',
-    '#ai-send'
-  ]);
-
-  if (!widget || !messagesContainer || !form || !input) {
-    console.warn('[Madera AI] Chat init failed: missing DOM elements');
-    return;
-  }
-
-  function openWidget() {
-    widget.classList.add('ai-open');
-  }
-
-  function closeWidget() {
-    widget.classList.remove('ai-open');
-  }
-
-  if (openBtn) {
-    openBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      openWidget();
-      input.focus();
-    });
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      closeWidget();
-    });
-  }
-
-  function scrollToBottom() {
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }
-
-  function createMessageBubble(role, text) {
-    const bubble = document.createElement('div');
-    bubble.classList.add('ai-message', `ai-message--${role}`);
-    bubble.textContent = text;
-    return bubble;
-  }
-
-  function addMessage(role, text) {
-    const bubble = createMessageBubble(role, text);
-    messagesContainer.appendChild(bubble);
-    scrollToBottom();
-    return bubble;
-  }
-
-  function addTypingIndicator() {
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('ai-message', 'ai-message--assistant', 'ai-typing');
-
-    for (let i = 0; i < 3; i++) {
-      const dot = document.createElement('span');
-      dot.className = 'ai-typing-dot';
-      wrapper.appendChild(dot);
-    }
-
-    messagesContainer.appendChild(wrapper);
-    scrollToBottom();
-    return wrapper;
-  }
-
-  function removeTypingIndicator(node) {
-    if (node && node.parentNode) {
-      node.parentNode.removeChild(node);
-    }
-  }
-
-  async function sendQuestion(question) {
-    addMessage('user', question);
-    const typingNode = addTypingIndicator();
-
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: question })
-      });
-
-      removeTypingIndicator(typingNode);
-
-      if (!response.ok) {
-        console.error(
-          '[Madera AI] HTTP error from /api/chat:',
-          response.status,
-          response.statusText
-        );
-        addMessage('assistant', FALLBACK_ANSWER);
-        return;
-      }
-
-      const data = await response.json();
-
-      const answer =
-        (data && (data.answer || data.message || data.text || data.reply)) ||
-        FALLBACK_ANSWER;
-
-      addMessage('assistant', answer);
-    } catch (err) {
-      console.error('[Madera AI] Network/JS error while calling /api/chat:', err);
-      removeTypingIndicator(typingNode);
-      addMessage('assistant', FALLBACK_ANSWER);
-    }
-  }
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const question = (input.value || '').trim();
-    if (!question) return;
-
-    if (sendButton) {
-      sendButton.disabled = true;
-      sendButton.classList.add('ai-send-disabled');
-    }
-
-    sendQuestion(question).finally(() => {
-      input.value = '';
-      input.focus();
-
-      if (sendButton) {
-        sendButton.disabled = false;
-        sendButton.classList.remove('ai-send-disabled');
-      }
-    });
-  });
-
-  if (sendButton) {
-    sendButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      form.requestSubmit();
-    });
-  }
-});
