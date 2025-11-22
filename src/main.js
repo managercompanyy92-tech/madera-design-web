@@ -169,7 +169,7 @@ function renderCatalog() {
   `;
 }
 
-// Раздел «Заказ»: калькулятор + маркетинг
+// Раздел «Заказ»: калькулятор + форма + маркетинг
 function renderOrder() {
   return `
     <section class="page page--order">
@@ -180,80 +180,202 @@ function renderOrder() {
       </p>
 
       <div class="order-layout">
-        <!-- Левая колонка: калькулятор -->
-        <div class="order-calc">
-          <div class="order-calc__header">
-            <div class="order-calc__title">Быстрый расчёт стоимости</div>
-            <div class="order-calc__tag">от 3 пог. метров</div>
-          </div>
-
-          <div class="order-calc__row">
-            <label class="order-calc__label" for="order-length">
-              Длина проекта, погонные метры
-            </label>
-            <input
-              id="order-length"
-              type="number"
-              min="1"
-              step="0.1"
-              placeholder="Например, 4.5"
-              class="order-calc__input"
-              data-calc-length
-            />
-            <div class="order-calc__hint">
-              Минимальный объём заказа — <strong>3 пог. метра</strong>. Меньшие проекты мы не принимаем.
+        <!-- Левая колонка: калькулятор + форма -->
+        <div>
+          <div class="order-calc">
+            <div class="order-calc__header">
+              <div class="order-calc__title">Быстрый расчёт стоимости</div>
+              <div class="order-calc__tag">от 3 пог. метров</div>
             </div>
-          </div>
 
-          <div class="order-calc__row">
-            <div class="order-calc__label">
-              Материал и тариф
-            </div>
-            <div class="order-calc__tariffs">
-              <label class="order-calc-tariff">
-                <input
-                  type="radio"
-                  name="tariff"
-                  value="standard"
-                  checked
-                />
-                <span class="order-calc-tariff__body">
-                  <span class="order-calc-tariff__name">Стандарт</span>
-                  <span class="order-calc-tariff__price">≈ ${BASE_RATES.standard.toLocaleString("ru-RU")} сом / п.м.</span>
-                  <span class="order-calc-tariff__desc">
-                    Корпус и фасады из ЛДСП, фурнитура Blum или аналог высокого качества.
-                  </span>
-                </span>
+            <div class="order-calc__row">
+              <label class="order-calc__label" for="order-length">
+                Длина проекта, погонные метры
               </label>
+              <input
+                id="order-length"
+                type="number"
+                min="1"
+                step="0.1"
+                placeholder="Например, 4.5"
+                class="order-calc__input"
+                data-calc-length
+              />
+              <div class="order-calc__hint">
+                Минимальный объём заказа — <strong>3 пог. метра</strong>. Меньшие проекты мы не принимаем.
+              </div>
+            </div>
 
-              <label class="order-calc-tariff">
-                <input
-                  type="radio"
-                  name="tariff"
-                  value="premium"
-                />
-                <span class="order-calc-tariff__body">
-                  <span class="order-calc-tariff__name">Премиум</span>
-                  <span class="order-calc-tariff__price">≈ ${BASE_RATES.premium.toLocaleString("ru-RU")} сом / п.м.</span>
-                  <span class="order-calc-tariff__desc">
-                    Корпус из ЛДСП, фасады из турецкого МДФ, фурнитура Blum. Премиальный внешний вид.
+            <div class="order-calc__row">
+              <div class="order-calc__label">
+                Материал и тариф
+              </div>
+              <div class="order-calc__tariffs">
+                <label class="order-calc-tariff">
+                  <input
+                    type="radio"
+                    name="tariff"
+                    value="standard"
+                    checked
+                  />
+                  <span class="order-calc-tariff__body">
+                    <span class="order-calc-tariff__name">Стандарт</span>
+                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.standard.toLocaleString("ru-RU")} сом / п.м.</span>
+                    <span class="order-calc-tariff__desc">
+                      Корпус и фасады из ЛДСП, фурнитура Blum или аналог высокого качества.
+                    </span>
                   </span>
-                </span>
-              </label>
+                </label>
+
+                <label class="order-calc-tariff">
+                  <input
+                    type="radio"
+                    name="tariff"
+                    value="premium"
+                  />
+                  <span class="order-calc-tariff__body">
+                    <span class="order-calc-tariff__name">Премиум</span>
+                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.premium.toLocaleString("ru-RU")} сом / п.м.</span>
+                    <span class="order-calc-tariff__desc">
+                      Корпус из ЛДСП, фасады из турецкого МДФ, фурнитура Blum. Премиальный внешний вид.
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="order-calc__actions">
+              <button class="btn btn--primary" data-action="calc-price">
+                Рассчитать стоимость
+              </button>
+              <div class="order-calc__note">
+                Расчёт предварительный и не учитывает сложные формы, встроенную технику и нестандартные решения.
+              </div>
+            </div>
+
+            <div class="order-calc__result">
+              Введите длину и выберите тариф, затем нажмите «Рассчитать стоимость».
             </div>
           </div>
 
-          <div class="order-calc__actions">
-            <button class="btn btn--primary" data-action="calc-price">
-              Рассчитать стоимость
-            </button>
-            <div class="order-calc__note">
-              Расчёт предварительный и не учитывает сложные формы, встроенную технику и нестандартные решения.
+          <!-- Форма заявки, связанная с калькулятором -->
+          <div class="order-form">
+            <div class="order-form__header">
+              <div class="order-form__title">Заявка на замер и расчёт</div>
+              <div class="order-form__subtitle">
+                Заполните контактные данные — менеджер свяжется с вами, уточнит детали и сделает точный расчёт.
+              </div>
             </div>
-          </div>
 
-          <div class="order-calc__result">
-            Введите длину и выберите тариф, затем нажмите «Рассчитать стоимость».
+            <div class="order-form__grid">
+              <div class="order-form__row">
+                <label class="order-form__label">Ваше имя*</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Как к вам обращаться?"
+                  data-order-name
+                />
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Телефон / WhatsApp*</label>
+                <input
+                  type="tel"
+                  class="order-form__input"
+                  placeholder="+992 ..."
+                  data-order-phone
+                />
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Предпочтительный способ связи</label>
+                <select class="order-form__select" data-order-contact-method>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="telegram">Telegram</option>
+                  <option value="call">Телефонный звонок</option>
+                </select>
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Категория мебели</label>
+                <select class="order-form__select" data-order-category>
+                  <option value="">Выберите категорию</option>
+                  <option value="kitchens">Кухни</option>
+                  <option value="bedrooms">Спальни</option>
+                  <option value="living">Гостиные</option>
+                  <option value="wardrobes">Гардеробные</option>
+                  <option value="hallways">Прихожие</option>
+                  <option value="kids">Детская мебель</option>
+                </select>
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Длина проекта, пог. метры (из калькулятора)</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Например, 4.5"
+                  data-order-length-output
+                />
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Выбранный тариф</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Стандарт / Премиум"
+                  data-order-tariff-output
+                />
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Промокод (если есть)</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Введите промокод"
+                  data-order-promo
+                />
+              </div>
+
+              <div class="order-form__row order-form__row--full">
+                <label class="order-form__label">Кратко опишите проект</label>
+                <textarea
+                  class="order-form__textarea"
+                  rows="3"
+                  placeholder="Кухня в современной квартире, примерно 4.5 м, нужен встроенный холодильник и духовой шкаф..."
+                  data-order-comment
+                ></textarea>
+              </div>
+
+              <div class="order-form__row order-form__row--full">
+                <label class="order-form__label">Насколько вы настроены на заказ? (отбор «наших» клиентов)</label>
+                <select class="order-form__select" data-order-readiness>
+                  <option value="soon">Готов(а) заказать в ближайший месяц</option>
+                  <option value="thinking">Пока изучаю варианты и цены</option>
+                  <option value="just-looking">Просто смотрю идеи на будущее</option>
+                </select>
+              </div>
+
+              <div class="order-form__row order-form__row--full order-form__row--checkbox">
+                <label class="order-form__checkbox">
+                  <input type="checkbox" data-order-minagree />
+                  <span>Я понимаю, что минимальный объём заказа — 3 погонных метра и согласен(на) с этим условием</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="order-form__footer">
+              <button class="btn btn--primary" data-action="submit-order">
+                Отправить заявку на расчёт
+              </button>
+              <div class="order-form__note">
+                Нажимая на кнопку, вы отправляете заявку менеджеру Madera Design. Мы не передаём данные третьим лицам.
+              </div>
+              <div class="order-form__result" data-order-result></div>
+            </div>
           </div>
         </div>
 
@@ -272,7 +394,7 @@ function renderOrder() {
 
           <div class="order-info__next">
             <div class="order-info__next-text">
-              Готовы обсудить проект? После расчёта вы сможете отправить заявку на замер и заказ прямо из приложения.
+              Готовы обсудить проект? После заявки менеджер свяжется с вами и создаст заказ в системе с отслеживанием статуса.
             </div>
             <button class="btn btn--outline" data-route="profile">
               Перейти к оформлению и статусам заказов
@@ -388,6 +510,17 @@ function handleCalcPrice() {
     return;
   }
 
+  // Заполняем форму заявки данными из калькулятора
+  const lengthField = main.querySelector("[data-order-length-output]");
+  const tariffField = main.querySelector("[data-order-tariff-output]");
+
+  if (lengthField) {
+    lengthField.value = length.toFixed(1);
+  }
+  if (tariffField) {
+    tariffField.value = tariff === "premium" ? "Премиум" : "Стандарт";
+  }
+
   resultBox.innerHTML = `
     <div class="order-calc__result-ok">
       <div class="order-calc__result-main">
@@ -403,7 +536,92 @@ function handleCalcPrice() {
         Точный расчёт вы получите после замера и утверждения дизайн-проекта.
       </div>
       <div class="order-calc__result-next">
-        Следующий шаг: отправьте заявку через раздел «Профиль» или свяжитесь с нами в мессенджерах.
+        Следующий шаг: отправьте заявку через форму ниже — менеджер свяжется с вами для точного расчёта.
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Обработчик отправки заявки
+ */
+function handleOrderSubmit() {
+  const main = document.getElementById("app-main");
+  if (!main) return;
+
+  const nameInput = main.querySelector("[data-order-name]");
+  const phoneInput = main.querySelector("[data-order-phone]");
+  const categorySelect = main.querySelector("[data-order-category]");
+  const lengthOutput = main.querySelector("[data-order-length-output]");
+  const tariffOutput = main.querySelector("[data-order-tariff-output]");
+  const promoInput = main.querySelector("[data-order-promo]");
+  const commentInput = main.querySelector("[data-order-comment]");
+  const readinessSelect = main.querySelector("[data-order-readiness]");
+  const minAgreeCheckbox = main.querySelector("[data-order-minagree]");
+  const resultBox = main.querySelector("[data-order-result]");
+
+  if (!resultBox) return;
+
+  const name = (nameInput?.value || "").trim();
+  const phone = (phoneInput?.value || "").trim();
+  const category = categorySelect?.value || "";
+  const lengthStr = (lengthOutput?.value || "").replace(",", ".");
+  const length = parseFloat(lengthStr);
+  const tariffText = (tariffOutput?.value || "").trim();
+  const promo = (promoInput?.value || "").trim();
+  const comment = (commentInput?.value || "").trim();
+  const readiness = readinessSelect?.value || "soon";
+  const minAgree = !!minAgreeCheckbox?.checked;
+
+  // Простая валидация
+  if (!name || !phone) {
+    resultBox.innerHTML = `
+      <div class="order-form__result-error">
+        Пожалуйста, укажите ваше имя и телефон для связи.
+      </div>
+    `;
+    return;
+  }
+
+  if (!minAgree) {
+    resultBox.innerHTML = `
+      <div class="order-form__result-error">
+        Для продолжения необходимо подтвердить, что вы согласны с минимальным объёмом заказа 3 погонных метра.
+      </div>
+    `;
+    return;
+  }
+
+  if (!Number.isNaN(length) && length < 3) {
+    resultBox.innerHTML = `
+      <div class="order-form__result-error">
+        В заявке указана длина менее 3 погонных метров. Уточните длину или обсудите с менеджером возможные варианты.
+      </div>
+    `;
+    return;
+  }
+
+  // Заготовка для интеграции с backend / CRM
+  const payload = {
+    name,
+    phone,
+    category,
+    length: Number.isNaN(length) ? null : length,
+    tariff: tariffText || null,
+    promo: promo || null,
+    comment: comment || null,
+    readiness,
+    minAgree
+  };
+  console.log("ORDER_PAYLOAD", payload);
+
+  resultBox.innerHTML = `
+    <div class="order-form__result-ok">
+      <div class="order-form__result-main">
+        Заявка отправлена. Менеджер Madera Design свяжется с вами для уточнения деталей и точного расчёта.
+      </div>
+      <div class="order-form__result-sub">
+        Если вы указали WhatsApp или Telegram, ответ придёт туда. В рабочее время мы обычно отвечаем в течение дня.
       </div>
     </div>
   `;
@@ -454,6 +672,13 @@ function setupRouter() {
     const calcTarget = event.target.closest("[data-action='calc-price']");
     if (calcTarget) {
       handleCalcPrice();
+      return;
+    }
+
+    // Кнопка отправки заявки
+    const submitTarget = event.target.closest("[data-action='submit-order']");
+    if (submitTarget) {
+      handleOrderSubmit();
       return;
     }
   });
