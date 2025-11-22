@@ -1,15 +1,12 @@
-// public/chat.js  или /src/chat.js — как у тебя подключено
+// public/chat.js (или src/chat.js — куда у тебя подключено)
 'use strict';
 
-// Куда шлём запрос на бэкенд
 const API_URL = '/api/chat';
 
-// Что показывать, если бэкенд упал или ещё не сделан
 const FALLBACK_ANSWER =
   'Спасибо за вопрос! Сейчас AI-ассистент в демо-режиме. ' +
   'Менеджер свяжется с вами после отправки заявки в разделе «Заказ».';
 
-// Удобный поиск элемента по нескольким селекторам
 function $(selectors) {
   for (const sel of selectors) {
     const el = document.querySelector(sel);
@@ -19,7 +16,6 @@ function $(selectors) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Кнопка "AI-ассистент" на странице
   const openBtn = $([
     '[data-ai-assistant-toggle]',
     '#ai-assistant-toggle',
@@ -28,35 +24,30 @@ document.addEventListener('DOMContentLoaded', () => {
     'button[aria-label="AI-ассистент"]'
   ]);
 
-  // Сам виджет (чёрный блок с чатом)
   const widget = $([
     '[data-ai-assistant]',
     '#ai-assistant',
     '.ai-assistant-widget'
   ]);
 
-  // Кнопка закрытия (крестик)
   const closeBtn = $([
     '[data-ai-assistant-close]',
     '.ai-assistant-close',
     '.ai-close'
   ]);
 
-  // Контейнер с сообщениями
   const messagesContainer = $([
     '[data-ai-messages]',
     '.ai-messages',
     '#ai-messages'
   ]);
 
-  // Форма, в которой поле ввода и кнопка отправки
   const form = $([
     '[data-ai-form]',
     '#ai-form',
     '.ai-form'
   ]);
 
-  // Поле ввода вопроса
   const input = $([
     '[data-ai-input]',
     '#ai-input',
@@ -65,20 +56,16 @@ document.addEventListener('DOMContentLoaded', () => {
     'input[name="ai-question"]'
   ]);
 
-  // Кнопка отправки
   const sendButton = $([
     '[data-ai-send]',
     '.ai-send-button',
     '#ai-send'
   ]);
 
-  // Если чего-то критического нет — просто выходим, чтобы не ломать сайт
   if (!widget || !messagesContainer || !form || !input) {
     console.warn('[Madera AI] Chat init failed: missing DOM elements');
     return;
   }
-
-  // ----- ОТКРЫТИЕ / ЗАКРЫТИЕ ВИДЖЕТА -----
 
   function openWidget() {
     widget.classList.add('ai-open');
@@ -102,8 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
       closeWidget();
     });
   }
-
-  // ----- РАБОТА С СООБЩЕНИЯМИ -----
 
   function scrollToBottom() {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -144,13 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ----- ОТПРАВКА ВОПРОСА НА БЭКЕНД -----
-
   async function sendQuestion(question) {
-    // Показать сообщение пользователя
     addMessage('user', question);
-
-    // Показать "печатает..."
     const typingNode = addTypingIndicator();
 
     try {
@@ -159,8 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        // ВАЖНО: поле message должно совпадать с тем,
-        // что ты читаешь на бэкенде (req.body.message)
         body: JSON.stringify({ message: question })
       });
 
@@ -178,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const data = await response.json();
 
-      // Пытаемся найти текст ответа в разных полях
       const answer =
         (data && (data.answer || data.message || data.text || data.reply)) ||
         FALLBACK_ANSWER;
@@ -190,8 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
       addMessage('assistant', FALLBACK_ANSWER);
     }
   }
-
-  // ----- ОБРАБОТКА ФОРМЫ -----
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -215,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Если есть отдельная кнопка "Отправить" — жмём submit у формы
   if (sendButton) {
     sendButton.addEventListener('click', (e) => {
       e.preventDefault();
