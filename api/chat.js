@@ -1,117 +1,146 @@
-// api/chat.js
-// Серверная функция Vercel для AI-чата Madera Design
+// chat.js
+// Требуемая разметка (можешь подстроить под свой HTML):
+// - Кнопка открытия чата: [data-chat-open]
+// - Кнопка закрытия чата (крестик в окне): [data-chat-close]
+// - Контейнер виджета чата: [data-chat-widget]
+// - Контейнер сообщений: [data-chat-messages]
+// - Форма отправки сообщения: [data-chat-form]
+// - Поле ввода: [data-chat-input]
+// - Кнопка отправки: [data-chat-send] (может быть <button> в форме)
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+document.addEventListener("DOMContentLoaded", () => {
+  const widget = document.querySelector("[data-chat-widget]");
+  const openBtn = document.querySelector("[data-chat-open]");
+  const closeBtn = document.querySelector("[data-chat-close]");
+  const form = document.querySelector("[data-chat-form]");
+  const input = document.querySelector("[data-chat-input]");
+  const messages = document.querySelector("[data-chat-messages]");
+  const sendBtn = document.querySelector("[data-chat-send]") || form?.querySelector("button[type='submit']");
 
-module.exports = async (req, res) => {
-  // Разрешаем только POST-запросы
-  if (req.method !== "POST") {
-    res.statusCode = 405;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: "Method Not Allowed" }));
+  if (!widget || !openBtn || !closeBtn || !form || !input || !messages) {
+    console.warn("Chat widget: не найдены необходимые элементы в разметке.");
     return;
   }
 
-  if (!OPENAI_API_KEY) {
-    res.statusCode = 500;
-    res.setHeader("Content-Type", "application/json");
-    res.end(
-      JSON.stringify({
-        error: "Server: OPENAI_API_KEY is not configured.",
-      })
-    );
-    return;
-  }
+  // Открыть чат
+  openBtn.addEventListener("click", () => {
+    widget.classList.add("chat-open");
+    input.focus();
+  });
 
-  try {
-    // Читаем тело запроса
-    let body = "";
-    await new Promise((resolve, reject) => {
-      req.on("data", (chunk) => {
-        body += chunk;
+  // Закрыть чат
+  closeBtn.addEventListener("click", () => {
+    widget.classList.remove("chat-open");
+  });
+
+  // Отправка сообщения по submit формы
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await handleSendMessage();
+  });
+
+  // Основная логика отправки
+  async function handleSendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendMessage("user", text);
+    input.value = "";
+    input.focus();
+
+    setInputDisabled(true);
+
+    const typingEl = showTypingIndicator();
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: text })
       });
-      req.on("end", resolve);
-      req.on("error", reject);
-    });
 
-    const parsed = body ? JSON.parse(body) : {};
-    const message = (parsed.message || "").toString().trim();
-    const leadSegment = parsed.leadSegment || "unknown";
-    const context = parsed.context || {};
+      removeTypingIndicator(typingEl);
 
-    if (!message) {
-      res.statusCode = 400;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ error: "Empty message" }));
-      return;
-    }
+      if (!response.ok) {
+        console.error("Chat API error:", response.status, response.statusText);
+        appendMessage(
+          "assistant",
+          "Извините, сейчас не удалось получить ответ от AI. Попробуйте ещё раз позже."
+        );
+        return;
+      }
 
-    const systemPrompt = `
-Ты ассистент мебельной студии Madera Design в Душанбе.
-
-Говоришь кратко, профессионально и дружелюбно:
-- Тарифы: ориентировочно 4000 сом/п.м. (ЛДСП фасады, Стандарт) и 5000 сом/п.м. (МДФ фасады, Премиум).
-- Минимальный заказ: 3 погонных метра.
-- Точных цен не даёшь без замера, используешь формулировки "примерно", "ориентировочно".
-- Предлагаешь следующий шаг: заявка на расчёт и замер.
-
-Тон в зависимости от сегмента лида:
-- hot: больше конкретики и призыв к действию (зафиксировать замер, обсудить детали).
-- warm: больше аргументов и примеров, помогаешь сравнить варианты.
-- cold: мягко вдохновляешь, даёшь идеи и общие ориентиры, без давления.
-
-Сегмент лида: ${leadSegment}.
-Контекст: ${JSON.stringify(context)}.
-    `.trim();
-
-    // Запрос к OpenAI Chat Completions
-    const apiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message },
-        ],
-        temperature: 0.4,
-        max_tokens: 350,
-      }),
-    });
-
-    if (!apiResponse.ok) {
-      const errorText = await apiResponse.text();
-      console.error("OpenAI API error:", apiResponse.status, errorText);
-
-      res.statusCode = 502;
-      res.setHeader("Content-Type", "application/json");
-      res.end(
-        JSON.stringify({
-          error: "AI provider error",
-        })
+      const data = await response.json();
+      const reply = (data && data.reply) || "Извините, я не смог сформировать ответ.";
+      appendMessage("assistant", reply);
+    } catch (error) {
+      console.error("Chat API request failed:", error);
+      removeTypingIndicator(typingEl);
+      appendMessage(
+        "assistant",
+        "Возникла ошибка при соединении с сервером. Проверьте интернет и попробуйте снова."
       );
-      return;
+    } finally {
+      setInputDisabled(false);
     }
-
-    const data = await apiResponse.json();
-    const reply =
-      data.choices?.[0]?.message?.content?.trim() ||
-      "Извините, сейчас не могу ответить. Попробуйте ещё раз чуть позже.";
-
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ reply }));
-  } catch (err) {
-    console.error("API /api/chat error:", err);
-    res.statusCode = 500;
-    res.setHeader("Content-Type", "application/json");
-    res.end(
-      JSON.stringify({
-        error: "Internal Server Error",
-      })
-    );
   }
-};
+
+  // Добавление сообщения в окно чата
+  function appendMessage(role, text) {
+    const messageEl = document.createElement("div");
+    messageEl.classList.add("chat-message", `chat-message--${role}`);
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("chat-bubble");
+    bubble.textContent = text;
+
+    messageEl.appendChild(bubble);
+    messages.appendChild(messageEl);
+    scrollToBottom();
+  }
+
+  // Индикатор "Ассистент печатает..."
+  function showTypingIndicator() {
+    const messageEl = document.createElement("div");
+    messageEl.classList.add("chat-message", "chat-message--assistant", "chat-message--typing");
+    messageEl.dataset.typing = "true";
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("chat-bubble");
+
+    const dots = document.createElement("span");
+    dots.classList.add("chat-typing-dots");
+    dots.textContent = "Ассистент печатает…";
+
+    bubble.appendChild(dots);
+    messageEl.appendChild(bubble);
+    messages.appendChild(messageEl);
+    scrollToBottom();
+
+    return messageEl;
+  }
+
+  function removeTypingIndicator(el) {
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    } else {
+      const existing = messages.querySelector("[data-typing='true']");
+      if (existing && existing.parentNode) {
+        existing.parentNode.removeChild(existing);
+      }
+    }
+  }
+
+  // Блокировка/разблокировка ввода во время запроса
+  function setInputDisabled(disabled) {
+    input.disabled = disabled;
+    if (sendBtn) sendBtn.disabled = disabled;
+  }
+
+  // Скролл вниз
+  function scrollToBottom() {
+    messages.scrollTop = messages.scrollHeight;
+  }
+});
