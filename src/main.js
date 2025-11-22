@@ -4,6 +4,12 @@
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
 
+// Тарифы за погонный метр (сомони)
+const BASE_RATES = {
+  standard: 4000, // ЛДСП фасады
+  premium: 5000   // МДФ фасады
+};
+
 // Корневой контейнер приложения
 const appRoot = document.getElementById("app");
 
@@ -163,18 +169,116 @@ function renderCatalog() {
   `;
 }
 
-// Страница заказа (позже превратим в калькулятор + форму)
+// Раздел «Заказ»: калькулятор + маркетинг
 function renderOrder() {
   return `
-    <section class="page">
-      <h1 class="page__title">Онлайн-заказ мебели</h1>
+    <section class="page page--order">
+      <h1 class="page__title">Онлайн-калькулятор и заказ мебели</h1>
       <p class="page__subtitle">
-        В этом разделе будет максимально простая и продающая форма заказа,
-        онлайн-калькулятор, условия оплаты и оформление в кредит.
+        Оцените базовую стоимость вашего проекта за несколько секунд. Это ориентировочный расчёт — 
+        точную цену вы получите после замера и согласования дизайн-проекта.
       </p>
-      <div class="page__placeholder">
-        На следующих шагах превратим эту страницу в конверсионный экран,
-        который отсекает неподходящие заявки и приводит «наших» клиентов.
+
+      <div class="order-layout">
+        <!-- Левая колонка: калькулятор -->
+        <div class="order-calc">
+          <div class="order-calc__header">
+            <div class="order-calc__title">Быстрый расчёт стоимости</div>
+            <div class="order-calc__tag">от 3 пог. метров</div>
+          </div>
+
+          <div class="order-calc__row">
+            <label class="order-calc__label" for="order-length">
+              Длина проекта, погонные метры
+            </label>
+            <input
+              id="order-length"
+              type="number"
+              min="1"
+              step="0.1"
+              placeholder="Например, 4.5"
+              class="order-calc__input"
+              data-calc-length
+            />
+            <div class="order-calc__hint">
+              Минимальный объём заказа — <strong>3 пог. метра</strong>. Меньшие проекты мы не принимаем.
+            </div>
+          </div>
+
+          <div class="order-calc__row">
+            <div class="order-calc__label">
+              Материал и тариф
+            </div>
+            <div class="order-calc__tariffs">
+              <label class="order-calc-tariff">
+                <input
+                  type="radio"
+                  name="tariff"
+                  value="standard"
+                  checked
+                />
+                <span class="order-calc-tariff__body">
+                  <span class="order-calc-tariff__name">Стандарт</span>
+                  <span class="order-calc-tariff__price">≈ ${BASE_RATES.standard.toLocaleString("ru-RU")} сом / п.м.</span>
+                  <span class="order-calc-tariff__desc">
+                    Корпус и фасады из ЛДСП, фурнитура Blum или аналог высокого качества.
+                  </span>
+                </span>
+              </label>
+
+              <label class="order-calc-tariff">
+                <input
+                  type="radio"
+                  name="tariff"
+                  value="premium"
+                />
+                <span class="order-calc-tariff__body">
+                  <span class="order-calc-tariff__name">Премиум</span>
+                  <span class="order-calc-tariff__price">≈ ${BASE_RATES.premium.toLocaleString("ru-RU")} сом / п.м.</span>
+                  <span class="order-calc-tariff__desc">
+                    Корпус из ЛДСП, фасады из турецкого МДФ, фурнитура Blum. Премиальный внешний вид.
+                  </span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="order-calc__actions">
+            <button class="btn btn--primary" data-action="calc-price">
+              Рассчитать стоимость
+            </button>
+            <div class="order-calc__note">
+              Расчёт предварительный и не учитывает сложные формы, встроенную технику и нестандартные решения.
+            </div>
+          </div>
+
+          <div class="order-calc__result">
+            Введите длину и выберите тариф, затем нажмите «Рассчитать стоимость».
+          </div>
+        </div>
+
+        <!-- Правая колонка: маркетинг + следующий шаг -->
+        <div class="order-info">
+          <div class="order-info__card">
+            <div class="order-info__badge">Маркетинг & доверие</div>
+            <h2 class="order-info__title">Почему клиенты выбирают Madera Design</h2>
+            <ul class="order-info__list">
+              <li>Прозрачные тарифы: 4000 / 5000 сомони за погонный метр без скрытых доплат.</li>
+              <li>Договор, сроки и статус заказа — всегда под рукой в веб-приложении.</li>
+              <li>AI-помощник подбирает идеи дизайна под ваш стиль и бюджет.</li>
+              <li>Послепродажный сервис и настройка фурнитуры в течение года.</li>
+            </ul>
+          </div>
+
+          <div class="order-info__next">
+            <div class="order-info__next-text">
+              Готовы обсудить проект? После расчёта вы сможете отправить заявку на замер и заказ прямо из приложения.
+            </div>
+            <button class="btn btn--outline" data-route="profile">
+              Перейти к оформлению и статусам заказов
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   `;
@@ -242,6 +346,70 @@ function renderRoute(route) {
 }
 
 /**
+ * Обработчик расчёта стоимости
+ */
+function handleCalcPrice() {
+  const main = document.getElementById("app-main");
+  if (!main) return;
+
+  const lengthInput = main.querySelector("[data-calc-length]");
+  const tariffInput = main.querySelector("input[name='tariff']:checked");
+  const resultBox = main.querySelector(".order-calc__result");
+
+  if (!lengthInput || !tariffInput || !resultBox) return;
+
+  const raw = String(lengthInput.value || "").replace(",", ".");
+  const length = parseFloat(raw);
+
+  if (Number.isNaN(length) || length <= 0) {
+    resultBox.innerHTML = `
+      <div class="order-calc__result-error">
+        Пожалуйста, введите корректную длину проекта в погонных метрах.
+      </div>
+    `;
+    return;
+  }
+
+  const tariff = tariffInput.value;
+  const rate = BASE_RATES[tariff] || BASE_RATES.standard;
+  const basePrice = length * rate;
+
+  const formatter = new Intl.NumberFormat("ru-RU");
+
+  if (length < 3) {
+    resultBox.innerHTML = `
+      <div class="order-calc__result-error">
+        Минимальный объём заказа — 3 погонных метра. Сейчас указано: ${length.toFixed(
+          1
+        )} м.<br />
+        Пожалуйста, скорректируйте длину или обсудите с менеджером индивидуально.
+      </div>
+    `;
+    return;
+  }
+
+  resultBox.innerHTML = `
+    <div class="order-calc__result-ok">
+      <div class="order-calc__result-main">
+        Ориентировочная стоимость проекта при длине
+        <strong>${length.toFixed(1)} пог. м</strong> и тарифе
+        <strong>${tariff === "premium" ? "Премиум" : "Стандарт"}</strong>:
+      </div>
+      <div class="order-calc__result-price">
+        ≈ ${formatter.format(basePrice)} сомони
+      </div>
+      <div class="order-calc__result-details">
+        Это базовая цена без учёта сложных форм, встроенной техники и нестандартных решений.
+        Точный расчёт вы получите после замера и утверждения дизайн-проекта.
+      </div>
+      <div class="order-calc__result-next">
+        Следующий шаг: отправьте заявку через раздел «Профиль» или свяжитесь с нами в мессенджерах.
+      </div>
+    </div>
+  `;
+}
+
+/**
  * Установка выбранной категории каталога
  */
 function setCatalogCategory(categoryId) {
@@ -279,6 +447,13 @@ function setupRouter() {
     if (backTarget) {
       selectedCatalogCategoryId = null;
       renderRoute("catalog");
+      return;
+    }
+
+    // Кнопка расчёта стоимости
+    const calcTarget = event.target.closest("[data-action='calc-price']");
+    if (calcTarget) {
+      handleCalcPrice();
       return;
     }
   });
