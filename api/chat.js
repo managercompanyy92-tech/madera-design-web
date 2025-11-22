@@ -1,179 +1,211 @@
-// chat.js
-// Логика фронтенд-виджета "AI-ассистент Madera"
-// Отправка запросов на /api/chat (сервер на Vercel) и отображение диалога
+// chat.js — логика AI-ассистента Madera
 
-(function () {
-  const API_URL = '/api/chat';
+document.addEventListener("DOMContentLoaded", () => {
+  // ================== КОНФИГ ==================
+  // URL серверной функции на Vercel (api/chat.js)
+  const API_URL = "/api/chat";
 
-  // DOM-элементы
-  const openBtn = document.querySelector('#madera-chat-open');
-  const widget = document.querySelector('#madera-chat-widget');
-  const closeBtn = document.querySelector('#madera-chat-close');
-  const messagesContainer = document.querySelector('#madera-chat-messages');
-  const input = document.querySelector('#madera-chat-input');
-  const sendBtn = document.querySelector('#madera-chat-send');
+  // Функция, которая пытается найти элемент по нескольким вариантам
+  function $multi(selectors) {
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el) return el;
+    }
+    return null;
+  }
 
-  if (!widget || !messagesContainer || !input || !sendBtn) {
+  // ================== ПОИСК ЭЛЕМЕНТОВ ==================
+  // Кнопка открытия виджета (кнопка "AI-ассистент")
+  const openButton = $multi([
+    "[data-ai-open]",
+    "[data-chat-open]",
+    ".ai-assistant-open",
+    "#ai-assistant-open",
+    "#ai-assistant-button"
+  ]);
+
+  // Контейнер виджета (вся карточка чата)
+  const widget = $multi([
+    "[data-ai-widget]",
+    "[data-chat-widget]",
+    ".ai-assistant-widget",
+    "#ai-assistant-widget",
+    "#ai-widget"
+  ]);
+
+  // Кнопка закрытия (крестик)
+  const closeButton = widget
+    ? widget.querySelector("[data-ai-close], [data-chat-close], .ai-assistant-close, #ai-assistant-close")
+    : null;
+
+  // Контейнер сообщений
+  const messages = widget
+    ? widget.querySelector("[data-ai-messages], [data-chat-messages], .ai-assistant-messages, #ai-assistant-messages")
+    : null;
+
+  // Форма ввода
+  const form = widget
+    ? widget.querySelector("[data-ai-form], [data-chat-form], .ai-assistant-form, #ai-assistant-form, form")
+    : null;
+
+  // Поле ввода текста
+  const input = widget
+    ? widget.querySelector("[data-ai-input], [data-chat-input], .ai-assistant-input, #ai-assistant-input, input[type='text'], textarea")
+    : null;
+
+  console.log("AI-ассистент: элементы UI", {
+    openButton,
+    widget,
+    closeButton,
+    messages,
+    form,
+    input
+  });
+
+  // Если чего-то критически не хватает — выходим
+  if (!widget || !messages || !form || !input) {
     console.warn(
-      '[Madera Chat] Не найдены один или несколько элементов виджета. Проверь id в HTML.'
+      "AI-ассистент: не могу инициализировать чат — отсутствуют обязательные элементы.\n" +
+        "Убедись, что в HTML у блока чата есть атрибуты:\n" +
+        "data-ai-widget, data-ai-messages, data-ai-form, data-ai-input\n" +
+        "или соответствующие классы/ID."
     );
     return;
   }
 
-  // Состояние
-  let isSending = false;
-
-  // Вспомогательные функции
+  // ================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==================
 
   function scrollToBottom() {
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    messages.scrollTop = messages.scrollHeight;
   }
 
-  function createMessageElement(role, text) {
-    const bubble = document.createElement('div');
-    bubble.classList.add('madera-chat-message', `madera-chat-${role}`);
-
-    // role: 'user' | 'assistant' | 'system'
-    // Ожидается, что в CSS есть стили:
-    // .madera-chat-message.madera-chat-user { ... }
-    // .madera-chat-message.madera-chat-assistant { ... }
-
-    bubble.textContent = text;
-    return bubble;
+  function createMessageElement(text, role) {
+    const el = document.createElement("div");
+    el.classList.add("ai-message", `ai-message--${role}`);
+    el.textContent = text;
+    return el;
   }
 
-  function addMessage(role, text) {
-    const el = createMessageElement(role, text);
-    messagesContainer.appendChild(el);
+  function addMessage(text, role) {
+    const el = createMessageElement(text, role);
+    messages.appendChild(el);
     scrollToBottom();
     return el;
   }
 
-  function setSendingState(value) {
-    isSending = value;
-    input.disabled = value;
-    sendBtn.disabled = value;
-    if (value) {
-      sendBtn.classList.add('madera-chat-send-disabled');
-    } else {
-      sendBtn.classList.remove('madera-chat-send-disabled');
+  function replaceMessage(tempEl, text, role) {
+    if (!tempEl) {
+      addMessage(text, role);
+      return;
     }
+    tempEl.className = "";
+    tempEl.classList.add("ai-message", `ai-message--${role}`);
+    tempEl.textContent = text;
+    scrollToBottom();
   }
 
-  // Отправка запроса на бэкенд
-  async function sendToBackend(messageText, placeholderEl) {
-    try {
-      const controller = new AbortController();
-      // таймаут 30 секунд на всякий случай
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+  function setInputDisabled(disabled) {
+    input.disabled = disabled;
+  }
 
+  // ================== ОТПРАВКА В BACKEND ==================
+
+  async function sendMessageToAssistant(rawText) {
+    const text = (rawText || "").trim();
+    if (!text) return;
+
+    console.log("AI-ассистент: отправляю сообщение в API:", text);
+
+    // 1. Добавляем сообщение пользователя
+    addMessage(text, "user");
+    input.value = "";
+
+    // 2. Ставим заглушку "думаю"
+    setInputDisabled(true);
+    const thinkingEl = addMessage("Ассистент думает…", "assistant");
+
+    // Текст по умолчанию (на случай ошибок)
+    let finalText =
+      "Спасибо за вопрос! Сейчас AI-ассистент в демо-режиме. " +
+      "Менеджер свяжется с вами после отправки заявки в разделе «Заказ».";
+
+    try {
       const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: messageText }),
-        signal: controller.signal
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: text })
       });
 
-      clearTimeout(timeoutId);
+      console.log("AI-ассистент: ответ API статус", response.status);
 
       if (!response.ok) {
-        console.error('[Madera Chat] Backend error:', response.status, await response.text());
-        throw new Error('Bad response from backend');
+        console.error("AI-ассистент: ошибка ответа API", response.status);
+      } else {
+        const data = await response.json();
+        console.log("AI-ассистент: тело ответа API", data);
+
+        if (data && typeof data.reply === "string" && data.reply.trim()) {
+          finalText = data.reply.trim();
+        } else {
+          console.warn(
+            "AI-ассистент: в ответе API нет поля reply, использую текст по умолчанию."
+          );
+        }
       }
-
-      const data = await response.json();
-      const reply =
-        (data && data.reply && String(data.reply).trim()) ||
-        'Не удалось получить ответ от ассистента. Попробуйте переформулировать вопрос.';
-
-      placeholderEl.textContent = reply;
     } catch (error) {
-      console.error('[Madera Chat] Request failed:', error);
-
-      // Фолбэк при ошибке — текст про демо-режим
-      placeholderEl.textContent =
-        'Спасибо за вопрос! Сейчас AI-ассистент в демо-режиме. ' +
-        'Менеджер свяжется с вами после отправки заявки в разделе «Заказ».';
+      console.error("AI-ассистент: ошибка сети / запроса", error);
+      finalText =
+        "Не удалось получить ответ от AI-ассистента. " +
+        "Проверьте подключение к интернету и попробуйте ещё раз, " +
+        "либо оставьте заявку в разделе «Заказ».";
     } finally {
-      setSendingState(false);
+      replaceMessage(thinkingEl, finalText, "assistant");
+      setInputDisabled(false);
+      input.focus();
     }
   }
 
-  // Обработка отправки сообщения
-  function handleSend() {
-    if (isSending) return;
+  // ================== ОБРАБОТЧИКИ UI ==================
 
-    const raw = input.value.trim();
-    if (!raw) return;
-
-    // добавляем сообщение пользователя
-    addMessage('user', raw);
-
-    // очищаем поле ввода
-    input.value = '';
-
-    // временное сообщение ассистента "печатает..."
-    const placeholder = addMessage('assistant', 'Ассистент печатает ответ...');
-
-    setSendingState(true);
-
-    // отправляем на бэкенд
-    sendToBackend(raw, placeholder);
-  }
-
-  // Открытие / закрытие виджета
-  function openWidget() {
-    widget.classList.add('madera-chat-visible');
-  }
-
-  function closeWidget() {
-    widget.classList.remove('madera-chat-visible');
-  }
-
-  // Инициализация
-
-  // Приветственное сообщение ассистента (один раз при загрузке)
-  function initGreeting() {
-    if (messagesContainer.dataset.initialized === '1') return;
-    messagesContainer.dataset.initialized = '1';
-
-    addMessage(
-      'assistant',
-      'Здравствуйте! Я AI-ассистент Madera. Задайте вопрос по стоимости, материалам или планировке — подскажу общие варианты.'
+  // Открытие виджета
+  if (openButton) {
+    openButton.addEventListener("click", () => {
+      widget.classList.add("ai-widget--open");
+      input.focus();
+      console.log("AI-ассистент: виджет ОТКРЫТ");
+    });
+  } else {
+    console.warn(
+      "AI-ассистент: кнопка открытия не найдена. " +
+        "Добавь элемент с data-ai-open или классом .ai-assistant-open."
     );
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    initGreeting();
-  });
-
-  // Слушатели
-
-  if (openBtn) {
-    openBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      openWidget();
-      input.focus();
+  // Закрытие виджета
+  if (closeButton) {
+    closeButton.addEventListener("click", () => {
+      widget.classList.remove("ai-widget--open");
+      console.log("AI-ассистент: виджет ЗАКРЫТ");
     });
   }
 
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      closeWidget();
-    });
-  }
-
-  sendBtn.addEventListener('click', (e) => {
+  // Отправка по submit формы (кнопка «Отправить»)
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    handleSend();
+    if (input.disabled) return;
+    sendMessageToAssistant(input.value);
   });
 
-  input.addEventListener('keydown', (e) => {
-    // Отправка по Enter, Shift+Enter — перенос строки
-    if (e.key === 'Enter' && !e.shiftKey) {
+  // Отправка по Enter (без Shift)
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (input.disabled) return;
+      sendMessageToAssistant(input.value);
     }
   });
-})();
+
+  console.log("AI-ассистент Madera: chat.js успешно инициализирован");
+});
