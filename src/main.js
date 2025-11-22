@@ -7,18 +7,17 @@ import { catalogItems } from "./utils/catalogItems.js";
 // Тарифы за погонный метр (сомони)
 const BASE_RATES = {
   standard: 4000, // ЛДСП фасады
-  premium: 5000   // МДФ фасады
+  premium: 5000,  // МДФ фасады
 };
 
 // Корневой контейнер приложения
 const appRoot = document.getElementById("app");
 
-// Состояние выбранной категории каталога (null = показываем список категорий)
+// Состояние выбранной категории каталога (null = список категорий)
 let selectedCatalogCategoryId = null;
 
 /**
  * VIEW-ФУНКЦИИ
- * Каждая функция возвращает HTML-разметку для конкретного раздела.
  */
 
 // Главная страница
@@ -89,11 +88,11 @@ function renderHome() {
 
 // Каталог: категории + внутренние идеи
 function renderCatalog() {
-  // Если категория не выбрана — показываем список категорий (первый уровень)
+  // Первый уровень: категории
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
-      .map((cat) => {
-        return `
+      .map(
+        (cat) => `
           <button class="catalog-category-card" data-category-id="${cat.id}">
             <div class="catalog-category-card__image-wrap">
               <img src="${cat.image}" alt="${cat.title}" class="catalog-category-card__img" />
@@ -106,8 +105,8 @@ function renderCatalog() {
               <span class="catalog-category-card__arrow">›</span>
             </div>
           </button>
-        `;
-      })
+        `
+      )
       .join("");
 
     return `
@@ -124,13 +123,13 @@ function renderCatalog() {
     `;
   }
 
-  // Если категория выбрана — показываем идеи внутри неё (второй уровень)
+  // Второй уровень: идеи внутри категории
   const category = catalogCategories.find((cat) => cat.id === selectedCatalogCategoryId);
   const items = catalogItems.filter((item) => item.categoryId === selectedCatalogCategoryId);
 
   const itemCards = items
-    .map((item) => {
-      return `
+    .map(
+      (item) => `
         <div class="catalog-item-card">
           <div class="catalog-item-card__image-wrap">
             <img src="${item.image}" alt="${item.title}" class="catalog-item-card__img" />
@@ -143,8 +142,8 @@ function renderCatalog() {
             </button>
           </div>
         </div>
-      `;
-    })
+      `
+    )
     .join("");
 
   return `
@@ -220,7 +219,9 @@ function renderOrder() {
                   />
                   <span class="order-calc-tariff__body">
                     <span class="order-calc-tariff__name">Стандарт</span>
-                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.standard.toLocaleString("ru-RU")} сом / п.м.</span>
+                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.standard.toLocaleString(
+                      "ru-RU"
+                    )} сом / п.м.</span>
                     <span class="order-calc-tariff__desc">
                       Корпус и фасады из ЛДСП, фурнитура Blum или аналог высокого качества.
                     </span>
@@ -235,7 +236,9 @@ function renderOrder() {
                   />
                   <span class="order-calc-tariff__body">
                     <span class="order-calc-tariff__name">Премиум</span>
-                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.premium.toLocaleString("ru-RU")} сом / п.м.</span>
+                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.premium.toLocaleString(
+                      "ru-RU"
+                    )} сом / п.м.</span>
                     <span class="order-calc-tariff__desc">
                       Корпус из ЛДСП, фасады из турецкого МДФ, фурнитура Blum. Премиальный внешний вид.
                     </span>
@@ -406,7 +409,7 @@ function renderOrder() {
   `;
 }
 
-// Личный кабинет
+// Личный кабинет (заготовка)
 function renderProfile() {
   return `
     <section class="page">
@@ -446,7 +449,7 @@ const VIEWS = {
   catalog: renderCatalog,
   order: renderOrder,
   profile: renderProfile,
-  more: renderMore
+  more: renderMore,
 };
 
 /**
@@ -543,7 +546,7 @@ function handleCalcPrice() {
 }
 
 /**
- * Обработчик отправки заявки
+ * Обработчик отправки заявки + сегментация лида
  */
 function handleOrderSubmit() {
   const main = document.getElementById("app-main");
@@ -601,6 +604,24 @@ function handleOrderSubmit() {
     return;
   }
 
+  // Сегментация лида: горячий / тёплый / холодный
+  let leadSegment = "cold";
+  let leadLabel = "Холодный лид";
+  let leadAdvice =
+    "Клиент на стадии вдохновения и изучения идей. Важно не давить, а мягко сопровождать и давать полезные материалы.";
+
+  if (readiness === "soon" && (Number.isNaN(length) || length >= 3)) {
+    leadSegment = "hot";
+    leadLabel = "Горячий лид";
+    leadAdvice =
+      "Клиент готов к заказу в ближайшее время и понимает минимальный объём. Важно быстро связаться, закрепить дизайн и зафиксировать условия.";
+  } else if (readiness === "thinking") {
+    leadSegment = "warm";
+    leadLabel = "Тёплый лид";
+    leadAdvice =
+      "Клиент сравнивает варианты. Нужны аргументы: кейсы, примеры работ, прозрачные цены, преимущества сервиса Madera Design.";
+  }
+
   // Заготовка для интеграции с backend / CRM
   const payload = {
     name,
@@ -611,7 +632,8 @@ function handleOrderSubmit() {
     promo: promo || null,
     comment: comment || null,
     readiness,
-    minAgree
+    minAgree,
+    leadSegment,
   };
   console.log("ORDER_PAYLOAD", payload);
 
@@ -622,6 +644,12 @@ function handleOrderSubmit() {
       </div>
       <div class="order-form__result-sub">
         Если вы указали WhatsApp или Telegram, ответ придёт туда. В рабочее время мы обычно отвечаем в течение дня.
+      </div>
+      <div class="order-form__result-ai">
+        <div class="order-form__result-ai-label">${leadLabel}</div>
+        <div class="order-form__result-ai-text">
+          ${leadAdvice}
+        </div>
       </div>
     </div>
   `;
@@ -636,15 +664,80 @@ function setCatalogCategory(categoryId) {
 }
 
 /**
+ * Открытие / закрытие AI-чата
+ */
+function toggleChat() {
+  const chatRoot = appRoot.querySelector(".ai-chat");
+  if (!chatRoot) return;
+  chatRoot.classList.toggle("ai-chat--open");
+
+  if (chatRoot.classList.contains("ai-chat--open")) {
+    const input = chatRoot.querySelector("[data-chat-input]");
+    if (input) input.focus();
+  }
+}
+
+/**
+ * Обработка отправки сообщения в AI-чат (UI-имитация)
+ */
+function handleChatSend() {
+  const chatRoot = appRoot.querySelector(".ai-chat");
+  if (!chatRoot) return;
+
+  const input = chatRoot.querySelector("[data-chat-input]");
+  const messages = chatRoot.querySelector("[data-chat-messages]");
+  if (!input || !messages) return;
+
+  const text = (input.value || "").trim();
+  if (!text) return;
+
+  // Сообщение пользователя
+  const userMsgHtml = `
+    <div class="ai-chat__msg ai-chat__msg--user">
+      <div class="ai-chat__msg-text">${text}</div>
+    </div>
+  `;
+  messages.insertAdjacentHTML("beforeend", userMsgHtml);
+
+  // Простейшая имитация ответа
+  let botText =
+    "Спасибо за вопрос! Сейчас AI-ассистент в демо-режиме. Менеджер свяжется с вами после отправки заявки в разделе «Заказ».";
+
+  const lower = text.toLowerCase();
+
+  if (lower.includes("цена") || lower.includes("стоим")) {
+    botText =
+      "Базовые тарифы: около 4000 сомони за погонный метр для ЛДСП (Стандарт) и 5000 сомони для МДФ фасадов (Премиум). Минимальный объём — 3 погонных метра.";
+  } else if (lower.includes("минимал")) {
+    botText =
+      "Минимальный объём заказа — 3 погонных метра. Это условие помогает нам сохранять качество сервиса и оптимальную нагрузку производства.";
+  } else if (lower.includes("кредит") || lower.includes("рассроч")) {
+    botText =
+      "Оплата возможна частями и в кредит через партнёрские банки. Конкретные условия вы сможете обсудить с менеджером при расчёте заказа.";
+  }
+
+  const botMsgHtml = `
+    <div class="ai-chat__msg ai-chat__msg--bot">
+      <div class="ai-chat__msg-text">${botText}</div>
+    </div>
+  `;
+  messages.insertAdjacentHTML("beforeend", botMsgHtml);
+
+  // Очистка + скролл
+  input.value = "";
+  messages.scrollTop = messages.scrollHeight;
+}
+
+/**
  * Простой роутер: клики по data-route, data-category-id, data-action
  */
 function setupRouter() {
+  // Клики
   appRoot.addEventListener("click", (event) => {
     // Переключение разделов
     const routeTarget = event.target.closest("[data-route]");
     if (routeTarget) {
       const route = routeTarget.getAttribute("data-route");
-      // При переходе в Каталог с других разделов — сбрасываем выбранную категорию
       if (route === "catalog") {
         selectedCatalogCategoryId = null;
       }
@@ -681,11 +774,34 @@ function setupRouter() {
       handleOrderSubmit();
       return;
     }
+
+    // Открытие / закрытие AI-чата
+    const chatToggle = event.target.closest("[data-action='chat-toggle']");
+    if (chatToggle) {
+      toggleChat();
+      return;
+    }
+
+    // Отправка сообщения в AI-чат
+    const chatSend = event.target.closest("[data-action='chat-send']");
+    if (chatSend) {
+      handleChatSend();
+      return;
+    }
+  });
+
+  // Enter в поле чата
+  appRoot.addEventListener("keydown", (event) => {
+    const target = event.target;
+    if (target && target.matches("[data-chat-input]") && event.key === "Enter") {
+      event.preventDefault();
+      handleChatSend();
+    }
   });
 }
 
 /**
- * Рендер оболочки (шапка + контент + нижняя навигация)
+ * Рендер оболочки (шапка + контент + нижняя навигация + AI-чат)
  */
 function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
@@ -703,6 +819,43 @@ function renderLayout(initialRoute = "home") {
       </header>
 
       <main class="app-main" id="app-main"></main>
+
+      <!-- AI-чат (UI-слой) -->
+      <div class="ai-chat">
+        <button class="ai-chat__toggle" data-action="chat-toggle">
+          AI-ассистент
+        </button>
+        <div class="ai-chat__panel">
+          <div class="ai-chat__header">
+            <div class="ai-chat__title">AI-ассистент Madera</div>
+            <button class="ai-chat__close" data-action="chat-toggle">×</button>
+          </div>
+          <div class="ai-chat__hint">
+            Задайте вопрос по стоимости, материалам или планировке — ассистент подскажет общие варианты.
+            Для точного расчёта всё равно потребуется менеджер и замер.
+          </div>
+          <div class="ai-chat__messages" data-chat-messages>
+            <div class="ai-chat__msg ai-chat__msg--bot">
+              <div class="ai-chat__msg-text">
+                Здравствуйте! Я AI-ассистент Madera Design. Могу подсказать по тарифам (4000 / 5000 сом), 
+                минимальному объёму 3 пог. метра и помочь с первичными идеями планировки.
+              </div>
+            </div>
+          </div>
+          <div class="ai-chat__input-row">
+            <input
+              type="text"
+              class="ai-chat__input"
+              placeholder="Напишите ваш вопрос..."
+              data-chat-input
+            />
+            <button class="ai-chat__send" data-action="chat-send">▶</button>
+          </div>
+          <div class="ai-chat__note">
+            Важное уточнение: ответы носят справочный характер. Окончательные решения принимает менеджер и замерщик.
+          </div>
+        </div>
+      </div>
 
       <nav class="app-nav">
         <button class="app-nav__item" data-route="home">Главная</button>
