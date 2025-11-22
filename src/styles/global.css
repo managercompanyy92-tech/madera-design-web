@@ -210,6 +210,7 @@ body {
 }
 
 /* Карточка "AI & Маркетинг" */
+
 .hero-card {
   width: 100%;
   max-width: 320px;
@@ -273,7 +274,7 @@ body {
 }
 
 /* ========================================================================== */
-/*  Нижняя навигация                                                         */
+/*  НИЖНЯЯ НАВИГАЦИЯ                                                          */
 /* ========================================================================== */
 
 .app-nav {
@@ -701,6 +702,144 @@ body {
 
 @media (max-width: 900px) {
   .order-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ========================================================================== */
+/*  РАЗДЕЛ ЗАКАЗА: ФОРМА ЗАЯВКИ                                              */
+/* ========================================================================== */
+
+.order-form {
+  margin-top: 14px;
+  padding: 14px 16px 16px;
+  border-radius: 20px;
+  background: rgba(12, 12, 12, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.9);
+}
+
+.order-form__header {
+  margin-bottom: 10px;
+}
+
+.order-form__title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.order-form__subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.order-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+  margin-top: 10px;
+}
+
+.order-form__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-form__row--full {
+  grid-column: 1 / -1;
+}
+
+.order-form__label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.order-form__input,
+.order-form__select,
+.order-form__textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.75);
+  color: #f5f5f5;
+  font-size: 13px;
+}
+
+.order-form__textarea {
+  resize: vertical;
+}
+
+.order-form__input:focus,
+.order-form__select:focus,
+.order-form__textarea:focus {
+  outline: none;
+  border-color: rgba(233, 122, 0, 0.8);
+  box-shadow: 0 0 0 1px rgba(233, 122, 0, 0.6);
+}
+
+.order-form__row--checkbox {
+  margin-top: 4px;
+}
+
+.order-form__checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.order-form__checkbox input[type="checkbox"] {
+  margin-top: 2px;
+}
+
+.order-form__footer {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.order-form__note {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.order-form__result {
+  font-size: 12px;
+}
+
+.order-form__result-ok {
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0, 64, 32, 0.7);
+  border: 1px solid rgba(0, 200, 120, 0.5);
+}
+
+.order-form__result-main {
+  margin-bottom: 2px;
+}
+
+.order-form__result-sub {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.order-form__result-error {
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(80, 0, 0, 0.7);
+  border: 1px solid rgba(255, 120, 120, 0.7);
+  font-size: 12px;
+}
+
+/* Адаптив для формы заявки */
+
+@media (max-width: 768px) {
+  .order-form__grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
