@@ -1,10 +1,14 @@
 // src/main.js
 
-// Импорт данных категорий каталога
+// Импорт данных каталога
 import { catalogCategories } from "./utils/catalogCategories.js";
+import { catalogItems } from "./utils/catalogItems.js";
 
 // Корневой контейнер приложения
 const appRoot = document.getElementById("app");
+
+// Состояние выбранной категории каталога (null = показываем список категорий)
+let selectedCatalogCategoryId = null;
 
 /**
  * VIEW-ФУНКЦИИ
@@ -77,43 +81,89 @@ function renderHome() {
   `;
 }
 
-// Каталог: уровень категорий (как на твоём примере)
+// Каталог: категории + внутренние идеи
 function renderCatalog() {
-  const cards = catalogCategories
-    .map((cat) => {
-      return `
-        <button class="catalog-category-card" data-category-id="${cat.id}">
-          <div class="catalog-category-card__image-wrap">
-            <img src="${cat.image}" alt="${cat.title}" class="catalog-category-card__img" />
-            <div class="catalog-category-card__icon">
-              <!-- Позже сюда добавим индивидуальные иконки категорий -->
-              <span>≡</span>
+  // Если категория не выбрана — показываем список категорий (первый уровень)
+  if (!selectedCatalogCategoryId) {
+    const cards = catalogCategories
+      .map((cat) => {
+        return `
+          <button class="catalog-category-card" data-category-id="${cat.id}">
+            <div class="catalog-category-card__image-wrap">
+              <img src="${cat.image}" alt="${cat.title}" class="catalog-category-card__img" />
+              <div class="catalog-category-card__icon">
+                <span>≡</span>
+              </div>
             </div>
+            <div class="catalog-category-card__bottom">
+              <span class="catalog-category-card__title">${cat.title}</span>
+              <span class="catalog-category-card__arrow">›</span>
+            </div>
+          </button>
+        `;
+      })
+      .join("");
+
+    return `
+      <section class="page page--catalog">
+        <h1 class="page__title">Каталог мебели</h1>
+        <p class="page__subtitle">
+          Выберите категорию — дальше покажем вдохновляющие идеи, а затем поможем посчитать стоимость и оформить заказ.
+        </p>
+
+        <div class="catalog-categories-grid">
+          ${cards}
+        </div>
+      </section>
+    `;
+  }
+
+  // Если категория выбрана — показываем идеи внутри неё (второй уровень)
+  const category = catalogCategories.find((cat) => cat.id === selectedCatalogCategoryId);
+  const items = catalogItems.filter((item) => item.categoryId === selectedCatalogCategoryId);
+
+  const itemCards = items
+    .map((item) => {
+      return `
+        <div class="catalog-item-card">
+          <div class="catalog-item-card__image-wrap">
+            <img src="${item.image}" alt="${item.title}" class="catalog-item-card__img" />
           </div>
-          <div class="catalog-category-card__bottom">
-            <span class="catalog-category-card__title">${cat.title}</span>
-            <span class="catalog-category-card__arrow">›</span>
+          <div class="catalog-item-card__info">
+            <div class="catalog-item-card__title">${item.title}</div>
+            <div class="catalog-item-card__desc">${item.description}</div>
+            <button class="btn btn--primary catalog-item-card__btn" data-route="order">
+              Рассчитать стоимость
+            </button>
           </div>
-        </button>
+        </div>
       `;
     })
     .join("");
 
   return `
     <section class="page page--catalog">
-      <h1 class="page__title">Каталог мебели</h1>
+      <button class="catalog-back" data-action="catalog-back">
+        ← Все категории
+      </button>
+
+      <h1 class="page__title">${category ? category.title : "Категория"}</h1>
       <p class="page__subtitle">
-        Выберите категорию — дальше покажем вдохновляющие идеи, а затем поможем посчитать стоимость и оформить заказ.
+        Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн под размеры
+        вашей квартиры и посчитаем стоимость.
       </p>
 
-      <div class="catalog-categories-grid">
-        ${cards}
+      <div class="catalog-items-grid">
+        ${
+          itemCards ||
+          "<div class='page__placeholder'>Идеи для этой категории появятся чуть позже.</div>"
+        }
       </div>
     </section>
   `;
 }
 
-// Страница заказа
+// Страница заказа (позже превратим в калькулятор + форму)
 function renderOrder() {
   return `
     <section class="page">
@@ -146,7 +196,7 @@ function renderProfile() {
   `;
 }
 
-// Раздел «Ещё» — информационные страницы
+// Раздел «Ещё» — инфо-блоки
 function renderMore() {
   return `
     <section class="page">
@@ -170,7 +220,7 @@ const VIEWS = {
   catalog: renderCatalog,
   order: renderOrder,
   profile: renderProfile,
-  more: renderMore,
+  more: renderMore
 };
 
 /**
@@ -192,7 +242,50 @@ function renderRoute(route) {
 }
 
 /**
- * Рендер общей оболочки (шапка + контент + нижняя навигация)
+ * Установка выбранной категории каталога
+ */
+function setCatalogCategory(categoryId) {
+  selectedCatalogCategoryId = categoryId;
+  renderRoute("catalog");
+}
+
+/**
+ * Простой роутер: клики по data-route, data-category-id, data-action
+ */
+function setupRouter() {
+  appRoot.addEventListener("click", (event) => {
+    // Переключение разделов
+    const routeTarget = event.target.closest("[data-route]");
+    if (routeTarget) {
+      const route = routeTarget.getAttribute("data-route");
+      // При переходе в Каталог с других разделов — сбрасываем выбранную категорию
+      if (route === "catalog") {
+        selectedCatalogCategoryId = null;
+      }
+      renderRoute(route);
+      return;
+    }
+
+    // Клик по категории каталога
+    const categoryTarget = event.target.closest("[data-category-id]");
+    if (categoryTarget) {
+      const categoryId = categoryTarget.getAttribute("data-category-id");
+      setCatalogCategory(categoryId);
+      return;
+    }
+
+    // Кнопка «← Все категории»
+    const backTarget = event.target.closest("[data-action='catalog-back']");
+    if (backTarget) {
+      selectedCatalogCategoryId = null;
+      renderRoute("catalog");
+      return;
+    }
+  });
+}
+
+/**
+ * Рендер оболочки (шапка + контент + нижняя навигация)
  */
 function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
@@ -223,19 +316,6 @@ function renderLayout(initialRoute = "home") {
 
   setupRouter();
   renderRoute(initialRoute);
-}
-
-/**
- * Простой роутер: клики по элементам с data-route
- */
-function setupRouter() {
-  appRoot.addEventListener("click", (event) => {
-    const target = event.target.closest("[data-route]");
-    if (!target) return;
-
-    const route = target.getAttribute("data-route");
-    renderRoute(route);
-  });
 }
 
 /**
