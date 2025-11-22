@@ -430,7 +430,7 @@ body {
 
 .catalog-item-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 18px 40px rgba(233, 122, 0, 0.9);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
 }
 
 .catalog-item-card__image-wrap {
@@ -469,7 +469,244 @@ body {
 }
 
 /* ========================================================================== */
-/*  АДАПТИВ                                                                   */
+/*  РАЗДЕЛ ЗАКАЗА: КАЛЬКУЛЯТОР                                               */
+/* ========================================================================== */
+
+.page--order {
+  padding-top: 4px;
+}
+
+.order-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 18px;
+}
+
+.order-calc {
+  padding: 16px 16px 18px;
+  border-radius: 20px;
+  background: rgba(16, 16, 16, 0.96);
+  border: 1px solid rgba(233, 122, 0, 0.35);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
+}
+
+.order-calc__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.order-calc__title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.order-calc__tag {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(233, 122, 0, 0.12);
+  color: #ffb347;
+}
+
+.order-calc__row {
+  margin-bottom: 14px;
+}
+
+.order-calc__label {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.order-calc__input {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.7);
+  color: #f5f5f5;
+  font-size: 14px;
+}
+
+.order-calc__input:focus {
+  outline: none;
+  border-color: rgba(233, 122, 0, 0.8);
+  box-shadow: 0 0 0 1px rgba(233, 122, 0, 0.6);
+}
+
+.order-calc__hint {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.order-calc__tariffs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-calc-tariff {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.order-calc-tariff input[type="radio"] {
+  margin-top: 4px;
+}
+
+.order-calc-tariff__body {
+  background: rgba(8, 8, 8, 0.9);
+  border-radius: 12px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-calc-tariff__name {
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.order-calc-tariff__price {
+  font-size: 12px;
+  color: #ffb347;
+}
+
+.order-calc-tariff__desc {
+  display: block;
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.order-calc__actions {
+  margin-top: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.order-calc__note {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.order-calc__result {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 13px;
+}
+
+.order-calc__result-ok {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.order-calc__result-main {
+  opacity: 0.9;
+}
+
+.order-calc__result-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffb347;
+}
+
+.order-calc__result-details {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.order-calc__result-next {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.order-calc__result-error {
+  font-size: 13px;
+  color: #ff9b9b;
+}
+
+/* Правая колонка: инфо и маркетинг */
+
+.order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-info__card {
+  padding: 14px 14px 16px;
+  border-radius: 18px;
+  background: rgba(10, 10, 10, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.8);
+}
+
+.order-info__badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #ffb347;
+  margin-bottom: 6px;
+}
+
+.order-info__title {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.order-info__list {
+  list-style: none;
+  font-size: 12px;
+  opacity: 0.85;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-info__list li::before {
+  content: "•";
+  color: #e97a00;
+  margin-right: 4px;
+}
+
+.order-info__next {
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(5, 5, 5, 0.9);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-info__next-text {
+  opacity: 0.85;
+}
+
+/* Адаптив для блока заказа */
+
+@media (max-width: 900px) {
+  .order-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ========================================================================== */
+/*  АДАПТИВ ОБЩИЙ                                                             */
 /* ========================================================================== */
 
 @media (max-width: 768px) {
@@ -503,4 +740,4 @@ body {
   .catalog-items-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-}
+  }
