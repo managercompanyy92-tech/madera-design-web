@@ -1,52 +1,67 @@
-export default async function handler(req, res) {
-  console.log("[Madera AI] Incoming request:", req.method);
+// api/chat.js — серверless-функция для Vercel
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+export default async function handler(req, res) {
+  console.log('[Madera AI] Incoming request:', req.method, req.url);
+
+  // Разрешаем только POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { message } = req.body;
-
-    console.log("[Madera AI] Message received:", message);
-
-    if (!message || typeof message !== "string") {
-      return res.status(400).json({ error: "Message is required" });
-    }
-
+    // Берём ключ из переменной окружения Vercel
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
-      console.error("[Madera AI] ERROR: OPENAI_API_KEY not found!");
-      return res.status(500).json({ error: "Server misconfiguration" });
+      console.error('[Madera AI] ERROR: OPENAI_API_KEY is not set');
+      return res.status(500).json({ error: 'Missing OPENAI_API_KEY on server' });
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
+    const { message } = req.body || {};
+
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ error: 'No message provided' });
+    }
+
+    // Запрос к OpenAI
+    const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: 'gpt-4o-mini',
         messages: [
-          { role: "system", content: "Ты — AI-ассистент мебельной студии Madera." },
-          { role: "user", content: message }
-        ]
-      })
+          {
+            role: 'system',
+            content:
+              'Ты — AI-ассистент мебельной студии Madera в Душанбе. ' +
+              'Отвечай кратко, по делу и дружелюбно. Если вопрос не про мебель, ' +
+              'вежливо возвращай разговор к теме мебели и кухни.',
+          },
+          { role: 'user', content: message },
+        ],
+        temperature: 0.4,
+      }),
     });
 
-    const data = await response.json();
+    if (!openaiRes.ok) {
+      const text = await openaiRes.text();
+      console.error('[Madera AI] OpenAI API error:', openaiRes.status, text);
+      return res.status(500).json({ error: 'OpenAI API error' });
+    }
 
-    console.log("[Madera AI] OpenAI response:", data);
+    const data = await openaiRes.json();
+    console.log('[Madera AI] Response data:', JSON.stringify(data));
 
     const reply =
-      data.choices?.[0]?.message?.content ||
-      "Извините, произошла ошибка. Попробуйте позже.";
+      data.choices?.[0]?.message?.content?.trim() ||
+      'Извините, произошла ошибка. Попробуйте позже.';
 
     return res.status(200).json({ reply });
   } catch (error) {
-    console.error("[Madera AI] Server error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error('[Madera AI] Unexpected error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
