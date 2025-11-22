@@ -3,16 +3,28 @@
 export default async function handler(req, res) {
   console.log('[Madera AI] Incoming request:', req.method, req.url);
 
-  // Разрешаем только POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     console.error('[Madera AI] OPENAI_API_KEY is not set in environment variables');
+    // Даже при GET показываем, что ключа нет
     return res.status(500).json({ error: 'Server configuration error: missing OPENAI_API_KEY' });
+  }
+
+  // ========= ПРОСТАЯ ПРОВЕРКА ЧЕРЕЗ БРАУЗЕР =========
+  // Если зайти GET-запросом по /api/chat в браузере —
+  // получим этот ответ. Это нужно только для проверки.
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      status: 'ok',
+      message: 'Madera AI backend is online. Use POST with { message } to get a reply.'
+    });
+  }
+  // ==================================================
+
+  // Основной режим работы — POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
@@ -40,7 +52,6 @@ export default async function handler(req, res) {
 мебели на заказ и услуг студии Madera.
     `.trim();
 
-    // Формируем сообщения для Chat Completions
     const messages = [
       { role: 'system', content: systemPrompt },
       ...(Array.isArray(history) ? history : []),
@@ -56,7 +67,7 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',           // можно заменить на gpt-4.1-mini при желании
+        model: 'gpt-4o-mini',
         messages,
         temperature: 0.4,
         max_tokens: 600
