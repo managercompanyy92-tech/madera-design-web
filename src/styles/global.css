@@ -1,4 +1,7 @@
-/* СБРОС БАЗОВЫХ СТИЛЕЙ */
+/* ========================================================================== */
+/*  БАЗОВЫЙ СБРОС                                                             */
+/* ========================================================================== */
+
 *,
 *::before,
 *::after {
@@ -7,7 +10,6 @@
   padding: 0;
 }
 
-/* БАЗА */
 html,
 body {
   height: 100%;
@@ -20,7 +22,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ОБОЛОЧКА ПРИЛОЖЕНИЯ */
+/* ========================================================================== */
+/*  ОБОЛОЧКА ПРИЛОЖЕНИЯ                                                       */
+/* ========================================================================== */
+
 .app-shell {
   min-height: 100vh;
   max-width: 1200px;
@@ -30,7 +35,10 @@ body {
   flex-direction: column;
 }
 
-/* ШАПКА */
+/* ========================================================================== */
+/*  ШАПКА                                                                     */
+/* ========================================================================== */
+
 .app-header {
   display: flex;
   align-items: center;
@@ -63,11 +71,10 @@ body {
   opacity: 0.8;
 }
 
-.app-header__cta {
-  flex-shrink: 0;
-}
+/* ========================================================================== */
+/*  КНОПКИ                                                                    */
+/* ========================================================================== */
 
-/* КНОПКИ */
 .btn {
   border: none;
   border-radius: 999px;
@@ -114,12 +121,14 @@ body {
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* ОСНОВНОЙ КОНТЕНТ */
+/* ========================================================================== */
+/*  ОСНОВНОЙ КОНТЕНТ                                                          */
+/* ========================================================================== */
+
 .app-main {
   flex: 1;
 }
 
-/* СТРАНИЦЫ */
 .page {
   padding: 8px 4px;
 }
@@ -146,7 +155,10 @@ body {
   opacity: 0.9;
 }
 
-/* ГЛАВНЫЙ ЭКРАН (HERO) */
+/* ========================================================================== */
+/*  ГЛАВНЫЙ ЭКРАН HERO                                                        */
+/* ========================================================================== */
+
 .page--home {
   padding-top: 4px;
 }
@@ -155,7 +167,7 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: 20px;
-  padding: 18px 16px 18px;
+  padding: 18px 16px;
   border-radius: 22px;
   background: radial-gradient(circle at top right, rgba(233, 122, 0, 0.18), rgba(12, 12, 12, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.04);
@@ -197,6 +209,7 @@ body {
   justify-content: center;
 }
 
+/* Карточка "AI & Маркетинг" */
 .hero-card {
   width: 100%;
   max-width: 320px;
@@ -229,7 +242,10 @@ body {
   margin-right: 6px;
 }
 
-/* БЛОК ПРЕИМУЩЕСТВ */
+/* ========================================================================== */
+/*  ПРЕИМУЩЕСТВА                                                              */
+/* ========================================================================== */
+
 .highlights {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -256,7 +272,10 @@ body {
   opacity: 0.8;
 }
 
-/* НИЖНЯЯ НАВИГАЦИЯ */
+/* ========================================================================== */
+/*  Нижняя навигация                                                         */
+/* ========================================================================== */
+
 .app-nav {
   position: fixed;
   left: 0;
@@ -275,8 +294,8 @@ body {
 
 .app-nav__item {
   flex: 1;
-  border-radius: 999px;
   border: none;
+  border-radius: 999px;
   background: transparent;
   color: #b0b0b0;
   font-size: 11px;
@@ -290,7 +309,169 @@ body {
   color: #ffb347;
 }
 
-/* АДАПТИВ */
+/* ========================================================================== */
+/*  КАТАЛОГ: КАТЕГОРИИ                                                        */
+/* ========================================================================== */
+
+.page--catalog {
+  padding-top: 4px;
+}
+
+.catalog-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.catalog-category-card {
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: #2c2c2c;
+  border-radius: 22px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6);
+  transition: transform 0.14s ease-out, box-shadow 0.18s ease-out;
+}
+
+.catalog-category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+}
+
+.catalog-category-card__image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.catalog-category-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.catalog-category-card__icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid rgba(233, 122, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #ffb347;
+}
+
+.catalog-category-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 12px;
+  background: #333;
+}
+
+.catalog-category-card__title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.catalog-category-card__arrow {
+  font-size: 18px;
+  color: #ffb347;
+}
+
+/* ========================================================================== */
+/*  КАТАЛОГ: ВНУТРЕННИЕ ИДЕИ                                                  */
+/* ========================================================================== */
+
+.catalog-back {
+  border: none;
+  background: transparent;
+  color: #ffb347;
+  font-size: 13px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.catalog-back:hover {
+  text-decoration: underline;
+}
+
+.catalog-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.catalog-item-card {
+  background: rgba(20, 20, 20, 0.95);
+  border-radius: 18px;
+  border: 1px solid rgba(233, 122, 0, 0.25);
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease-out, box-shadow 0.2s ease-out;
+}
+
+.catalog-item-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(233, 122, 0, 0.9);
+}
+
+.catalog-item-card__image-wrap {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.catalog-item-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.catalog-item-card__info {
+  padding: 12px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.catalog-item-card__title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.catalog-item-card__desc {
+  font-size: 13px;
+  opacity: 0.82;
+}
+
+.catalog-item-card__btn {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+/* ========================================================================== */
+/*  АДАПТИВ                                                                   */
+/* ========================================================================== */
+
 @media (max-width: 768px) {
   .app-shell {
     padding: 8px 10px 72px;
@@ -308,14 +489,18 @@ body {
   .highlights {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .catalog-items-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-@media (min-width: 1024px) {
-  .hero__title {
-    font-size: 28px;
+@media (max-width: 480px) {
+  .catalog-categories-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .page__title {
-    font-size: 24px;
+  .catalog-items-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
