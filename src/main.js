@@ -1,13 +1,17 @@
 // src/main.js
 
+// Импорт данных категорий каталога
+import { catalogCategories } from "./utils/catalogCategories.js";
+
 // Корневой контейнер приложения
-const appRoot = document.getElementById('app');
+const appRoot = document.getElementById("app");
 
 /**
  * VIEW-ФУНКЦИИ
- * Каждая функция возвращает HTML-разметку для конкретного «экрана» (раздела).
+ * Каждая функция возвращает HTML-разметку для конкретного раздела.
  */
 
+// Главная страница
 function renderHome() {
   return `
     <section class="page page--home">
@@ -73,22 +77,43 @@ function renderHome() {
   `;
 }
 
+// Каталог: уровень категорий (как на твоём примере)
 function renderCatalog() {
+  const cards = catalogCategories
+    .map((cat) => {
+      return `
+        <button class="catalog-category-card" data-category-id="${cat.id}">
+          <div class="catalog-category-card__image-wrap">
+            <img src="${cat.image}" alt="${cat.title}" class="catalog-category-card__img" />
+            <div class="catalog-category-card__icon">
+              <!-- Позже сюда добавим индивидуальные иконки категорий -->
+              <span>≡</span>
+            </div>
+          </div>
+          <div class="catalog-category-card__bottom">
+            <span class="catalog-category-card__title">${cat.title}</span>
+            <span class="catalog-category-card__arrow">›</span>
+          </div>
+        </button>
+      `;
+    })
+    .join("");
+
   return `
-    <section class="page">
+    <section class="page page--catalog">
       <h1 class="page__title">Каталог мебели</h1>
       <p class="page__subtitle">
-        Вдохновляющие дизайн-идеи для кухонь, гостиных, спален, детских и гардеробных.
-        На старте это концепты, которые мы адаптируем под вашу квартиру.
+        Выберите категорию — дальше покажем вдохновляющие идеи, а затем поможем посчитать стоимость и оформить заказ.
       </p>
-      <div class="page__placeholder">
-        Здесь появится интерактивный каталог с фильтрами по стилю,
-        AI-рекомендациями и привязкой к онлайн-калькулятору стоимости.
+
+      <div class="catalog-categories-grid">
+        ${cards}
       </div>
     </section>
   `;
 }
 
+// Страница заказа
 function renderOrder() {
   return `
     <section class="page">
@@ -105,6 +130,7 @@ function renderOrder() {
   `;
 }
 
+// Личный кабинет
 function renderProfile() {
   return `
     <section class="page">
@@ -120,6 +146,7 @@ function renderProfile() {
   `;
 }
 
+// Раздел «Ещё» — информационные страницы
 function renderMore() {
   return `
     <section class="page">
@@ -136,38 +163,38 @@ function renderMore() {
 }
 
 /**
- * КАРТА РОУТОВ (разделов)
+ * КАРТА РОУТОВ
  */
 const VIEWS = {
   home: renderHome,
   catalog: renderCatalog,
   order: renderOrder,
   profile: renderProfile,
-  more: renderMore
+  more: renderMore,
 };
 
 /**
- * РЕНДЕР ОПРЕДЕЛЁННОГО РАЗДЕЛА
+ * Рендер определённого раздела
  */
 function renderRoute(route) {
   const viewFn = VIEWS[route] || VIEWS.home;
-  const main = document.getElementById('app-main');
+  const main = document.getElementById("app-main");
   if (!main) return;
 
   main.innerHTML = viewFn();
 
   // Подсветка активной кнопки нижней навигации
-  const navButtons = appRoot.querySelectorAll('.app-nav__item');
+  const navButtons = appRoot.querySelectorAll(".app-nav__item");
   navButtons.forEach((btn) => {
-    const r = btn.getAttribute('data-route');
-    btn.classList.toggle('app-nav__item--active', r === route);
+    const r = btn.getAttribute("data-route");
+    btn.classList.toggle("app-nav__item--active", r === route);
   });
 }
 
 /**
- * РЕНДЕР ОБОЛОЧКИ ПРИЛОЖЕНИЯ (шапка + контент + нижняя навигация)
+ * Рендер общей оболочки (шапка + контент + нижняя навигация)
  */
-function renderLayout(initialRoute = 'home') {
+function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
     <div class="app-shell">
       <header class="app-header">
@@ -199,24 +226,23 @@ function renderLayout(initialRoute = 'home') {
 }
 
 /**
- * ПРОСТОЙ РОУТЕР НА ОСНОВЕ ДЕЛЕГАЦИИ СОБЫТИЙ
- * Любой элемент с атрибутом data-route будет переключать раздел.
+ * Простой роутер: клики по элементам с data-route
  */
 function setupRouter() {
-  appRoot.addEventListener('click', (event) => {
-    const target = event.target.closest('[data-route]');
+  appRoot.addEventListener("click", (event) => {
+    const target = event.target.closest("[data-route]");
     if (!target) return;
 
-    const route = target.getAttribute('data-route');
+    const route = target.getAttribute("data-route");
     renderRoute(route);
   });
 }
 
 /**
- * ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+ * Инициализация приложения
  */
 function initApp() {
-  renderLayout('home');
+  renderLayout("home");
 }
 
 initApp();
