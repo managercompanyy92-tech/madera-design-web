@@ -1,95 +1,52 @@
-// api/chat.js — серверная функция Vercel для Madera AI
-
 export default async function handler(req, res) {
-  console.log('[Madera AI] Incoming request:', req.method, req.url);
+  console.log("[Madera AI] Incoming request:", req.method);
 
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    console.error('[Madera AI] OPENAI_API_KEY is not set in environment variables');
-    // Даже при GET показываем, что ключа нет
-    return res.status(500).json({ error: 'Server configuration error: missing OPENAI_API_KEY' });
-  }
-
-  // ========= ПРОСТАЯ ПРОВЕРКА ЧЕРЕЗ БРАУЗЕР =========
-  // Если зайти GET-запросом по /api/chat в браузере —
-  // получим этот ответ. Это нужно только для проверки.
-  if (req.method === 'GET') {
-    return res.status(200).json({
-      status: 'ok',
-      message: 'Madera AI backend is online. Use POST with { message } to get a reply.'
-    });
-  }
-  // ==================================================
-
-  // Основной режим работы — POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const { message, history } = req.body || {};
+    const { message } = req.body;
 
-    if (!message || typeof message !== 'string') {
-      console.warn('[Madera AI] Invalid message in request body:', req.body);
-      return res.status(400).json({ error: 'Invalid "message" field' });
+    console.log("[Madera AI] Message received:", message);
+
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ error: "Message is required" });
     }
 
-    const systemPrompt = `
-Ты — AI-ассистент студии мебельного дизайна Madera в Душанбе.
-Твоя задача — помогать клиентам с ориентировочной оценкой стоимости корпусной мебели,
-подсказками по материалам, фурнитуре и планировке.
+    const apiKey = process.env.OPENAI_API_KEY;
 
-Важные правила:
-1. ВСЕГДА отвечай по-русски.
-2. Всегда напоминай, что расчёт ориентировочный, а окончательную цену и замер делает менеджер.
-3. Если не хватает данных (размер, форма, материалы, фурнитура) — задавай уточняющие вопросы.
-4. Не давай юридических советов и не обсуждай темы, не связанные с мебелью или ремонтом.
-5. Цены давай примерно, в сомони, с нормальной человеческой формулировкой.
-6. В конце ответа мягко предложи оставить заявку в разделе «Заказ» на сайте.
+    if (!apiKey) {
+      console.error("[Madera AI] ERROR: OPENAI_API_KEY not found!");
+      return res.status(500).json({ error: "Server misconfiguration" });
+    }
 
-Если пользователь отходит от темы мебели и ремонта, вежливо верни диалог обратно к теме
-мебели на заказ и услуг студии Madera.
-    `.trim();
-
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...(Array.isArray(history) ? history : []),
-      { role: 'user', content: message }
-    ];
-
-    console.log('[Madera AI] Sending request to OpenAI...');
-
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages,
-        temperature: 0.4,
-        max_tokens: 600
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "Ты — AI-ассистент мебельной студии Madera." },
+          { role: "user", content: message }
+        ]
       })
     });
 
-    const data = await openaiResponse.json();
+    const data = await response.json();
 
-    if (!openaiResponse.ok) {
-      console.error('[Madera AI] OpenAI API error:', openaiResponse.status, data);
-      return res.status(500).json({ error: 'AI request failed', details: data });
-    }
+    console.log("[Madera AI] OpenAI response:", data);
 
     const reply =
-      data?.choices?.[0]?.message?.content?.trim() ||
-      'Извините, сейчас не удалось получить ответ от модели. Попробуйте ещё раз.';
-
-    console.log('[Madera AI] Reply ready');
+      data.choices?.[0]?.message?.content ||
+      "Извините, произошла ошибка. Попробуйте позже.";
 
     return res.status(200).json({ reply });
   } catch (error) {
-    console.error('[Madera AI] Unexpected server error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("[Madera AI] Server error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
