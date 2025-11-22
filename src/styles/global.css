@@ -1,1 +1,72 @@
+/* Сброс базовых отступов */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
+/* Базовая тёмная тема под фирменный стиль */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #121212;
+  color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* Стартовый экран */
+.app-start {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #2b2b2b 0, #000 55%, #000 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-start__overlay {
+  padding: 32px 40px;
+  border-radius: 24px;
+  background: rgba(15, 15, 15, 0.9);
+  border: 1px solid rgba(233, 122, 0, 0.25);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7);
+  max-width: 560px;
+  width: 100%;
+}
+
+.app-start__content {
+  text-align: center;
+}
+
+.app-start__logo {
+  font-size: 28px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e97a00;
+  margin-bottom: 12px;
+}
+
+.app-start__tagline {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.app-start__text {
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+/* Небольшая анимация "дыхания" для премиального ощущения */
+.app-start__logo {
+  animation: glow 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 6px rgba(233, 122, 0, 0.4);
+  }
+  100% {
+    text-shadow: 0 0 18px rgba(233, 122, 0, 0.8);
+  }
+}
