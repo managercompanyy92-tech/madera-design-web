@@ -1,130 +1,153 @@
-// chat.js — фронтенд-логика виджета "AI-ассистент Madera"
+// Фронтенд для AI-ассистента Madera
+// Этот файл подключается на странице, где есть разметка виджета чата.
+// Он отправляет запросы на backend /api/chat и отображает ответы.
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('[Madera AI] Frontend script loaded');
+  const widget = document.querySelector('[data-madera-chat]');
+  const openBtn = document.querySelector('[data-madera-chat-open]');
+  const closeBtn = widget?.querySelector('[data-madera-chat-close]');
+  const form = widget?.querySelector('[data-madera-chat-form]');
+  const input = widget?.querySelector('[data-madera-chat-input]');
+  const messages = widget?.querySelector('[data-madera-chat-messages]');
+  const statusEl = widget?.querySelector('[data-madera-chat-status]');
 
-  // === 1. Находим элементы чата ===
-  // ПРОВЕРЬТЕ, что эти селекторы совпадают с вашей версткой.
-  // Если у вас другие id/class — замените тут.
-
-  const chatWidget =
-    document.querySelector('[data-madera-chat]') ||
-    document.querySelector('#madera-chat') ||
-    document.querySelector('.ai-assistant');
-
-  const messagesContainer =
-    document.querySelector('[data-madera-chat-messages]') ||
-    document.querySelector('#madera-chat-messages') ||
-    (chatWidget && chatWidget.querySelector('.chat__messages'));
-
-  const form =
-    document.querySelector('[data-madera-chat-form]') ||
-    document.querySelector('#madera-chat-form') ||
-    (chatWidget && chatWidget.querySelector('form'));
-
-  const input =
-    document.querySelector('[data-madera-chat-input]') ||
-    document.querySelector('#madera-chat-input') ||
-    (chatWidget && chatWidget.querySelector('input, textarea'));
-
-  const submitButton =
-    document.querySelector('[data-madera-chat-send]') ||
-    document.querySelector('#madera-chat-send') ||
-    (chatWidget && chatWidget.querySelector('button[type="submit"], .chat__send'));
-
-  // Если ключевых элементов нет — выходим, чтобы не ломать страницу
-  if (!messagesContainer || !form || !input) {
-    console.warn('[Madera AI] Chat elements not found. Check selectors in chat.js');
+  if (!widget || !openBtn || !closeBtn || !form || !input || !messages) {
+    console.warn('[Madera AI] Не найдены элементы чата. Проверь разметку и data-атрибуты.');
     return;
   }
 
-  // === 2. История диалога ===
-  const chatHistory = [];
+  let isSending = false;
 
-  // === 3. Утилиты ===
-  function scrollToBottom() {
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  // --- Вспомогательные функции ---
+
+  // Показать / скрыть чат
+  function openChat() {
+    widget.classList.add('chat-open');
+    widget.classList.remove('chat-closed');
   }
 
-  function addMessage(text, sender = 'user') {
-    const messageEl = document.createElement('div');
-    messageEl.classList.add('madera-chat-message', `madera-chat-message--${sender}`);
-    messageEl.textContent = text;
-    messagesContainer.appendChild(messageEl);
+  function closeChat() {
+    widget.classList.add('chat-closed');
+    widget.classList.remove('chat-open');
+  }
+
+  // Прокрутка вниз
+  function scrollToBottom() {
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  // Установка статуса (под полем ввода)
+  function setStatus(text) {
+    if (!statusEl) return;
+    statusEl.textContent = text || '';
+  }
+
+  // Создание DOM-элемента сообщения
+  function createMessageElement(role, text) {
+    const bubble = document.createElement('div');
+    bubble.classList.add('madera-chat-bubble');
+
+    if (role === 'user') {
+      bubble.classList.add('madera-chat-bubble-user');
+    } else {
+      bubble.classList.add('madera-chat-bubble-assistant');
+    }
+
+    bubble.textContent = text;
+    return bubble;
+  }
+
+  // Добавить сообщение в список
+  function addMessage(role, text) {
+    const el = createMessageElement(role, text);
+    messages.appendChild(el);
     scrollToBottom();
   }
 
-  // === 4. Стартовое сообщение (диагностическое) ===
-  if (!messagesContainer.dataset.initialized) {
-    addMessage(
-      'Здравствуйте! Я новый AI-ассистент Madera. ' +
-        'Если вы видите ЭТО сообщение, значит подключен актуальный файл chat.js, ' +
-        'и мы сейчас попробуем связаться с сервером.',
-      'assistant'
-    );
-    messagesContainer.dataset.initialized = 'true';
-  }
+  // --- Работа с сервером ---
 
-  // === 5. Отправка запроса на /api/chat ===
-  async function sendToServer(userText) {
-    chatHistory.push({ role: 'user', content: userText });
+  async function sendToServer(messageText) {
+    if (isSending) return;
+    isSending = true;
+    input.disabled = true;
+
+    setStatus('AI-ассистент печатает…');
 
     try {
-      if (submitButton) submitButton.disabled = true;
-      input.disabled = true;
-
-      console.log('[Madera AI] Sending request to /api/chat');
+      console.log('[Madera AI] Отправка на /api/chat:', messageText);
 
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          message: userText,
-          history: chatHistory
-        })
+        body: JSON.stringify({ message: messageText })
       });
 
       if (!response.ok) {
-        console.error('[Madera AI] /api/chat responded with status', response.status);
-        addMessage(
-          'Извините, сервер ответил с ошибкой. Попробуйте ещё раз чуть позже.',
-          'assistant'
-        );
+        console.error('[Madera AI] Ошибка ответа сервера:', response.status);
+        addMessage('assistant', 'Извините, произошла ошибка на сервере. Попробуйте позже.');
         return;
       }
 
       const data = await response.json();
-      const reply =
-        (data && data.reply) ||
-        'Извините, не удалось получить ответ от AI. Попробуйте ещё раз.';
+      console.log('[Madera AI] Ответ от /api/chat:', data);
 
-      chatHistory.push({ role: 'assistant', content: reply });
-      addMessage(reply, 'assistant');
-    } catch (err) {
-      console.error('[Madera AI] Network or parsing error:', err);
+      const reply =
+        (data && typeof data.reply === 'string' && data.reply.trim()) ||
+        'Извините, произошла ошибка. Попробуйте позже.';
+
+      addMessage('assistant', reply);
+    } catch (error) {
+      console.error('[Madera AI] Ошибка фронтенда:', error);
       addMessage(
-        'Похоже, есть проблема с соединением или сервером. Попробуйте ещё раз позже.',
-        'assistant'
+        'assistant',
+        'Извините, не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.'
       );
     } finally {
-      if (submitButton) submitButton.disabled = false;
+      isSending = false;
       input.disabled = false;
       input.focus();
+      setStatus('AI-ассистент онлайн');
     }
   }
 
-  // === 6. Обработчик формы ===
+  // --- Обработчики событий ---
+
+  // Открыть чат
+  openBtn.addEventListener('click', () => {
+    openChat();
+    input.focus();
+  });
+
+  // Закрыть чат
+  closeBtn.addEventListener('click', () => {
+    closeChat();
+  });
+
+  // Отправка формы
   form.addEventListener('submit', (event) => {
     event.preventDefault();
+    const text = (input.value || '').trim();
+    if (!text || isSending) return;
 
-    const userText = (input.value || '').trim();
-    if (!userText) return;
-
-    addMessage(userText, 'user');
+    // Добавляем сообщение пользователя
+    addMessage('user', text);
     input.value = '';
 
-    sendToServer(userText);
+    // Отправляем на сервер
+    sendToServer(text);
   });
+
+  // Отправка по Enter (без Shift)
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      form.requestSubmit(); // эквивалент нажатия кнопки «Отправить»
+    }
+  });
+
+  // Инициализация статуса
+  setStatus('AI-ассистент онлайн');
+  console.log('[Madera AI] Фронтенд инициализирован');
 });
