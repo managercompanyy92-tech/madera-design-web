@@ -1,26 +1,19 @@
 // src/main.js
 
-// Импорт данных каталога
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
 
 // Тарифы за погонный метр (сомони)
 const BASE_RATES = {
-  standard: 4000, // ЛДСП фасады
-  premium: 5000,  // МДФ фасады
+  standard: 4000,
+  premium: 5000,
 };
 
-// Корневой контейнер приложения
 const appRoot = document.getElementById("app");
-
-// Состояние выбранной категории каталога (null = список категорий)
 let selectedCatalogCategoryId = null;
 
-/* -------------------------------------------------------------------------- */
-/*                                VIEW-ФУНКЦИИ                                */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
 
-// Главная страница
 function renderHome() {
   return `
     <section class="page page--home">
@@ -86,9 +79,7 @@ function renderHome() {
   `;
 }
 
-// Каталог: категории + внутренние идеи
 function renderCatalog() {
-  // Первый уровень: список категорий
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
       .map(
@@ -123,7 +114,6 @@ function renderCatalog() {
     `;
   }
 
-  // Второй уровень: идеи внутри выбранной категории
   const category = catalogCategories.find((cat) => cat.id === selectedCatalogCategoryId);
   const items = catalogItems.filter((item) => item.categoryId === selectedCatalogCategoryId);
 
@@ -168,7 +158,6 @@ function renderCatalog() {
   `;
 }
 
-// Раздел «Заказ»: калькулятор + форма + маркетинг
 function renderOrder() {
   return `
     <section class="page page--order">
@@ -179,7 +168,6 @@ function renderOrder() {
       </p>
 
       <div class="order-layout">
-        <!-- Левая колонка: калькулятор + форма -->
         <div>
           <div class="order-calc">
             <div class="order-calc__header">
@@ -261,7 +249,6 @@ function renderOrder() {
             </div>
           </div>
 
-          <!-- Форма заявки, связанная с калькулятором -->
           <div class="order-form">
             <div class="order-form__header">
               <div class="order-form__title">Заявка на замер и расчёт</div>
@@ -382,7 +369,6 @@ function renderOrder() {
           </div>
         </div>
 
-        <!-- Правая колонка: маркетинг + следующий шаг -->
         <div class="order-info">
           <div class="order-info__card">
             <div class="order-info__badge">Маркетинг & доверие</div>
@@ -409,7 +395,6 @@ function renderOrder() {
   `;
 }
 
-// Личный кабинет (заготовка)
 function renderProfile() {
   return `
     <section class="page">
@@ -425,7 +410,6 @@ function renderProfile() {
   `;
 }
 
-// Раздел «Ещё» — инфо-блоки
 function renderMore() {
   return `
     <section class="page">
@@ -441,9 +425,7 @@ function renderMore() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                КАРТА РОУТОВ                                */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------- ROUTES --------------------------------- */
 
 const VIEWS = {
   home: renderHome,
@@ -453,10 +435,6 @@ const VIEWS = {
   more: renderMore,
 };
 
-/* -------------------------------------------------------------------------- */
-/*                            РЕНДЕР ОПРЕДЕЛЁННОГО РОУТА                      */
-/* -------------------------------------------------------------------------- */
-
 function renderRoute(route) {
   const viewFn = VIEWS[route] || VIEWS.home;
   const main = document.getElementById("app-main");
@@ -464,7 +442,6 @@ function renderRoute(route) {
 
   main.innerHTML = viewFn();
 
-  // Подсветка активной кнопки нижней навигации
   const navButtons = appRoot.querySelectorAll(".app-nav__item");
   navButtons.forEach((btn) => {
     const r = btn.getAttribute("data-route");
@@ -472,9 +449,7 @@ function renderRoute(route) {
   });
 }
 
-/* -------------------------------------------------------------------------- */
-/*                         ЛОГИКА КАЛЬКУЛЯТОРА СТОИМОСТИ                      */
-/* -------------------------------------------------------------------------- */
+/* ------------------------- ЛОГИКА КАЛЬКУЛЯТОРА --------------------------- */
 
 function handleCalcPrice() {
   const main = document.getElementById("app-main");
@@ -501,7 +476,6 @@ function handleCalcPrice() {
   const tariff = tariffInput.value;
   const rate = BASE_RATES[tariff] || BASE_RATES.standard;
   const basePrice = length * rate;
-
   const formatter = new Intl.NumberFormat("ru-RU");
 
   if (length < 3) {
@@ -516,7 +490,6 @@ function handleCalcPrice() {
     return;
   }
 
-  // Заполняем форму заявки данными из калькулятора
   const lengthField = main.querySelector("[data-order-length-output]");
   const tariffField = main.querySelector("[data-order-tariff-output]");
 
@@ -548,9 +521,7 @@ function handleCalcPrice() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                       ОТПРАВКА ЗАЯВКИ + СЕГМЕНТАЦИЯ ЛИДА                   */
-/* -------------------------------------------------------------------------- */
+/* ------------------------ ОТПРАВКА ЗАЯВКИ + СЕГМЕНТ ----------------------- */
 
 function handleOrderSubmit() {
   const main = document.getElementById("app-main");
@@ -580,7 +551,6 @@ function handleOrderSubmit() {
   const readiness = readinessSelect?.value || "soon";
   const minAgree = !!minAgreeCheckbox?.checked;
 
-  // Простая валидация
   if (!name || !phone) {
     resultBox.innerHTML = `
       <div class="order-form__result-error">
@@ -608,7 +578,6 @@ function handleOrderSubmit() {
     return;
   }
 
-  // Сегментация лида: горячий / тёплый / холодный
   let leadSegment = "cold";
   let leadLabel = "Холодный лид";
   let leadAdvice =
@@ -626,7 +595,6 @@ function handleOrderSubmit() {
       "Клиент сравнивает варианты. Нужны аргументы: кейсы, примеры работ, прозрачные цены, преимущества сервиса Madera Design.";
   }
 
-  // Заготовка для интеграции с backend / CRM
   const payload = {
     name,
     phone,
@@ -659,25 +627,17 @@ function handleOrderSubmit() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                            ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ                         */
-/* -------------------------------------------------------------------------- */
+/* -------------------------------- РОУТЕР ---------------------------------- */
 
 function setCatalogCategory(categoryId) {
   selectedCatalogCategoryId = categoryId;
   renderRoute("catalog");
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                  РОУТЕР                                    */
-/* -------------------------------------------------------------------------- */
-
 function setupRouter() {
-  // Делегирование кликов
   appRoot.addEventListener("click", (event) => {
     const target = event.target;
 
-    // Переключение разделов
     const routeTarget = target.closest("[data-route]");
     if (routeTarget) {
       const route = routeTarget.getAttribute("data-route");
@@ -688,7 +648,6 @@ function setupRouter() {
       return;
     }
 
-    // Клик по категории каталога
     const categoryTarget = target.closest("[data-category-id]");
     if (categoryTarget) {
       const categoryId = categoryTarget.getAttribute("data-category-id");
@@ -696,7 +655,6 @@ function setupRouter() {
       return;
     }
 
-    // Кнопка «← Все категории»
     const backTarget = target.closest("[data-action='catalog-back']");
     if (backTarget) {
       selectedCatalogCategoryId = null;
@@ -704,14 +662,12 @@ function setupRouter() {
       return;
     }
 
-    // Кнопка расчёта стоимости
     const calcTarget = target.closest("[data-action='calc-price']");
     if (calcTarget) {
       handleCalcPrice();
       return;
     }
 
-    // Кнопка отправки заявки
     const submitTarget = target.closest("[data-action='submit-order']");
     if (submitTarget) {
       handleOrderSubmit();
@@ -720,9 +676,7 @@ function setupRouter() {
   });
 }
 
-/* -------------------------------------------------------------------------- */
-/*                           РЕНДЕР ОБОЛОЧКИ ПРИЛОЖЕНИЯ                       */
-/* -------------------------------------------------------------------------- */
+/* ------------------------- РЕНДЕР ОБОЛОЧКИ SPA --------------------------- */
 
 function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
@@ -755,9 +709,7 @@ function renderLayout(initialRoute = "home") {
   renderRoute(initialRoute);
 }
 
-/* -------------------------------------------------------------------------- */
-/*                               ИНИЦИАЛИЗАЦИЯ                                */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------ ИНИЦИАЛИЗАЦИЯ ----------------------------- */
 
 function initApp() {
   renderLayout("home");
