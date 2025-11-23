@@ -2,21 +2,21 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>Madera Design — Современная корпусная мебель на заказ</title>
+    <title>Madera Design — Современная корпусная мебель</title>
 
-    <!-- Мобильная вёрстка и безопасные отступы на смартфонах -->
+    <!-- Мобильная вёрстка -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
     />
 
-    <!-- SEO-описание -->
+    <!-- SEO -->
     <meta
       name="description"
-      content="Madera Design — корпусная мебель на заказ в Душанбе: кухни, шкафы, гардеробные, прихожие. Дизайн, производство и монтаж под ключ."
+      content="Madera Design — корпусная мебель на заказ, онлайн-калькулятор стоимости, AI-ассистент, каталог идей."
     />
 
-    <!-- Глобальные стили приложения (включая новый чат-виджет с иконкой) -->
+    <!-- Глобальные стили -->
     <link rel="stylesheet" href="src/styles/global.css" />
   </head>
 
@@ -24,7 +24,60 @@
     <!-- Корневой контейнер SPA-приложения -->
     <div id="app"></div>
 
-    <!-- Входная точка JS-приложения (внутри main.js уже есть весь layout и чат-иконка) -->
+    <!-- ============================= -->
+    <!--       КНОПКА ЧАТА (ИКОНКА)     -->
+    <!-- ============================= -->
+    <button id="ai-chat-toggle" class="ai-chat-toggle">
+      <img
+        src="src/assets/assistant.webp"
+        alt="AI Assistant"
+        class="ai-chat-avatar"
+      />
+    </button>
+
+    <!-- ============================= -->
+    <!--          ПАНЕЛЬ ЧАТА          -->
+    <!-- ============================= -->
+
+    <div class="madera-chat" id="madera-chat">
+      <div class="madera-chat__header">
+        <div>
+          <div class="madera-chat__title">AI-ассистент Madera</div>
+          <div class="madera-chat__subtitle">
+            Помогу прикинуть стоимость и подобрать материалы
+          </div>
+        </div>
+        <button type="button" class="madera-chat__close" id="ai-chat-close">
+          ×
+        </button>
+      </div>
+
+      <!-- Сообщения чата -->
+      <div class="madera-chat__messages" id="madera-chat-messages">
+        <div class="madera-chat__message madera-chat__message--bot">
+          <div class="madera-chat__bubble">
+            Здравствуйте! Я AI-ассистент Madera.  
+            Помогу рассчитать стоимость кухни или шкафа и подсказать по материалам.
+          </div>
+        </div>
+      </div>
+
+      <!-- Поле ввода -->
+      <form class="madera-chat__form" id="madera-chat-form">
+        <input
+          type="text"
+          id="madera-chat-input"
+          class="madera-chat__input"
+          placeholder="Напишите ваш вопрос..."
+          autocomplete="off"
+        />
+        <button type="submit" class="madera-chat__send">➤</button>
+      </form>
+    </div>
+
+    <!-- ============================= -->
+    <!--        JS-приложение          -->
+    <!-- ============================= -->
     <script type="module" src="src/main.js"></script>
   </body>
 </html>
