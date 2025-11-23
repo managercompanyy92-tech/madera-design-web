@@ -2,27 +2,134 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>Madera Design — Современная корпусная мебель на заказ</title>
+    <title>Madera Design — корпусная мебель на заказ</title>
 
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <meta
-      name="description"
-      content="Madera Design — корпусная мебель на заказ в Душанбе: кухни, шкафы, гардеробные, прихожие. Дизайн, производство и монтаж под ключ."
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Madera Design — кухни, шкафы, гардеробные на заказ с AI-ассистентом." />
 
-    <!-- Глобальные стили приложения (включая новый AI-чат .ai-chat) -->
+    <!-- Основные стили SPA (включая новый чат .ai-chat) -->
     <link rel="stylesheet" href="src/styles/global.css" />
+
+    <!-- Стили большого виджета Madera -->
+    <style>
+      :root {
+        --madera-bg: #181818;
+        --madera-bg-soft: #222;
+        --madera-border: #3a3a3a;
+        --madera-accent: #ff8a26;
+        --madera-accent-soft: #ffb25f;
+        --madera-text: #f5f5f5;
+        --madera-text-soft: #c8c8c8;
+      }
+
+      .madera-chat-open-btn {
+        position: fixed;
+        right: 16px;
+        bottom: 120px;
+        z-index: 40;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: var(--madera-accent);
+        color: #000;
+        border: none;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      }
+
+      .madera-chat {
+        position: fixed;
+        right: 16px;
+        bottom: 120px;
+        width: 100%;
+        max-width: 420px;
+        max-height: 80vh;
+        background: var(--madera-bg);
+        border-radius: 18px;
+        border: 1px solid var(--madera-border);
+        color: var(--madera-text);
+        box-shadow: 0 18px 45px rgba(0,0,0,0.6);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 50;
+      }
+
+      .madera-chat--open {
+        display: flex !important;
+      }
+    </style>
   </head>
 
   <body>
-    <!-- Корневой контейнер SPA. Внутри него рендерится всё приложение,
-         в том числе НОВЫЙ AI-ЧАТ (который управляется src/main.js). -->
+
+    <!-- Корневой контейнер SPA (внутри него работает НОВЫЙ чат .ai-chat) -->
     <div id="app"></div>
 
-    <!-- Входная точка JS-приложения -->
+
+    <!-- Кнопка старого большого AI-чата -->
+    <button
+      class="madera-chat-open-btn"
+      data-madera-chat-open
+    >
+      AI-ассистент (большой чат)
+    </button>
+
+
+    <!-- Большой AI-чат Madera -->
+    <div class="madera-chat" data-madera-chat>
+      <div class="madera-chat__header">
+        <div>
+          <div class="madera-chat__title">AI-ассистент Madera</div>
+          <div class="madera-chat__subtitle">
+            Подскажу материалы, рассчитаю стоимость, помогу с идеями.
+          </div>
+        </div>
+
+        <button class="madera-chat__close" data-madera-chat-close>
+          ×
+        </button>
+      </div>
+
+      <div class="madera-chat__body">
+        <div class="madera-chat__messages" data-madera-chat-messages>
+          <div class="madera-chat__message madera-chat__message--bot">
+            <div class="madera-chat__bubble">
+              Здравствуйте! Я AI-ассистент Madera.
+              Могу рассчитать стоимость кухни (4000/5000 сомони за пог.м),
+              шкафов, гардеробных и другой мебели.
+            </div>
+          </div>
+        </div>
+
+        <div class="madera-chat__status" data-madera-chat-status>
+          Ассистент онлайн.
+        </div>
+
+        <form class="madera-chat__form" data-madera-chat-form>
+          <input
+            type="text"
+            class="madera-chat__input"
+            placeholder="Напишите или скажите…"
+            data-madera-chat-input
+          />
+
+          <button class="madera-chat__voice" data-madera-chat-voice>
+            🎤
+          </button>
+
+          <button class="madera-chat__send" type="submit">
+            ➤
+          </button>
+        </form>
+      </div>
+    </div>
+
+
+    <!-- Логика основного SPA -->
     <script type="module" src="src/main.js"></script>
+
+    <!-- Логика большого чата Madera -->
+    <script src="chat.js" defer></script>
+
   </body>
 </html>
