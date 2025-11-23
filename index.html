@@ -1,21 +1,162 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Madera Design — Современная корпусная мебель в Душанбе</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <title>Madera Design — Современная мебель на заказ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Базовое SEO-описание, потом усилим под маркетинг -->
-  <meta name="description" content="Madera Design — современная корпусная мебель на заказ в Душанбе. Премиальный сервис, дизайн с ИИ, онлайн-калькулятор, статусы заказов и партнёрская программа." />
+    <!-- Базовое SEO-описание -->
+    <meta name="description" content="Madera Design — мебельная студия, премиальная корпусная мебель на заказ в Душанбе.">
 
-  <!-- Подключаем глобальные стили -->
-  <link rel="stylesheet" href="src/styles/global.css" />
+    <!-- Подключаем глобальные стили -->
+    <link rel="stylesheet" href="src/styles/main.css">
 </head>
-<body>
-  <!-- Корневой контейнер SPA -->
-  <div id="app"></div>
 
-  <!-- Входная точка JS-приложения -->
-  <script type="module" src="src/main.js"></script>
+<body>
+
+    <!-- Корневой контейнер твоего SPA -->
+    <div id="app"></div>
+
+
+    <!-- ========================================= -->
+    <!--      HTML-РАЗМЕТКА ВИДЖЕТА AI-ЧАТА       -->
+    <!-- ========================================= -->
+
+    <!-- Кнопка открытия чата -->
+    <button
+        data-madera-chat-open
+        class="madera-chat-open-btn"
+        style="
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ff8c2b;
+            color: white;
+            border-radius: 50px;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 9999;
+        "
+    >
+        AI-ассистент
+    </button>
+
+    <!-- Виджет чата -->
+    <div
+        data-madera-chat
+        class="madera-chat-widget"
+        style="
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 330px;
+            background: #1a1a1a;
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 9999;
+        "
+    >
+
+        <!-- Шапка чата -->
+        <div
+            style="
+                padding: 14px;
+                background: #252525;
+                font-size: 18px;
+                font-weight: bold;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            "
+        >
+            AI-ассистент Madera
+            <span
+                data-madera-chat-close
+                style="
+                    cursor: pointer;
+                    font-size: 20px;
+                    padding: 4px;
+                "
+            >
+                ×
+            </span>
+        </div>
+
+        <!-- Контейнер сообщений -->
+        <div
+            data-madera-chat-messages
+            style="
+                padding: 12px;
+                height: 260px;
+                overflow-y: auto;
+                font-size: 15px;
+            "
+        ></div>
+
+        <!-- Форма отправки сообщения -->
+        <form
+            data-madera-chat-form
+            style="
+                display: flex;
+                padding: 10px;
+                background: #252525;
+                gap: 10px;
+            "
+        >
+            <input
+                data-madera-chat-input
+                type="text"
+                placeholder="Напишите ваш вопрос…"
+                style="
+                    flex: 1;
+                    padding: 10px;
+                    border-radius: 8px;
+                    border: none;
+                    outline: none;
+                "
+            />
+
+            <button
+                type="submit"
+                style="
+                    background: #ff8c2b;
+                    border: none;
+                    color: white;
+                    padding: 10px 14px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                "
+            >
+                ➤
+            </button>
+        </form>
+
+        <!-- Статус под полем -->
+        <div
+            data-madera-chat-status
+            style="
+                padding: 5px 12px;
+                font-size: 12px;
+                opacity: 0.7;
+            "
+        ></div>
+
+    </div>
+    <!-- КОНЕЦ HTML ЧАТА -->
+
+
+    <!-- Подключение фронтенд-логики чата -->
+    <!-- chat.js должен лежать в корне репозитория -->
+    <script src="./chat.js"></script>
+
+    <!-- Входная точка JS-приложения (твоя SPA) -->
+    <script type="module" src="src/main.js"></script>
+
 </body>
 </html>
