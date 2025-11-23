@@ -80,6 +80,7 @@ function renderHome() {
 }
 
 function renderCatalog() {
+  // Первый уровень: категории
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
       .map(
@@ -114,6 +115,7 @@ function renderCatalog() {
     `;
   }
 
+  // Второй уровень: идеи внутри категории
   const category = catalogCategories.find((cat) => cat.id === selectedCatalogCategoryId);
   const items = catalogItems.filter((item) => item.categoryId === selectedCatalogCategoryId);
 
@@ -168,6 +170,7 @@ function renderOrder() {
       </p>
 
       <div class="order-layout">
+        <!-- Левая колонка: калькулятор + форма -->
         <div>
           <div class="order-calc">
             <div class="order-calc__header">
@@ -249,6 +252,7 @@ function renderOrder() {
             </div>
           </div>
 
+          <!-- Форма заявки, связанная с калькулятором -->
           <div class="order-form">
             <div class="order-form__header">
               <div class="order-form__title">Заявка на замер и расчёт</div>
@@ -369,6 +373,7 @@ function renderOrder() {
           </div>
         </div>
 
+        <!-- Правая колонка: маркетинг + следующий шаг -->
         <div class="order-info">
           <div class="order-info__card">
             <div class="order-info__badge">Маркетинг & доверие</div>
@@ -395,31 +400,211 @@ function renderOrder() {
   `;
 }
 
+/* -------------------------- ЛИЧНЫЙ КАБИНЕТ -------------------------- */
+
 function renderProfile() {
   return `
-    <section class="page">
+    <section class="page page--profile">
       <h1 class="page__title">Личный кабинет</h1>
       <p class="page__subtitle">
-        Здесь клиент будет видеть статусы заказов, историю, партнёрский промокод,
-        начисленные бонусы и чат с поддержкой.
+        Здесь клиент будет видеть статусы своих заказов, промокоды, бонусы и связь с менеджером.
+        Сейчас это демонстрационный макет — позже мы подключим сюда реальный backend.
       </p>
-      <div class="page__placeholder">
-        Позже мы добавим блоки «Мои заказы», «Партнёрская программа», «Настройки профиля».
+
+      <div class="order-layout">
+        <!-- Левая колонка: заказы + профиль -->
+        <div>
+          <!-- Мои заказы -->
+          <div class="order-form" style="margin-top: 0;">
+            <div class="order-form__header">
+              <div class="order-form__title">Мои заказы</div>
+              <div class="order-form__subtitle">
+                Здесь будет список всех ваших заказов в Madera Design с этапами и статусами.
+              </div>
+            </div>
+
+            <div class="page__placeholder">
+              <strong>Пример (демо):</strong><br/><br/>
+              • Заказ №MD-001 — кухня 4,5 м, тариф «Премиум», статус: <strong>в работе</strong><br/>
+              • Заказ №MD-002 — гардеробная 3 м, тариф «Стандарт», статус: <strong>ожидает замера</strong><br/><br/>
+              В реальной версии здесь будет таблица с датой, суммой, этапом («Замер», «Дизайн», «Производство», «Монтаж»)
+              и быстрым переходом в чат с менеджером по конкретному заказу.
+            </div>
+          </div>
+
+          <!-- Профиль клиента -->
+          <div class="order-form">
+            <div class="order-form__header">
+              <div class="order-form__title">Профиль клиента</div>
+              <div class="order-form__subtitle">
+                Базовые данные, чтобы менеджеру было проще вести коммуникацию и подбирать решения.
+              </div>
+            </div>
+
+            <div class="order-form__grid">
+              <div class="order-form__row">
+                <label class="order-form__label">Имя</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Как к вам обращаться?"
+                  disabled
+                  value="(будет подтягиваться из заявок)"
+                />
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Телефон / WhatsApp</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="+992 ..."
+                  disabled
+                  value="(будет подтягиваться из заявок)"
+                />
+              </div>
+
+              <div class="order-form__row order-form__row--full">
+                <label class="order-form__label">Предпочтительный стиль интерьера</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Современный / минимализм / классика ..."
+                  disabled
+                  value="(будет сохраняться после первых заказов)"
+                />
+              </div>
+            </div>
+
+            <div class="order-form__footer">
+              <div class="order-form__note">
+                В дальнейшем клиент сможет самостоятельно обновлять свои данные и предпочтения,
+                а система будет предлагать идеи под его стиль и бюджет.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Правая колонка: партнёрка + план развития -->
+        <div class="order-info">
+          <!-- Партнёрская программа -->
+          <div class="order-info__card">
+            <div class="order-info__badge">Партнёрская программа</div>
+            <h2 class="order-info__title">Зарабатывайте вместе с Madera Design</h2>
+            <ul class="order-info__list">
+              <li>Клиент получает личный промокод на скидку для друзей.</li>
+              <li>За каждый заказ по вашему промокоду — бонусы или денежное вознаграждение.</li>
+              <li>Бонусы можно использовать на свои будущие проекты или обслуживание.</li>
+            </ul>
+          </div>
+
+          <!-- Как будет работать личный кабинет -->
+          <div class="order-info__next">
+            <div class="order-info__next-text">
+              <strong>Дальнейшее развитие личного кабинета:</strong><br/><br/>
+              1. Подключение реального backend и базы заказов.<br/>
+              2. Отображение этапов заказа в реальном времени.<br/>
+              3. История диалогов с AI-ассистентом и менеджерами.<br/>
+              4. Управление промокодами и партнёрскими начислениями.
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   `;
 }
 
+/* ------------------------- РАЗДЕЛ «ЕЩЁ» / ИНФО ------------------------- */
+
 function renderMore() {
   return `
-    <section class="page">
-      <h1 class="page__title">Дополнительно</h1>
+    <section class="page page--more">
+      <h1 class="page__title">Информация о сервисе Madera Design</h1>
       <p class="page__subtitle">
-        Информационные разделы: материалы, цены, сроки, документы, акции, о компании,
-        дизайн-проект и контакты.
+        Ответы на частые вопросы: из чего делаем мебель, какие реальные сроки, как формируется цена,
+        какие условия гарантии и как работает сервис после монтажа.
       </p>
-      <div class="page__placeholder">
-        Здесь позже появится структурированное «меню знаний» о Madera Design и сервисе.
+
+      <section class="highlights">
+        <article class="highlights__item">
+          <h2 class="highlights__title">Материалы и фурнитура</h2>
+          <p class="highlights__text">
+            Корпуса — из качественного ЛДСП российских производителей. Фасады — ЛДСП или турецкий МДФ
+            в зависимости от тарифа. Фурнитура — Blum или проверенные аналоги (направляющие, петли,
+            механизмы плавного закрывания).
+          </p>
+        </article>
+
+        <article class="highlights__item">
+          <h2 class="highlights__title">Сроки и этапы</h2>
+          <p class="highlights__text">
+            Типовой проект: замер 1–3 дня, дизайн и утверждение — 3–7 дней,
+            производство — 10–20 дней, монтаж — 1–3 дня.
+            Конкретные сроки зависят от сложности проекта и загруженности производства.
+          </p>
+        </article>
+
+        <article class="highlights__item">
+          <h2 class="highlights__title">Цена и прозрачность</h2>
+          <p class="highlights__text">
+            Базовые тарифы: около 4000 сомони за погонный метр для ЛДСП фасадов (Стандарт)
+            и 5000 сомони для МДФ фасадов (Премиум). Минимальный объём — 3 погонных метра.
+            Все доплаты (техника, сложные формы) проговариваются заранее.
+          </p>
+        </article>
+      </section>
+
+      <div class="order-layout" style="margin-top: 18px;">
+        <div>
+          <!-- Оплата и рассрочка -->
+          <div class="order-info__card">
+            <div class="order-info__badge">Оплата и рассрочка</div>
+            <h2 class="order-info__title">Как можно оплатить заказ</h2>
+            <ul class="order-info__list">
+              <li>Частичная предоплата для запуска в производство.</li>
+              <li>Окончательный расчёт после монтажа и приёмки мебели.</li>
+              <li>Возможность оплаты по безналичному расчёту.</li>
+              <li>Возможна рассрочка и кредит через партнёрские организации (по согласованию).</li>
+            </ul>
+          </div>
+
+          <!-- Гарантия и сервис -->
+          <div class="order-info__card">
+            <div class="order-info__badge">Гарантия и сервис</div>
+            <h2 class="order-info__title">Что мы гарантируем</h2>
+            <ul class="order-info__list">
+              <li>Гарантия на корпус и фасады — по договору (при нормальной эксплуатации).</li>
+              <li>Сервисная настройка фурнитуры в течение первого года.</li>
+              <li>Возможность доукомплектовать или модифицировать мебель со временем.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="order-info">
+          <!-- О компании -->
+          <div class="order-info__card">
+            <div class="order-info__badge">О компании</div>
+            <h2 class="order-info__title">Madera Design — мебель нового формата</h2>
+            <ul class="order-info__list">
+              <li>Фокус на современных интерьерах и функциональных решениях.</li>
+              <li>Собственное производство и команда монтажников в Душанбе.</li>
+              <li>Использование цифровых инструментов: AI-ассистент, калькулятор, статус заказа онлайн.</li>
+            </ul>
+          </div>
+
+          <!-- Частые вопросы -->
+          <div class="order-info__next">
+            <div class="order-info__next-text">
+              <strong>Частые вопросы (FAQ):</strong><br/><br/>
+              <strong>— Можно ли заказать меньше 3 пог. метров?</strong><br/>
+              Обычно нет, так как это нерентабельно. Но можно обсудить комбинированный проект (например, кухня + шкаф).<br/><br/>
+              <strong>— Делаете ли вы выезд на замер?</strong><br/>
+              Да, после предварительного расчёта и согласия клиента.<br/><br/>
+              <strong>— Можно ли принести свой дизайн?</strong><br/>
+              Да, мы можем адаптировать ваш дизайн под реальные материалы и фурнитуру Madera Design.
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   `;
