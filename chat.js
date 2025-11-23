@@ -1,378 +1,198 @@
-// chat.js — фронтенд-логика виджета AI-ассистента Madera
-// Работает с HTML-разметкой, где есть data-madera-* атрибуты
+// chat.js
 
 (function () {
-  document.addEventListener("DOMContentLoaded", initMaderaChat);
+  const API_URL = "https://your-backend.example.com/api/assistant"; // замените на свой backend при необходимости
 
-  function initMaderaChat() {
-    const chatEl = document.querySelector("[data-madera-chat]");
-    const openButtons = document.querySelectorAll("[data-madera-chat-open]");
-    const closeButton = document.querySelector("[data-madera-chat-close]");
-    const form = document.querySelector("[data-madera-chat-form]");
-    const input = document.querySelector("[data-madera-chat-input]");
-    const messagesEl = document.querySelector("[data-madera-chat-messages]");
-    const statusEl = document.querySelector("[data-madera-chat-status]");
-    const voiceBtn = document.querySelector("[data-madera-chat-voice]");
+  const chatRoot = document.querySelector("[data-madera-chat]");
+  const openBtn = document.querySelector("[data-madera-chat-open]");
+  const closeBtn = chatRoot?.querySelector("[data-madera-chat-close]");
+  const messagesEl = chatRoot?.querySelector("[data-madera-chat-messages]");
+  const statusEl = chatRoot?.querySelector("[data-madera-chat-status]");
+  const formEl = chatRoot?.querySelector("[data-madera-chat-form]");
+  const inputEl = chatRoot?.querySelector("[data-madera-chat-input]");
+  const voiceBtn = chatRoot?.querySelector("[data-madera-chat-voice]");
 
-    if (
-      !chatEl ||
-      !openButtons.length ||
-      !closeButton ||
-      !form ||
-      !input ||
-      !messagesEl
-    ) {
-      console.warn("[Madera AI] Не найдены элементы чата. Проверь data-атрибуты.");
+  if (!chatRoot || !openBtn || !formEl || !messagesEl || !inputEl) {
+    console.warn("Madera chat: DOM elements not found");
+    return;
+  }
+
+  /* ------------------------ ОТКРЫТИЕ / ЗАКРЫТИЕ ЧАТА ------------------------ */
+
+  function openChat() {
+    chatRoot.classList.add("madera-chat--open");
+    if (inputEl) inputEl.focus();
+  }
+
+  function closeChat() {
+    chatRoot.classList.remove("madera-chat--open");
+    stopRecognition();
+  }
+
+  openBtn.addEventListener("click", openChat);
+  closeBtn?.addEventListener("click", closeChat);
+
+  /* ------------------------------ РЕНДЕР СООБЩЕНИЙ ------------------------------ */
+
+  function appendMessage(text, role = "bot") {
+    const wrapper = document.createElement("div");
+    wrapper.className =
+      "madera-chat__message " +
+      (role === "user"
+        ? "madera-chat__message--user"
+        : "madera-chat__message--bot");
+
+    const bubble = document.createElement("div");
+    bubble.className = "madera-chat__bubble";
+    bubble.textContent = text;
+
+    wrapper.appendChild(bubble);
+    messagesEl.appendChild(wrapper);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  /* -------------------------- ГОЛОСОВОЙ ОТВЕТ (TTS) -------------------------- */
+
+  function speak(text) {
+    if (!("speechSynthesis" in window)) return;
+    try {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "ru-RU";
+      utter.rate = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+    } catch (e) {
+      console.warn("TTS error:", e);
+    }
+  }
+
+  /* ------------------------- ОТПРАВКА НА BACKEND / ФОЛБЭК ------------------------- */
+
+  async function sendToAssistant(message) {
+    statusEl.textContent = "Думаю над ответом…";
+
+    // Попытка обратиться к backend API
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const reply = data.reply || data.text || "";
+        if (reply) {
+          return reply;
+        }
+      }
+    } catch (e) {
+      console.warn("API error, fallback to локальная логика:", e);
+    }
+
+    // Локальный фолбэк, если API нет или отвечает с ошибкой
+    const lower = message.toLowerCase();
+
+    if (lower.includes("цена") || lower.includes("стоим")) {
+      return "Базовые тарифы: около 4000 сомони за погонный метр для ЛДСП (Стандарт) и 5000 сомони для МДФ фасадов (Премиум). Минимальный объём — 3 погонных метра.";
+    }
+
+    if (lower.includes("минимал")) {
+      return "Минимальный объём заказа — 3 погонных метра. Это помогает сохранять качество сервиса и оптимальную загрузку производства.";
+    }
+
+    if (lower.includes("кредит") || lower.includes("рассроч")) {
+      return "Оплата возможна частями и в кредит через партнёрские банки. Конкретные условия можно обсудить с менеджером после расчёта проекта.";
+    }
+
+    if (lower.includes("адрес") || lower.includes("где находитесь")) {
+      return "Шоурум и производство Madera Design находятся в Душанбе. Точный адрес и схему проезда вам уточнит менеджер при согласовании замера.";
+    }
+
+    return "Я зафиксировала ваш вопрос. Ориентировочные тарифы: 4000 / 5000 сом за погонный метр, минимальный объём — 3 пог. метра. За точными цифрами лучше заполнить заявку в разделе «Заказ» — менеджер всё посчитает.";
+  }
+
+  /* ------------------------------ ОТПРАВКА ФОРМЫ ------------------------------ */
+
+  formEl.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const text = (inputEl.value || "").trim();
+    if (!text) return;
+
+    appendMessage(text, "user");
+    inputEl.value = "";
+
+    const reply = await sendToAssistant(text);
+    appendMessage(reply, "bot");
+    statusEl.textContent =
+      "Готова к следующему вопросу. Голосовой и текстовый ввод доступны.";
+    speak(reply);
+  });
+
+  inputEl.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      formEl.dispatchEvent(new Event("submit", { cancelable: true }));
+    }
+  });
+
+  /* --------------------------- ГОЛОСОВОЙ ВВОД (STT) --------------------------- */
+
+  let recognition = null;
+  let recognizing = false;
+
+  if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = "ru-RU";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.addEventListener("start", () => {
+      recognizing = true;
+      voiceBtn.classList.add("madera-chat__voice--active");
+      statusEl.textContent = "Слушаю… говорите ваш вопрос.";
+    });
+
+    recognition.addEventListener("end", () => {
+      recognizing = false;
+      voiceBtn.classList.remove("madera-chat__voice--active");
+      statusEl.textContent =
+        "Готова к следующему вопросу. Голосовой и текстовый ввод доступны.";
+    });
+
+    recognition.addEventListener("result", (event) => {
+      const transcript = event.results[0][0].transcript;
+      inputEl.value = transcript;
+      formEl.dispatchEvent(new Event("submit", { cancelable: true }));
+    });
+  } else {
+    console.warn("SpeechRecognition API not supported");
+  }
+
+  function startRecognition() {
+    if (!recognition || recognizing) return;
+    recognition.start();
+  }
+
+  function stopRecognition() {
+    if (!recognition || !recognizing) return;
+    recognition.stop();
+  }
+
+  voiceBtn.addEventListener("click", () => {
+    if (!recognition) {
+      statusEl.textContent =
+        "Голосовой ввод не поддерживается в этом браузере. Попробуйте последний Chrome.";
       return;
     }
-
-    // --- Состояния и константы ---------------------------------------------
-
-    const STORAGE_KEY = "maderaChatHistoryV1";
-
-    const DEFAULT_STATUS =
-      (statusEl && statusEl.textContent.trim()) ||
-      "Онлайн-ассистент. Точный расчёт сделает менеджер после замера.";
-
-    const QUICK_QUESTIONS = [
-      "Сколько стоит кухня 3 метра?",
-      "Сколько стоит кухня 5 метров с фасадом МДФ?",
-      "Сколько стоит шкаф-купе 4 метра?",
-      "Сколько стоит прихожая 3 метра?",
-    ];
-
-    let history = [];
-    let isLoading = false;
-    let isRecognizing = false;
-    let recognition = null;
-
-    // --- Вспомогательные функции ------------------------------------------
-
-    function openChat() {
-      chatEl.classList.add("madera-chat--open");
-      // Автофокус в поле ввода
-      setTimeout(() => input.focus(), 50);
+    if (recognizing) {
+      stopRecognition();
+    } else {
+      startRecognition();
     }
-
-    function closeChat() {
-      chatEl.classList.remove("madera-chat--open");
-    }
-
-    function setStatus(text) {
-      if (!statusEl) return;
-      statusEl.textContent = text;
-    }
-
-    function updateStatus() {
-      if (isRecognizing) {
-        setStatus("Слушаю вас…");
-      } else if (isLoading) {
-        setStatus("AI-ассистент обрабатывает ваш запрос…");
-      } else {
-        setStatus(DEFAULT_STATUS);
-      }
-    }
-
-    function scrollMessagesToBottom() {
-      if (!messagesEl) return;
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    function saveHistory() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-      } catch (e) {
-        console.warn("[Madera AI] Не удалось сохранить историю чата:", e);
-      }
-    }
-
-    function loadHistory() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return;
-        history = parsed;
-        // Восстанавливаем визуальные сообщения
-        history.forEach((msg) => {
-          if (!msg || !msg.role || !msg.content) return;
-          appendMessage(
-            msg.role === "user" ? "user" : "bot",
-            msg.content,
-            false
-          );
-        });
-        scrollMessagesToBottom();
-      } catch (e) {
-        console.warn("[Madera AI] Не удалось прочитать историю чата:", e);
-      }
-    }
-
-    /**
-     * Добавить сообщение в чат.
-     * role: 'user' | 'bot'
-     * save: нужно ли сохранять в историю (по умолчанию true)
-     */
-    function appendMessage(role, text, save = true) {
-      if (!messagesEl || !text) return;
-
-      const wrapper = document.createElement("div");
-      wrapper.classList.add("madera-chat__message");
-      if (role === "user") {
-        wrapper.classList.add("madera-chat__message--user");
-      } else {
-        wrapper.classList.add("madera-chat__message--bot");
-      }
-
-      const bubble = document.createElement("div");
-      bubble.classList.add("madera-chat__bubble");
-      bubble.textContent = text;
-
-      wrapper.appendChild(bubble);
-      messagesEl.appendChild(wrapper);
-
-      if (save) {
-        history.push({
-          role: role === "user" ? "user" : "assistant",
-          content: text,
-        });
-        saveHistory();
-      }
-
-      scrollMessagesToBottom();
-    }
-
-    // Создание блока быстрых вопросов (FAQ)
-    function createQuickQuestions() {
-      if (!messagesEl || QUICK_QUESTIONS.length === 0) return;
-
-      const container = document.createElement("div");
-      container.style.marginBottom = "6px";
-      container.style.display = "flex";
-      container.style.flexWrap = "wrap";
-      container.style.gap = "4px";
-
-      QUICK_QUESTIONS.forEach((q) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.textContent = q;
-        btn.style.fontSize = "11px";
-        btn.style.padding = "4px 8px";
-        btn.style.borderRadius = "999px";
-        btn.style.border = "1px solid var(--madera-border)";
-        btn.style.background = "var(--madera-bg-soft)";
-        btn.style.color = "var(--madera-text-soft)";
-        btn.style.cursor = "pointer";
-        btn.style.whiteSpace = "nowrap";
-
-        btn.addEventListener("click", () => {
-          handleUserMessage(q);
-        });
-
-        container.appendChild(btn);
-      });
-
-      // Вставляем блок быстрых вопросов в начало списка сообщений
-      messagesEl.insertBefore(container, messagesEl.firstChild);
-    }
-
-    // --- Работа с backend ---------------------------------------------------
-
-    async function sendToBackend(message) {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
-
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ message }),
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeout);
-
-        if (!res.ok) {
-          console.error("[Madera AI] Backend responded with status", res.status);
-          throw new Error("Bad response from server");
-        }
-
-        const data = await res.json();
-        console.log("[Madera AI] Response:", data);
-
-        const reply =
-          data?.reply?.trim() ||
-          "Извините, произошла ошибка. Попробуйте позже.";
-
-        return reply;
-      } catch (error) {
-        clearTimeout(timeout);
-        console.error("[Madera AI] ERROR:", error);
-        throw error;
-      }
-    }
-
-    async function handleUserMessage(textFromOutside) {
-      const text =
-        typeof textFromOutside === "string"
-          ? textFromOutside.trim()
-          : input.value.trim();
-
-      if (!text) return;
-
-      // Если сообщение пришло из поля ввода — очищаем его
-      if (!textFromOutside && input) {
-        input.value = "";
-      }
-
-      appendMessage("user", text);
-
-      isLoading = true;
-      updateStatus();
-
-      try {
-        const reply = await sendToBackend(text);
-        appendMessage("bot", reply);
-      } catch (e) {
-        appendMessage(
-          "bot",
-          "Извините, сейчас не получается получить ответ. Попробуйте ещё раз чуть позже."
-        );
-      } finally {
-        isLoading = false;
-        updateStatus();
-      }
-    }
-
-    // --- Голосовой ввод ----------------------------------------------------
-
-    function initSpeechRecognition() {
-      const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-
-      if (!SpeechRecognition) {
-        console.warn(
-          "[Madera AI] В браузере нет поддержки SpeechRecognition (голосовой ввод недоступен)."
-        );
-        return null;
-      }
-
-      const rec = new SpeechRecognition();
-      rec.lang = "ru-RU";
-      rec.continuous = false;
-      rec.interimResults = false;
-
-      rec.onstart = () => {
-        isRecognizing = true;
-        if (voiceBtn) {
-          voiceBtn.classList.add("madera-chat__voice--active");
-        }
-        updateStatus();
-      };
-
-      rec.onend = () => {
-        isRecognizing = false;
-        if (voiceBtn) {
-          voiceBtn.classList.remove("madera-chat__voice--active");
-        }
-        updateStatus();
-      };
-
-      rec.onerror = (event) => {
-        console.error("[Madera AI] SpeechRecognition error:", event.error);
-        isRecognizing = false;
-        if (voiceBtn) {
-          voiceBtn.classList.remove("madera-chat__voice--active");
-        }
-        updateStatus();
-      };
-
-      rec.onresult = (event) => {
-        try {
-          const transcript = Array.from(event.results)
-            .map((result) => result[0]?.transcript || "")
-            .join(" ")
-            .trim();
-
-          if (!transcript) return;
-
-          // Можно подсветить распознанный текст в поле
-          if (input) {
-            input.value = transcript;
-          }
-
-          // Автоматически отправляем распознанный вопрос
-          handleUserMessage(transcript);
-        } catch (e) {
-          console.error("[Madera AI] Ошибка обработки голосового ввода:", e);
-        }
-      };
-
-      return rec;
-    }
-
-    function toggleVoiceRecognition() {
-      if (!recognition) {
-        recognition = initSpeechRecognition();
-      }
-      if (!recognition) return;
-
-      if (isRecognizing) {
-        recognition.stop();
-      } else {
-        try {
-          recognition.start();
-        } catch (e) {
-          // В некоторых браузерах повторный start может бросить ошибку
-          console.error("[Madera AI] Не удалось запустить распознавание:", e);
-        }
-      }
-    }
-
-    // --- Навешиваем обработчики -------------------------------------------
-
-    openButtons.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        openChat();
-      });
-    });
-
-    closeButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      closeChat();
-    });
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      handleUserMessage();
-    });
-
-    if (voiceBtn) {
-      voiceBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        toggleVoiceRecognition();
-      });
-    }
-
-    // Открытие чата по клавише "Escape" (закрытие) и "Ctrl+Shift+A" (открыть)
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && chatEl.classList.contains("madera-chat--open")) {
-        closeChat();
-      }
-      if (e.key.toLowerCase() === "a" && e.ctrlKey && e.shiftKey) {
-        openChat();
-      }
-    });
-
-    // --- Инициализация при загрузке страницы -------------------------------
-
-    createQuickQuestions();
-    loadHistory();
-    updateStatus();
-
-    console.log("[Madera AI] Чат инициализирован.");
-  }
+  });
 })();
