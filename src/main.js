@@ -4,24 +4,23 @@
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
 
-// Тарифы за погонный метр
+// Тарифы за погонный метр (сомони)
 const BASE_RATES = {
-  standard: 4000,
-  premium: 5000,
+  standard: 4000, // ЛДСП фасады
+  premium: 5000, // МДФ фасады
 };
 
-// URL ассистента
-const ASSISTANT_API_URL = "/api/assistant";
-
-// Корневой контейнер
+// Корневой контейнер приложения
 const appRoot = document.getElementById("app");
 
-// Состояние выбранной категории каталога
+// Состояние выбранной категории каталога (null = список категорий)
 let selectedCatalogCategoryId = null;
 
-// ------------------------- VIEW-ФУНКЦИИ ----------------------------------
+/**
+ * VIEW-ФУНКЦИИ
+ */
 
-// Главная
+// Главная страница
 function renderHome() {
   return `
     <section class="page page--home">
@@ -49,7 +48,7 @@ function renderHome() {
         </div>
         <div class="hero__side">
           <div class="hero-card">
-            <div class="hero-card__label">AI &amp; маркетинг</div>
+            <div class="hero-card__label">AI &amp; МАРКЕТИНГ</div>
             <ul class="hero-card__list">
               <li>Персональные рекомендации дизайна</li>
               <li>AI-чат 24/7 по мебели и стоимости</li>
@@ -89,7 +88,6 @@ function renderHome() {
 
 // Каталог
 function renderCatalog() {
-  // список категорий
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
       .map(
@@ -124,7 +122,6 @@ function renderCatalog() {
     `;
   }
 
-  // внутренние идеи
   const category = catalogCategories.find(
     (cat) => cat.id === selectedCatalogCategoryId
   );
@@ -173,20 +170,18 @@ function renderCatalog() {
   `;
 }
 
-// Заказ (калькулятор + форма + маркетинг)
-// (логика та же, что и в твоём предыдущем варианте, чтобы не раздувать ответ)
+// Раздел «Заказ»
 function renderOrder() {
   return `
     <section class="page page--order">
       <h1 class="page__title">Онлайн-калькулятор и заказ мебели</h1>
       <p class="page__subtitle">
-        Оцените базовую стоимость вашего проекта за несколько секунд. Это ориентировочный расчёт — 
+        Оцените базовую стоимость вашего проекта за несколько секунд. Это ориентировочный расчёт —
         точную цену вы получите после замера и согласования дизайн-проекта.
       </p>
 
       <div class="order-layout">
         <div>
-          <!-- калькулятор (укороченная верстка, как раньше) -->
           <div class="order-calc">
             <div class="order-calc__header">
               <div class="order-calc__title">Быстрый расчёт стоимости</div>
@@ -207,7 +202,7 @@ function renderOrder() {
                 data-calc-length
               />
               <div class="order-calc__hint">
-                Минимальный объём заказа — <strong>3 пог. метра</strong>.
+                Минимальный объём заказа — <strong>3 пог. метра</strong>. Меньшие проекты мы не принимаем.
               </div>
             </div>
 
@@ -218,17 +213,24 @@ function renderOrder() {
                   <input type="radio" name="tariff" value="standard" checked />
                   <span class="order-calc-tariff__body">
                     <span class="order-calc-tariff__name">Стандарт</span>
-                    <span class="order-calc-tariff__price">
-                      ≈ ${BASE_RATES.standard.toLocaleString("ru-RU")} сом / п.м.
+                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.standard.toLocaleString(
+                      "ru-RU"
+                    )} сом / п.м.</span>
+                    <span class="order-calc-tariff__desc">
+                      Корпус и фасады из ЛДСП, фурнитура Blum или аналог высокого качества.
                     </span>
                   </span>
                 </label>
+
                 <label class="order-calc-tariff">
                   <input type="radio" name="tariff" value="premium" />
                   <span class="order-calc-tariff__body">
                     <span class="order-calc-tariff__name">Премиум</span>
-                    <span class="order-calc-tariff__price">
-                      ≈ ${BASE_RATES.premium.toLocaleString("ru-RU")} сом / п.м.
+                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.premium.toLocaleString(
+                      "ru-RU"
+                    )} сом / п.м.</span>
+                    <span class="order-calc-tariff__desc">
+                      Корпус из ЛДСП, фасады из турецкого МДФ, фурнитура Blum. Премиальный внешний вид.
                     </span>
                   </span>
                 </label>
@@ -240,7 +242,7 @@ function renderOrder() {
                 Рассчитать стоимость
               </button>
               <div class="order-calc__note">
-                Расчёт ориентировочный, без учёта сложных форм и техники.
+                Расчёт предварительный и не учитывает сложные формы, встроенную технику и нестандартные решения.
               </div>
             </div>
 
@@ -249,7 +251,126 @@ function renderOrder() {
             </div>
           </div>
 
-          <!-- тут можешь оставить свою форму заявки как раньше -->
+          <div class="order-form">
+            <div class="order-form__header">
+              <div class="order-form__title">Заявка на замер и расчёт</div>
+              <div class="order-form__subtitle">
+                Заполните контактные данные — менеджер свяжется с вами, уточнит детали и сделает точный расчёт.
+              </div>
+            </div>
+
+            <div class="order-form__grid">
+              <div class="order-form__row">
+                <label class="order-form__label">Ваше имя*</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Как к вам обращаться?"
+                  data-order-name
+                />
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Телефон / WhatsApp*</label>
+                <input
+                  type="tel"
+                  class="order-form__input"
+                  placeholder="+992 ..."
+                  data-order-phone
+                />
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Предпочтительный способ связи</label>
+                <select class="order-form__select" data-order-contact-method>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="telegram">Telegram</option>
+                  <option value="call">Телефонный звонок</option>
+                </select>
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Категория мебели</label>
+                <select class="order-form__select" data-order-category>
+                  <option value="">Выберите категорию</option>
+                  <option value="kitchens">Кухни</option>
+                  <option value="bedrooms">Спальни</option>
+                  <option value="living">Гостиные</option>
+                  <option value="wardrobes">Гардеробные</option>
+                  <option value="hallways">Прихожие</option>
+                  <option value="kids">Детская мебель</option>
+                </select>
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Длина проекта, пог. метры (из калькулятора)</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Например, 4.5"
+                  data-order-length-output
+                />
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Выбранный тариф</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Стандарт / Премиум"
+                  data-order-tariff-output
+                />
+              </div>
+
+              <div class="order-form__row">
+                <label class="order-form__label">Промокод (если есть)</label>
+                <input
+                  type="text"
+                  class="order-form__input"
+                  placeholder="Введите промокод"
+                  data-order-promo
+                />
+              </div>
+
+              <div class="order-form__row order-form__row--full">
+                <label class="order-form__label">Кратко опишите проект</label>
+                <textarea
+                  class="order-form__textarea"
+                  rows="3"
+                  placeholder="Кухня в современной квартире, примерно 4.5 м, нужен встроенный холодильник и духовой шкаф..."
+                  data-order-comment
+                ></textarea>
+              </div>
+
+              <div class="order-form__row order-form__row--full">
+                <label class="order-form__label">
+                  Насколько вы настроены на заказ? (отбор «наших» клиентов)
+                </label>
+                <select class="order-form__select" data-order-readiness>
+                  <option value="soon">Готов(а) заказать в ближайший месяц</option>
+                  <option value="thinking">Пока изучаю варианты и цены</option>
+                  <option value="just-looking">Просто смотрю идеи на будущее</option>
+                </select>
+              </div>
+
+              <div class="order-form__row order-form__row--full order-form__row--checkbox">
+                <label class="order-form__checkbox">
+                  <input type="checkbox" data-order-minagree />
+                  <span>Я понимаю, что минимальный объём заказа — 3 погонных метра и согласен(на) с этим условием</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="order-form__footer">
+              <button class="btn btn--primary" data-action="submit-order">
+                Отправить заявку на расчёт
+              </button>
+              <div class="order-form__note">
+                Нажимая на кнопку, вы отправляете заявку менеджеру Madera Design. Мы не передаём данные третьим лицам.
+              </div>
+              <div class="order-form__result" data-order-result></div>
+            </div>
+          </div>
         </div>
 
         <div class="order-info">
@@ -257,10 +378,20 @@ function renderOrder() {
             <div class="order-info__badge">Маркетинг & доверие</div>
             <h2 class="order-info__title">Почему клиенты выбирают Madera Design</h2>
             <ul class="order-info__list">
-              <li>Прозрачные тарифы: 4000 / 5000 сомони за погонный метр.</li>
-              <li>Договор, сроки и статус заказа — в одном интерфейсе.</li>
-              <li>AI-помощник подбирает идеи под ваш стиль и бюджет.</li>
+              <li>Прозрачные тарифы: 4000 / 5000 сомони за погонный метр без скрытых доплат.</li>
+              <li>Договор, сроки и статус заказа — всегда под рукой в веб-приложении.</li>
+              <li>AI-помощник подбирает идеи дизайна под ваш стиль и бюджет.</li>
+              <li>Послепродажный сервис и настройка фурнитуры в течение года.</li>
             </ul>
+          </div>
+
+          <div class="order-info__next">
+            <div class="order-info__next-text">
+              Готовы обсудить проект? После заявки менеджер свяжется с вами и создаст заказ в системе с отслеживанием статуса.
+            </div>
+            <button class="btn btn--outline" data-route="profile">
+              Перейти к оформлению и статусам заказов
+            </button>
           </div>
         </div>
       </div>
@@ -268,37 +399,41 @@ function renderOrder() {
   `;
 }
 
-// Личный кабинет и «Ещё» — заглушки
+// Личный кабинет (заглушка)
 function renderProfile() {
   return `
     <section class="page">
       <h1 class="page__title">Личный кабинет</h1>
       <p class="page__subtitle">
-        Здесь позже появятся статусы заказов, партнёрская программа и бонусы.
+        Здесь клиент будет видеть статусы заказов, историю, партнёрский промокод,
+        начисленные бонусы и чат с поддержкой.
       </p>
       <div class="page__placeholder">
-        Заглушка: раздел в разработке.
+        Позже мы добавим блоки «Мои заказы», «Партнёрская программа», «Настройки профиля».
       </div>
     </section>
   `;
 }
 
+// Раздел «Ещё»
 function renderMore() {
   return `
     <section class="page">
       <h1 class="page__title">Дополнительно</h1>
       <p class="page__subtitle">
-        Материалы, цены, сроки, документы, акции и контакты Madera Design.
+        Информационные разделы: материалы, цены, сроки, документы, акции, о компании,
+        дизайн-проект и контакты.
       </p>
       <div class="page__placeholder">
-        Здесь позже появится структурированное меню знаний о компании.
+        Здесь позже появится структурированное «меню знаний» о Madera Design и сервисе.
       </div>
     </section>
   `;
 }
 
-// ------------------------- РОУТЕР -----------------------------------------
-
+/**
+ * КАРТА РОУТОВ
+ */
 const VIEWS = {
   home: renderHome,
   catalog: renderCatalog,
@@ -307,6 +442,9 @@ const VIEWS = {
   more: renderMore,
 };
 
+/**
+ * Рендер определённого раздела
+ */
 function renderRoute(route) {
   const viewFn = VIEWS[route] || VIEWS.home;
   const main = document.getElementById("app-main");
@@ -321,8 +459,9 @@ function renderRoute(route) {
   });
 }
 
-// ------------------------- КАЛЬКУЛЯТОР ------------------------------------
-
+/**
+ * Обработчик расчёта стоимости
+ */
 function handleCalcPrice() {
   const main = document.getElementById("app-main");
   if (!main) return;
@@ -345,22 +484,32 @@ function handleCalcPrice() {
     return;
   }
 
+  const tariff = tariffInput.value;
+  const rate = BASE_RATES[tariff] || BASE_RATES.standard;
+  const basePrice = length * rate;
+  const formatter = new Intl.NumberFormat("ru-RU");
+
   if (length < 3) {
     resultBox.innerHTML = `
       <div class="order-calc__result-error">
         Минимальный объём заказа — 3 погонных метра. Сейчас указано: ${length.toFixed(
           1
-        )} м.
+        )} м.<br />
+        Пожалуйста, скорректируйте длину или обсудите с менеджером индивидуально.
       </div>
     `;
     return;
   }
 
-  const tariff = tariffInput.value;
-  const rate = BASE_RATES[tariff] || BASE_RATES.standard;
-  const price = length * rate;
+  const lengthField = main.querySelector("[data-order-length-output]");
+  const tariffField = main.querySelector("[data-order-tariff-output]");
 
-  const formatter = new Intl.NumberFormat("ru-RU");
+  if (lengthField) {
+    lengthField.value = length.toFixed(1);
+  }
+  if (tariffField) {
+    tariffField.value = tariff === "premium" ? "Премиум" : "Стандарт";
+  }
 
   resultBox.innerHTML = `
     <div class="order-calc__result-ok">
@@ -370,148 +519,129 @@ function handleCalcPrice() {
         <strong>${tariff === "premium" ? "Премиум" : "Стандарт"}</strong>:
       </div>
       <div class="order-calc__result-price">
-        ≈ ${formatter.format(price)} сомони
+        ≈ ${formatter.format(basePrice)} сомони
       </div>
       <div class="order-calc__result-details">
-        Для точного расчёта оставьте заявку — менеджер уточнит детали и сделает финальный просчёт.
+        Это базовая цена без учёта сложных форм, встроенной техники и нестандартных решений.
+        Точный расчёт вы получите после замера и утверждения дизайн-проекта.
+      </div>
+      <div class="order-calc__result-next">
+        Следующий шаг: отправьте заявку через форму ниже — менеджер свяжется с вами для точного расчёта.
       </div>
     </div>
   `;
 }
 
-// ------------------------- НОВЫЙ AI-ЧАТ -----------------------------------
+/**
+ * Обработчик отправки заявки + сегментация лида
+ */
+function handleOrderSubmit() {
+  const main = document.getElementById("app-main");
+  if (!main) return;
 
-// обращаемся к корню чата
-function getChatRoot() {
-  return appRoot.querySelector("[data-ai-chat-root]");
-}
+  const nameInput = main.querySelector("[data-order-name]");
+  const phoneInput = main.querySelector("[data-order-phone]");
+  const categorySelect = main.querySelector("[data-order-category]");
+  const lengthOutput = main.querySelector("[data-order-length-output]");
+  const tariffOutput = main.querySelector("[data-order-tariff-output]");
+  const promoInput = main.querySelector("[data-order-promo]");
+  const commentInput = main.querySelector("[data-order-comment]");
+  const readinessSelect = main.querySelector("[data-order-readiness]");
+  const minAgreeCheckbox = main.querySelector("[data-order-minagree]");
+  const resultBox = main.querySelector("[data-order-result]");
 
-function setChatStatus(text) {
-  const root = getChatRoot();
-  if (!root) return;
-  const statusEl = root.querySelector("[data-ai-chat-status]");
-  if (statusEl) statusEl.textContent = text;
-}
+  if (!resultBox) return;
 
-function appendChatMessage(role, text) {
-  const root = getChatRoot();
-  if (!root) return;
-  const container = root.querySelector("[data-chat-messages]");
-  if (!container) return;
+  const name = (nameInput?.value || "").trim();
+  const phone = (phoneInput?.value || "").trim();
+  const category = categorySelect?.value || "";
+  const lengthStr = (lengthOutput?.value || "").replace(",", ".");
+  const length = parseFloat(lengthStr);
+  const tariffText = (tariffOutput?.value || "").trim();
+  const promo = (promoInput?.value || "").trim();
+  const comment = (commentInput?.value || "").trim();
+  const readiness = readinessSelect?.value || "soon";
+  const minAgree = !!minAgreeCheckbox?.checked;
 
-  const wrapper = document.createElement("div");
-  wrapper.className =
-    "ai-chat__msg " +
-    (role === "user" ? "ai-chat__msg--user" : "ai-chat__msg--bot");
-
-  const bubble = document.createElement("div");
-  bubble.className = "ai-chat__msg-text";
-  bubble.textContent = text;
-
-  wrapper.appendChild(bubble);
-  container.appendChild(wrapper);
-  container.scrollTop = container.scrollHeight;
-}
-
-function openChat() {
-  const root = getChatRoot();
-  if (!root) return;
-  root.classList.add("ai-chat--open");
-  const input = root.querySelector("[data-chat-input]");
-  if (input) input.focus();
-}
-
-function closeChat() {
-  const root = getChatRoot();
-  if (!root) return;
-  root.classList.remove("ai-chat--open");
-}
-
-// запрос к API ассистента
-async function sendToAssistant(message, history = []) {
-  const payload = { message, history };
-
-  try {
-    const res = await fetch(ASSISTANT_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) throw new Error("Bad response");
-
-    const data = await res.json();
-    const reply =
-      data.reply || data.answer || data.message || "Спасибо за вопрос!";
-
-    return reply;
-  } catch (e) {
-    console.error("ASSISTANT_API_ERROR", e);
-    return "Сейчас есть сложности с подключением к AI-ассистенту. Попробуйте ещё раз позже или оставьте заявку в разделе «Заказ».";
+  if (!name || !phone) {
+    resultBox.innerHTML = `
+      <div class="order-form__result-error">
+        Пожалуйста, укажите ваше имя и телефон для связи.
+      </div>
+    `;
+    return;
   }
+
+  if (!minAgree) {
+    resultBox.innerHTML = `
+      <div class="order-form__result-error">
+        Для продолжения необходимо подтвердить, что вы согласны с минимальным объёмом заказа 3 погонных метра.
+      </div>
+    `;
+    return;
+  }
+
+  if (!Number.isNaN(length) && length < 3) {
+    resultBox.innerHTML = `
+      <div class="order-form__result-error">
+        В заявке указана длина менее 3 погонных метров. Уточните длину или обсудите с менеджером возможные варианты.
+      </div>
+    `;
+    return;
+  }
+
+  let leadSegment = "cold";
+  let leadLabel = "Холодный лид";
+  let leadAdvice =
+    "Клиент на стадии вдохновения и изучения идей. Важно не давить, а мягко сопровождать и давать полезные материалы.";
+
+  if (readiness === "soon" && (Number.isNaN(length) || length >= 3)) {
+    leadSegment = "hot";
+    leadLabel = "Горячий лид";
+    leadAdvice =
+      "Клиент готов к заказу в ближайшее время и понимает минимальный объём. Важно быстро связаться, закрепить дизайн и зафиксировать условия.";
+  } else if (readiness === "thinking") {
+    leadSegment = "warm";
+    leadLabel = "Тёплый лид";
+    leadAdvice =
+      "Клиент сравнивает варианты. Нужны аргументы: кейсы, примеры работ, прозрачные цены, преимущества сервиса Madera Design.";
+  }
+
+  const payload = {
+    name,
+    phone,
+    category,
+    length: Number.isNaN(length) ? null : length,
+    tariff: tariffText || null,
+    promo: promo || null,
+    comment: comment || null,
+    readiness,
+    minAgree,
+    leadSegment,
+  };
+  console.log("ORDER_PAYLOAD", payload);
+
+  resultBox.innerHTML = `
+    <div class="order-form__result-ok">
+      <div class="order-form__result-main">
+        Заявка отправлена. Менеджер Madera Design свяжется с вами для уточнения деталей и точного расчёта.
+      </div>
+      <div class="order-form__result-sub">
+        Если вы указали WhatsApp или Telegram, ответ придёт туда. В рабочее время мы обычно отвечаем в течение дня.
+      </div>
+      <div class="order-form__result-ai">
+        <div class="order-form__result-ai-label">${leadLabel}</div>
+        <div class="order-form__result-ai-text">
+          ${leadAdvice}
+        </div>
+      </div>
+    </div>
+  `;
 }
 
-const chatHistory = [];
-
-async function handleChatSend() {
-  const root = getChatRoot();
-  if (!root) return;
-
-  const input = root.querySelector("[data-chat-input]");
-  const messages = root.querySelector("[data-chat-messages]");
-  if (!input || !messages) return;
-
-  const text = (input.value || "").trim();
-  if (!text) return;
-
-  appendChatMessage("user", text);
-  chatHistory.push({ role: "user", content: text });
-  input.value = "";
-
-  setChatStatus("AI-ассистент думает над ответом…");
-
-  const reply = await sendToAssistant(text, chatHistory);
-
-  appendChatMessage("assistant", reply);
-  chatHistory.push({ role: "assistant", content: reply });
-
-  setChatStatus(
-    "Онлайн-ассистент. Для точного расчёта всё равно потребуется менеджер и замер."
-  );
-}
-
-// свайп вверх по иконке для открытия
-function setupChatSwipe(root) {
-  const toggle = root.querySelector("[data-action='chat-toggle']");
-  if (!toggle) return;
-
-  let startY = null;
-  let startX = null;
-
-  toggle.addEventListener("touchstart", (e) => {
-    const t = e.touches[0];
-    startY = t.clientY;
-    startX = t.clientX;
-  });
-
-  toggle.addEventListener("touchend", (e) => {
-    if (startY === null || startX === null) return;
-    const t = e.changedTouches[0];
-    const dy = startY - t.clientY;
-    const dx = Math.abs(startX - t.clientX);
-
-    // в основном вертикальный свайп вверх
-    if (dy > 25 && dx < 40) {
-      openChat();
-    }
-
-    startY = null;
-    startX = null;
-  });
-}
-
-// ------------------------- ОБРАБОТЧИКИ КЛИКОВ -----------------------------
-
+/**
+ * Роутер: клики по data-route / data-category-id / data-action
+ */
 function setupRouter() {
   appRoot.addEventListener("click", (event) => {
     const routeTarget = event.target.closest("[data-route]");
@@ -545,50 +675,24 @@ function setupRouter() {
       return;
     }
 
-    const chatToggle = event.target.closest("[data-action='chat-toggle']");
-    if (chatToggle) {
-      const root = getChatRoot();
-      if (!root) return;
-      if (root.classList.contains("ai-chat--open")) {
-        closeChat();
-      } else {
-        openChat();
-      }
+    const submitTarget = event.target.closest("[data-action='submit-order']");
+    if (submitTarget) {
+      handleOrderSubmit();
       return;
-    }
-
-    const chatSend = event.target.closest("[data-action='chat-send']");
-    if (chatSend) {
-      handleChatSend();
-      return;
-    }
-  });
-
-  // Enter в поле чата
-  appRoot.addEventListener("keydown", (event) => {
-    const target = event.target;
-    if (
-      target &&
-      target.matches("[data-chat-input]") &&
-      event.key === "Enter"
-    ) {
-      event.preventDefault();
-      handleChatSend();
     }
   });
 }
 
-// ------------------------- РЕНДЕР ОБОЛОЧКИ --------------------------------
-
+/**
+ * Рендер оболочки (шапка + контент + нижняя навигация)
+ */
 function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
     <div class="app-shell">
       <header class="app-header">
         <div class="app-header__brand">
           <div class="app-header__logo">Madera Design</div>
-          <div class="app-header__tagline">
-            Партнёр в создании современного интерьера
-          </div>
+          <div class="app-header__tagline">Партнёр в создании современного интерьера</div>
         </div>
         <div class="app-header__cta">
           <button class="btn btn--outline" data-route="order">
@@ -598,67 +702,6 @@ function renderLayout(initialRoute = "home") {
       </header>
 
       <main class="app-main" id="app-main"></main>
-
-      <!-- НОВЫЙ AI-ЧАТ С ИКОНКОЙ -->
-      <div class="ai-chat" data-ai-chat-root>
-        <button
-          class="ai-chat__toggle"
-          type="button"
-          data-action="chat-toggle"
-          aria-label="Открыть AI-ассистента"
-        >
-          🤖
-        </button>
-
-        <div class="ai-chat__panel">
-          <div class="ai-chat__header">
-            <div class="ai-chat__title">AI-ассистент Madera</div>
-            <button
-              class="ai-chat__close"
-              type="button"
-              data-action="chat-toggle"
-              aria-label="Закрыть чат"
-            >
-              ×
-            </button>
-          </div>
-          <div class="ai-chat__hint">
-            Задайте вопрос по стоимости, материалам или планировке — ассистент подскажет общие варианты.
-          </div>
-
-          <div class="ai-chat__messages" data-chat-messages>
-            <div class="ai-chat__msg ai-chat__msg--bot">
-              <div class="ai-chat__msg-text">
-                Здравствуйте! Я AI-ассистент Madera Design. Помогу прикинуть стоимость кухни или шкафа и подсказать по материалам.
-              </div>
-            </div>
-          </div>
-
-          <div class="ai-chat__input-row">
-            <input
-              type="text"
-              class="ai-chat__input"
-              placeholder="Напишите ваш вопрос..."
-              data-chat-input
-            />
-            <button
-              class="ai-chat__send"
-              type="button"
-              data-action="chat-send"
-              aria-label="Отправить"
-            >
-              ▶
-            </button>
-          </div>
-
-          <div
-            class="ai-chat__note"
-            data-ai-chat-status
-          >
-            Онлайн-ассистент. Для точного расчёта всё равно потребуется менеджер и замер.
-          </div>
-        </div>
-      </div>
 
       <nav class="app-nav">
         <button class="app-nav__item" data-route="home">Главная</button>
@@ -672,15 +715,11 @@ function renderLayout(initialRoute = "home") {
 
   setupRouter();
   renderRoute(initialRoute);
-
-  const chatRoot = getChatRoot();
-  if (chatRoot) {
-    setupChatSwipe(chatRoot);
-  }
 }
 
-// ------------------------- ИНИЦИАЛИЗАЦИЯ ----------------------------------
-
+/**
+ * Инициализация приложения
+ */
 function initApp() {
   renderLayout("home");
 }
