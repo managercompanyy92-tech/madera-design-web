@@ -16,43 +16,10 @@ body {
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: radial-gradient(circle at top, #2b2b2b 0, #050505 55%, #000 100%);
   color: #f5f5f5;
   -webkit-font-smoothing: antialiased;
-}
-
-/* ========================================================================== */
-/*  СКРЫТИЕ СТАРЫХ ВИДЖЕТОВ (СТОРОННИЕ МИНИ-ЧАТЫ И Т.Д.)                     */
-/* ========================================================================== */
-
-.ai-assistant-small,
-.ai-assistant,
-.ai-assistant-btn,
-.ai-bubble,
-.ai-widget,
-.ai-fab,
-.chat-fab,
-.chat-btn,
-.chat-widget,
-.chat-widget-btn,
-.chat-mini,
-#ai-assistant,
-#ai-assistant-small,
-#ai-bubble,
-#chat-btn,
-#chat-mini,
-#chat-widget,
-#old-chat,
-.old-ai-assistant,
-body .assistant,
-body .floating-chat,
-body .support-bubble {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
 }
 
 /* ========================================================================== */
@@ -79,11 +46,7 @@ body .support-bubble {
   gap: 16px;
   padding: 12px 16px;
   border-radius: 18px;
-  background: radial-gradient(
-    circle at top left,
-    rgba(233, 122, 0, 0.16),
-    rgba(15, 15, 15, 0.96)
-  );
+  background: radial-gradient(circle at top left, rgba(233, 122, 0, 0.16), rgba(15, 15, 15, 0.96));
   border: 1px solid rgba(233, 122, 0, 0.25);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(18px);
@@ -206,11 +169,7 @@ body .support-bubble {
   gap: 20px;
   padding: 18px 16px;
   border-radius: 22px;
-  background: radial-gradient(
-    circle at top right,
-    rgba(233, 122, 0, 0.18),
-    rgba(12, 12, 12, 0.96)
-  );
+  background: radial-gradient(circle at top right, rgba(233, 122, 0, 0.18), rgba(12, 12, 12, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
 }
@@ -257,11 +216,7 @@ body .support-bubble {
   max-width: 320px;
   padding: 16px 14px;
   border-radius: 18px;
-  background: radial-gradient(
-    circle at top left,
-    rgba(233, 122, 0, 0.22),
-    rgba(0, 0, 0, 0.94)
-  );
+  background: radial-gradient(circle at top left, rgba(233, 122, 0, 0.22), rgba(0, 0, 0, 0.94));
   border: 1px solid rgba(233, 122, 0, 0.5);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.85);
 }
@@ -333,11 +288,7 @@ body .support-bubble {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  background: radial-gradient(
-    circle at top,
-    rgba(0, 0, 0, 0.96),
-    rgba(0, 0, 0, 0.96)
-  );
+  background: radial-gradient(circle at top, rgba(0, 0, 0, 0.96), rgba(0, 0, 0, 0.96));
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(16px);
 }
@@ -519,7 +470,7 @@ body .support-bubble {
 }
 
 /* ========================================================================== */
-/*  РАЗДЕЛ ЗАКАЗА: КАЛЬКУЛЯТОР + ФОРМА                                        */
+/*  РАЗДЕЛ ЗАКАЗА: КАЛЬКУЛЯТОР                                               */
 /* ========================================================================== */
 
 .page--order {
@@ -747,7 +698,17 @@ body .support-bubble {
   opacity: 0.85;
 }
 
-/* Форма заявки */
+/* Адаптив для блока заказа */
+
+@media (max-width: 900px) {
+  .order-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ========================================================================== */
+/*  РАЗДЕЛ ЗАКАЗА: ФОРМА ЗАЯВКИ                                              */
+/* ========================================================================== */
 
 .order-form {
   margin-top: 14px;
@@ -896,211 +857,298 @@ body .support-bubble {
   opacity: 0.85;
 }
 
-/* ========================================================================== */
-/*  ЛК / ЕЩЁ                                                                  */
-/* ========================================================================== */
+/* Адаптив для формы заявки */
 
-.page--profile .page__placeholder,
-.page--more .page__placeholder {
-  margin-top: 10px;
-}
-
-/* ========================================================================== */
-/*  НОВЫЙ AI-ЧАТ MADERA (ИКОНКА + ПАНЕЛЬ)                                     */
-/* ========================================================================== */
-
-.madera-ai {
-  position: fixed;
-  right: 16px;
-  bottom: 80px; /* над нижней навигацией */
-  z-index: 60;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-}
-
-/* Круглая кнопка с девушкой */
-
-.madera-ai__button {
-  border: none;
-  border-radius: 999px;
-  width: 64px;
-  height: 64px;
-  padding: 0;
-  cursor: pointer;
-  background: radial-gradient(circle at 30% 0, #ffcf8a, #e97a00);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
-  position: relative;
-  overflow: hidden;
-}
-
-.madera-ai__avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 999px;
-}
-
-/* Лёгкий неон по контуру */
-
-.madera-ai__button::after {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  border-radius: 999px;
-  box-shadow: 0 0 18px rgba(233, 122, 0, 0.65);
-  pointer-events: none;
-}
-
-/* Панель чата */
-
-.madera-ai__panel {
-  width: 340px;
-  max-height: 70vh;
-  border-radius: 18px;
-  background: rgba(10, 10, 10, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.9);
-  display: none;
-  flex-direction: column;
-  padding: 10px 10px 8px;
-}
-
-/* когда открыт */
-
-.madera-ai--open .madera-ai__panel {
-  display: flex;
-}
-
-/* шапка */
-
-.madera-ai__panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.madera-ai__panel-title {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.madera-ai__panel-close {
-  border: none;
-  background: transparent;
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-/* подсказка */
-
-.madera-ai__panel-hint {
-  font-size: 11px;
-  opacity: 0.8;
-  margin-bottom: 6px;
-}
-
-/* сообщения */
-
-.madera-ai__messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 6px 2px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.madera-ai__msg {
-  max-width: 80%;
-  padding: 6px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1.35;
-}
-
-.madera-ai__msg--bot {
-  background: rgba(50, 50, 50, 0.9);
-  align-self: flex-start;
-}
-
-.madera-ai__msg--user {
-  background: rgba(233, 122, 0, 0.9);
-  color: #111;
-  align-self: flex-end;
-}
-
-.madera-ai__msg-text {
-  white-space: pre-wrap;
-}
-
-.madera-ai__status {
-  font-size: 10px;
-  opacity: 0.7;
-  margin-top: 4px;
-}
-
-/* ввод */
-
-.madera-ai__input-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.madera-ai__input {
-  flex: 1;
-  padding: 6px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(0, 0, 0, 0.8);
-  color: #f5f5f5;
-  font-size: 12px;
-}
-
-.madera-ai__input:focus {
-  outline: none;
-  border-color: rgba(233, 122, 0, 0.9);
-}
-
-.madera-ai__send {
-  border: none;
-  border-radius: 999px;
-  width: 30px;
-  height: 30px;
-  font-size: 13px;
-  cursor: pointer;
-  background: rgba(233, 122, 0, 0.9);
-  color: #111;
-}
-
-/* подпись под строкой ввода */
-
-.madera-ai__note {
-  margin-top: 4px;
-  font-size: 10px;
-  opacity: 0.7;
-}
-
-/* ========================================================================== */
-/*  АДАПТИВ                                                                   */
-/* ========================================================================== */
-
-@media (max-width: 900px) {
-  .order-layout {
+@media (max-width: 768px) {
+  .order-form__grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ========================================================================== */
+/*  WIDGET: КНОПКА-ИКОНИКА + ПАНЕЛЬ AI-ЧАТА                                  */
+/* ========================================================================== */
+
+.madera-chat-open-btn {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: radial-gradient(circle at 30% 0, #ffd18a, #e97a00);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+}
+
+/* кольцевой эффект */
+.madera-chat-open-btn::after {
+  content: "";
+  position: absolute;
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+  border: 1px solid rgba(233, 122, 0, 0.4);
+  opacity: 0.8;
+}
+
+/* маленькая точка-статус (онлайн) */
+.madera-chat-open-btn__status-dot {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #00d084;
+  border: 2px solid #111;
+  z-index: 2;
+}
+
+/* аватар ассистентки */
+.madera-chat-open-btn__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid rgba(0, 0, 0, 0.8);
+  z-index: 1;
+}
+
+/* маленькая иконка микрофона */
+.madera-chat-open-btn__mic {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ПАНЕЛЬ ЧАТА */
+
+.madera-chat {
+  position: fixed;
+  right: 16px;
+  bottom: 90px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 80vh;
+  background: #181818;
+  color: #f5f5f5;
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 55;
+  border: 1px solid #3a3a3a;
+}
+
+.madera-chat--open {
+  display: flex;
+}
+
+.madera-chat__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #2a2a2a, #181818);
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.madera-chat__title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.madera-chat__subtitle {
+  font-size: 12px;
+  color: #c8c8c8;
+  margin-top: 2px;
+}
+
+.madera-chat__close {
+  border: none;
+  background: transparent;
+  color: #c8c8c8;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.madera-chat__close:hover {
+  color: #fff;
+}
+
+.madera-chat__body {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 12px 10px;
+  gap: 8px;
+  background: radial-gradient(circle at top left, #262626, #181818);
+}
+
+.madera-chat__messages {
+  flex: 1;
+  min-height: 140px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.madera-chat__messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.madera-chat__messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.madera-chat__messages::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 999px;
+}
+
+.madera-chat__message {
+  margin-bottom: 8px;
+  display: flex;
+}
+
+.madera-chat__message--user {
+  justify-content: flex-end;
+}
+
+.madera-chat__message--bot {
+  justify-content: flex-start;
+}
+
+.madera-chat__bubble {
+  max-width: 80%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-line;
+}
+
+.madera-chat__message--user .madera-chat__bubble {
+  background: #ff8a26;
+  color: #000;
+  border-bottom-right-radius: 4px;
+}
+
+.madera-chat__message--bot .madera-chat__bubble {
+  background: #222;
+  border: 1px solid #3a3a3a;
+  color: #f5f5f5;
+  border-bottom-left-radius: 4px;
+}
+
+.madera-chat__status {
+  font-size: 11px;
+  color: #c8c8c8;
+  padding: 0 2px;
+}
+
+.madera-chat__form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.madera-chat__input {
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: 999px;
+  border: 1px solid #3a3a3a;
+  background: #111;
+  color: #f5f5f5;
+  font-size: 14px;
+  outline: none;
+}
+
+.madera-chat__input::placeholder {
+  color: #666;
+}
+
+.madera-chat__input:focus {
+  border-color: #ff8a26;
+}
+
+.madera-chat__voice,
+.madera-chat__send {
+  border-radius: 999px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* голосовой ввод */
+.madera-chat__voice {
+  width: 34px;
+  height: 34px;
+  background: #262626;
+  color: #c8c8c8;
+  font-size: 16px;
+}
+
+.madera-chat__voice--active {
+  background: #3d7cff;
+  color: #fff;
+}
+
+/* отправка */
+.madera-chat__send {
+  width: 40px;
+  height: 34px;
+  background: #ff8a26;
+  color: #000;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.madera-chat__send:hover {
+  background: #ffb25f;
+}
+
+/* мобильная адаптация чата */
+
+@media (max-width: 480px) {
+  .madera-chat-open-btn {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .madera-chat {
+    right: 8px;
+    left: 8px;
+    bottom: 82px;
+    max-width: none;
+    max-height: 70vh;
+  }
+}
+
+/* ========================================================================== */
+/*  АДАПТИВ ОБЩИЙ                                                             */
+/* ========================================================================== */
 
 @media (max-width: 768px) {
   .app-shell {
@@ -1133,14 +1181,4 @@ body .support-bubble {
   .catalog-items-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-
-  .madera-ai {
-    right: 12px;
-    bottom: 84px;
-  }
-
-  .madera-ai__panel {
-    width: calc(100vw - 24px);
-    max-height: 68vh;
-  }
-  }
+    }
