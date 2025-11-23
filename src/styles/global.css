@@ -24,22 +24,8 @@ body {
 
 /* ========================================================================== */
 /*  СКРЫТИЕ СТАРОГО МАЛЕНЬКОГО AI-АССИСТЕНТА                                 */
-/*  (НЕ ЗАТРАГИВАЕТ НОВЫЙ ЧАТ .ai-chat)                                      */
+/*  (НЕ ЗАТРАГИВАЕТ НОВЫЙ ЧАТ Madera)                                         */
 /* ========================================================================== */
-
-/* Скрываем маленький виджет по data-атрибутам Madera */
-[data-madera-chat-open],
-[data-madera-chat],
-[data-madera-chat-close],
-[data-madera-chat-form],
-[data-madera-chat-input],
-[data-madera-chat-messages],
-[data-madera-chat-status] {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
 
 /* самые типичные классы/ID маленьких виджетов */
 .ai-assistant-small,
@@ -918,7 +904,7 @@ body .support-bubble {
 }
 
 /* ========================================================================== */
-/*  AI-ЧАТ                                                                    */
+/*  AI-ЧАТ (если будешь использовать свой .ai-chat)                           */
 /* ========================================================================== */
 
 .ai-chat {
@@ -1107,4 +1093,4 @@ body .support-bubble {
   .catalog-items-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-                                }
+  }
