@@ -7,8 +7,14 @@ import { catalogItems } from "./utils/catalogItems.js";
 // Тарифы за погонный метр (сомони)
 const BASE_RATES = {
   standard: 4000, // ЛДСП фасады
-  premium: 5000,  // МДФ фасады
+  premium: 5000, // МДФ фасады
 };
+
+const CHAT_NOTE_DEFAULT =
+  "Важное уточнение: ответы носят справочный характер. Окончательные решения принимает менеджер и замерщик.";
+
+// История диалога для отправки в API
+let chatHistory = [];
 
 // Корневой контейнер приложения
 const appRoot = document.getElementById("app");
@@ -666,66 +672,117 @@ function setCatalogCategory(categoryId) {
 /**
  * Открытие / закрытие AI-чата
  */
-function toggleChat() {
+function openChat() {
   const chatRoot = appRoot.querySelector(".ai-chat");
   if (!chatRoot) return;
-  chatRoot.classList.toggle("ai-chat--open");
-
-  if (chatRoot.classList.contains("ai-chat--open")) {
+  if (!chatRoot.classList.contains("ai-chat--open")) {
+    chatRoot.classList.add("ai-chat--open");
     const input = chatRoot.querySelector("[data-chat-input]");
     if (input) input.focus();
   }
 }
 
+function closeChat() {
+  const chatRoot = appRoot.querySelector(".ai-chat");
+  if (!chatRoot) return;
+  chatRoot.classList.remove("ai-chat--open");
+}
+
+function toggleChat() {
+  const chatRoot = appRoot.querySelector(".ai-chat");
+  if (!chatRoot) return;
+  if (chatRoot.classList.contains("ai-chat--open")) {
+    closeChat();
+  } else {
+    openChat();
+  }
+}
+
 /**
- * Обработка отправки сообщения в AI-чат (UI-имитация)
+ * Обработка отправки сообщения в AI-чат (с API)
  */
-function handleChatSend() {
+async function handleChatSend() {
   const chatRoot = appRoot.querySelector(".ai-chat");
   if (!chatRoot) return;
 
   const input = chatRoot.querySelector("[data-chat-input]");
   const messages = chatRoot.querySelector("[data-chat-messages]");
+  const noteEl = chatRoot.querySelector(".ai-chat__note");
+
   if (!input || !messages) return;
 
   const text = (input.value || "").trim();
   if (!text) return;
 
-  // Сообщение пользователя
+  // Сообщение пользователя в UI
   const userMsgHtml = `
     <div class="ai-chat__msg ai-chat__msg--user">
       <div class="ai-chat__msg-text">${text}</div>
     </div>
   `;
   messages.insertAdjacentHTML("beforeend", userMsgHtml);
+  messages.scrollTop = messages.scrollHeight;
 
-  // Простейшая имитация ответа
-  let botText =
-    "Спасибо за вопрос! Сейчас AI-ассистент в демо-режиме. Менеджер свяжется с вами после отправки заявки в разделе «Заказ».";
+  // Добавляем в историю
+  chatHistory.push({ role: "user", content: text });
 
-  const lower = text.toLowerCase();
+  // Сбрасываем инпут
+  input.value = "";
 
-  if (lower.includes("цена") || lower.includes("стоим")) {
-    botText =
-      "Базовые тарифы: около 4000 сомони за погонный метр для ЛДСП (Стандарт) и 5000 сомони для МДФ фасадов (Премиум). Минимальный объём — 3 погонных метра.";
-  } else if (lower.includes("минимал")) {
-    botText =
-      "Минимальный объём заказа — 3 погонных метра. Это условие помогает нам сохранять качество сервиса и оптимальную нагрузку производства.";
-  } else if (lower.includes("кредит") || lower.includes("рассроч")) {
-    botText =
-      "Оплата возможна частями и в кредит через партнёрские банки. Конкретные условия вы сможете обсудить с менеджером при расчёте заказа.";
+  // Статус
+  if (noteEl) {
+    noteEl.textContent = "AI-ассистент обрабатывает ваш запрос…";
   }
 
-  const botMsgHtml = `
-    <div class="ai-chat__msg ai-chat__msg--bot">
-      <div class="ai-chat__msg-text">${botText}</div>
-    </div>
-  `;
-  messages.insertAdjacentHTML("beforeend", botMsgHtml);
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: text,
+        history: chatHistory,
+      }),
+    });
 
-  // Очистка + скролл
-  input.value = "";
-  messages.scrollTop = messages.scrollHeight;
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Подстраховка: ищем ответ в нескольких возможных полях
+    const reply =
+      data.reply || data.answer || data.message || "Извините, не удалось получить ответ от сервера.";
+
+    // Добавляем в историю
+    chatHistory.push({ role: "assistant", content: reply });
+
+    const botMsgHtml = `
+      <div class="ai-chat__msg ai-chat__msg--bot">
+        <div class="ai-chat__msg-text">${reply}</div>
+      </div>
+    `;
+    messages.insertAdjacentHTML("beforeend", botMsgHtml);
+    messages.scrollTop = messages.scrollHeight;
+  } catch (error) {
+    console.error("CHAT_API_ERROR", error);
+    const botMsgHtml = `
+      <div class="ai-chat__msg ai-chat__msg--bot">
+        <div class="ai-chat__msg-text">
+          Сейчас не получается связаться с AI-сервером. Попробуйте ещё раз чуть позже
+          или уточните детали у менеджера по телефону.
+        </div>
+      </div>
+    `;
+    messages.insertAdjacentHTML("beforeend", botMsgHtml);
+    messages.scrollTop = messages.scrollHeight;
+  } finally {
+    if (noteEl) {
+      noteEl.textContent = CHAT_NOTE_DEFAULT;
+    }
+  }
 }
 
 /**
@@ -801,6 +858,49 @@ function setupRouter() {
 }
 
 /**
+ * Свайп снизу-справа для открытия чата (мобильные)
+ */
+function setupSwipeToOpen() {
+  let touchStartX = null;
+  let touchStartY = null;
+
+  window.addEventListener(
+    "touchstart",
+    (event) => {
+      if (!event.touches || event.touches.length !== 1) return;
+      const t = event.touches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+    },
+    { passive: true }
+  );
+
+  window.addEventListener(
+    "touchend",
+    (event) => {
+      if (touchStartX === null || touchStartY === null) return;
+      const t = event.changedTouches && event.changedTouches[0];
+      if (!t) return;
+
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+
+      const startFromBottom = touchStartY > window.innerHeight * 0.7;
+      const startFromRight = touchStartX > window.innerWidth * 0.5;
+      const isSwipeUp = dy < -40 && Math.abs(dy) > Math.abs(dx) * 1.5;
+
+      if (startFromBottom && startFromRight && isSwipeUp) {
+        openChat();
+      }
+
+      touchStartX = null;
+      touchStartY = null;
+    },
+    { passive: true }
+  );
+}
+
+/**
  * Рендер оболочки (шапка + контент + нижняя навигация + AI-чат)
  */
 function renderLayout(initialRoute = "home") {
@@ -822,8 +922,12 @@ function renderLayout(initialRoute = "home") {
 
       <!-- AI-чат (UI-слой) -->
       <div class="ai-chat">
-        <button class="ai-chat__toggle" data-action="chat-toggle">
-          AI-ассистент
+        <button
+          class="ai-chat__toggle"
+          data-action="chat-toggle"
+          aria-label="Открыть чат с AI-ассистентом"
+        >
+          🤖
         </button>
         <div class="ai-chat__panel">
           <div class="ai-chat__header">
@@ -837,8 +941,8 @@ function renderLayout(initialRoute = "home") {
           <div class="ai-chat__messages" data-chat-messages>
             <div class="ai-chat__msg ai-chat__msg--bot">
               <div class="ai-chat__msg-text">
-                Здравствуйте! Я AI-ассистент Madera Design. Могу подсказать по тарифам (4000 / 5000 сом), 
-                минимальному объёму 3 пог. метра и помочь с первичными идеями планировки.
+                Здравствуйте! Я AI-ассистент Madera Design. Опишите задачу — помогу с ориентировочной стоимостью,
+                материалами и базовыми идеями планировки.
               </div>
             </div>
           </div>
@@ -852,7 +956,7 @@ function renderLayout(initialRoute = "home") {
             <button class="ai-chat__send" data-action="chat-send">▶</button>
           </div>
           <div class="ai-chat__note">
-            Важное уточнение: ответы носят справочный характер. Окончательные решения принимает менеджер и замерщик.
+            ${CHAT_NOTE_DEFAULT}
           </div>
         </div>
       </div>
@@ -868,6 +972,7 @@ function renderLayout(initialRoute = "home") {
   `;
 
   setupRouter();
+  setupSwipeToOpen();
   renderRoute(initialRoute);
 }
 
