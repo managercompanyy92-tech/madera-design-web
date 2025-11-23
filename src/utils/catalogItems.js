@@ -1,72 +1,7 @@
 // src/utils/catalogItems.js
 
-export const catalogItems = [
-  // КУХНИ
-  {
-    id: "kitchen-modern-01",
-    categoryId: "kitchens",
-    title: "Современная кухня с островом",
-    description: "Белые фасады, тёплое дерево, барная стойка. Идеальна для современной квартиры.",
-    image: "https://via.placeholder.com/800x500?text=Kitchen+1"
-  },
-  {
-    id: "kitchen-scandi-02",
-    categoryId: "kitchens",
-    title: "Скандинавская угловая кухня",
-    description: "Светлые матовые фасады, максимум воздуха и света.",
-    image: "https://via.placeholder.com/800x500?text=Kitchen+2"
-  },
-
-  // СПАЛЬНИ
-  {
-    id: "bedroom-soft-01",
-    categoryId: "bedrooms",
-    title: "Спальня в мягких тонах",
-    description: "Встроенный шкаф-купе, мягкая подсветка изголовья, ощущение отеля.",
-    image: "https://via.placeholder.com/800x500?text=Bedroom+1"
-  },
-
-  // ГОСТИНЫЕ
-  {
-    id: "living-modern-01",
-    categoryId: "living",
-    title: "Гостиная в стиле модерн",
-    description: "ТВ-зона, навесные шкафы, декоративная подсветка.",
-    image: "https://via.placeholder.com/800x500?text=Living+1"
-  },
-
-  // ГАРДЕРОБНЫЕ
-  {
-    id: "wardrobe-premium-01",
-    categoryId: "wardrobes",
-    title: "Гардеробная премиум-класса",
-    description: "Открытые и закрытые секции, подсветка по периметру, идеальная организация.",
-    image: "https://via.placeholder.com/800x500?text=Wardrobe+1"
-  },
-
-  // ПРИХОЖИЕ
-  {
-    id: "hallway-compact-01",
-    categoryId: "hallways",
-    title: "Компактная прихожая",
-    description: "Шкаф до потолка, место для обуви и сидения, большое зеркало.",
-    image: "https://via.placeholder.com/800x500?text=Hallway+1"
-  },
-
-  // ДЕТСКАЯ
-  {
-    id: "kidsroom-fun-01",
-    categoryId: "kids",
-    title: "Детская с игровым пространством",
-    description: "Безопасные фасады, встроенные системы хранения, зона для игр и учёбы.",
-    image: "https://viaplaceholder..com/800x500?text=Kidsroom+1"
-  }
-];
-// src/utils/catalogItems.js
-
-// ВНИМАНИЕ: сейчас заполнена только категория "Гардеробные" (wardrobes).
-// Для остальных категорий (кухни, спальни и т.д.) приложение просто покажет
-// заглушку "идеи появятся позже" — это нормально.
+// Сейчас заполнена только категория "Гардеробные" (wardrobes).
+// Остальные категории будут показывать заглушку "Идеи появятся позже".
 
 export const catalogItems = [
   /* ===================== ГАРДЕРОБНЫЕ (w1–w44) ===================== */
@@ -221,7 +156,7 @@ export const catalogItems = [
     categoryId: "wardrobes",
     title: "Яркая витрина",
     description:
-      "Стеклянные фасады и тёплый подсвет делают гардеробную центром притяжения в интерьере.",
+      "Стеклянные фасады и тёплый свет делают гардеробную центром притяжения в интерьере.",
     image: "assets/wardrobes/w19.jpg",
   },
   {
@@ -294,7 +229,7 @@ export const catalogItems = [
     categoryId: "wardrobes",
     title: "Лёгкий глянец",
     description:
-      "Гардеробная в теплом дереве и стекле создаёт ощущение светлого, воздушного пространства без визуального шума.",
+      "Гардеробная в тёплом дереве и стекле создаёт ощущение светлого, воздушного пространства без визуального шума.",
     image: "assets/wardrobes/w28.jpg",
   },
   {
@@ -310,7 +245,7 @@ export const catalogItems = [
     categoryId: "wardrobes",
     title: "Кабинет стиля",
     description:
-      "Классическая гардеробная с симметрией, мягким ковром и большим количеством секций для полной коллекции образов.",
+      "Классическая гардеробная с симметрией, мягким ковром и секциями для полной коллекции образов.",
     image: "assets/wardrobes/w30.jpg",
   },
   {
@@ -375,7 +310,7 @@ export const catalogItems = [
     categoryId: "wardrobes",
     title: "Лаконичный моноблок",
     description:
-      "Строгие линии, тёплый текстурный шпон и мягкий ковёр — формула спокойного, дорогого интерьера.",
+      "Строгие линии, тёплый шпон и мягкий ковёр — формула спокойного, дорогого интерьера.",
     image: "assets/wardrobes/w38.jpg",
   },
   {
