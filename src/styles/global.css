@@ -1094,3 +1094,13 @@ body .support-bubble {
     grid-template-columns: minmax(0, 1fr);
   }
   }
+/* Полностью отключаем маленький старый AI-чат */
+.ai-chat,
+.ai-chat *,
+.ai-chat__toggle,
+.ai-chat__panel {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
