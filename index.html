@@ -2,15 +2,21 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>Madera Design — корпусная мебель на заказ</title>
+    <title>Madera Design — Современная корпусная мебель на заказ</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content="Madera Design — кухни, шкафы, гардеробные на заказ с AI-ассистентом." />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Madera Design — корпусная мебель на заказ в Душанбе: кухни, шкафы, гардеробные, прихожие. Дизайн, производство и монтаж под ключ."
+    />
 
-    <!-- Основные стили SPA (включая новый чат .ai-chat) -->
+    <!-- Глобальные стили SPA (включая новый чат .ai-chat) -->
     <link rel="stylesheet" href="src/styles/global.css" />
 
-    <!-- Стили большого виджета Madera -->
+    <!-- Полные стили большого виджета AI-чата Madera -->
     <style>
       :root {
         --madera-bg: #181818;
@@ -22,58 +28,240 @@
         --madera-text-soft: #c8c8c8;
       }
 
+      /* Кнопка открытия большого чата (поднимаем над нижним меню) */
       .madera-chat-open-btn {
         position: fixed;
         right: 16px;
-        bottom: 120px;
+        bottom: 120px; /* выше нижней навигации и кнопки .ai-chat */
         z-index: 40;
         padding: 10px 16px;
         border-radius: 999px;
+        border: none;
         background: var(--madera-accent);
         color: #000;
-        border: none;
         font-weight: 600;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        font-size: 14px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
       }
 
+      .madera-chat-open-btn:hover {
+        background: var(--madera-accent-soft);
+      }
+
+      /* Контейнер виджета большого чата */
       .madera-chat {
         position: fixed;
         right: 16px;
-        bottom: 120px;
+        bottom: 120px; /* чтобы не наезжать на нижнюю навигацию */
         width: 100%;
         max-width: 420px;
         max-height: 80vh;
         background: var(--madera-bg);
-        border-radius: 18px;
-        border: 1px solid var(--madera-border);
         color: var(--madera-text);
-        box-shadow: 0 18px 45px rgba(0,0,0,0.6);
+        border-radius: 18px;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
         display: none;
         flex-direction: column;
         overflow: hidden;
         z-index: 50;
+        border: 1px solid var(--madera-border);
       }
 
       .madera-chat--open {
-        display: flex !important;
+        display: flex;
+      }
+
+      .madera-chat__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, #2a2a2a, #181818);
+        border-bottom: 1px solid var(--madera-border);
+      }
+
+      .madera-chat__title {
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .madera-chat__subtitle {
+        font-size: 12px;
+        color: var(--madera-text-soft);
+        margin-top: 2px;
+      }
+
+      .madera-chat__close {
+        border: none;
+        background: transparent;
+        color: var(--madera-text-soft);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 0 4px;
+      }
+
+      .madera-chat__close:hover {
+        color: #ffffff;
+      }
+
+      .madera-chat__body {
+        display: flex;
+        flex-direction: column;
+        padding: 12px 12px 10px;
+        gap: 8px;
+        background: radial-gradient(circle at top left, #262626, #181818);
+      }
+
+      .madera-chat__messages {
+        flex: 1;
+        min-height: 140px;
+        max-height: 50vh;
+        overflow-y: auto;
+        padding-right: 6px;
+      }
+
+      .madera-chat__messages::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .madera-chat__messages::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .madera-chat__messages::-webkit-scrollbar-thumb {
+        background: #444;
+        border-radius: 999px;
+      }
+
+      .madera-chat__message {
+        margin-bottom: 8px;
+        display: flex;
+      }
+
+      .madera-chat__message--user {
+        justify-content: flex-end;
+      }
+
+      .madera-chat__message--bot {
+        justify-content: flex-start;
+      }
+
+      .madera-chat__bubble {
+        max-width: 80%;
+        padding: 10px 12px;
+        border-radius: 14px;
+        font-size: 14px;
+        line-height: 1.4;
+        word-wrap: break-word;
+        white-space: pre-line;
+      }
+
+      .madera-chat__message--user .madera-chat__bubble {
+        background: var(--madera-accent);
+        color: #000;
+        border-bottom-right-radius: 4px;
+      }
+
+      .madera-chat__message--bot .madera-chat__bubble {
+        background: var(--madera-bg-soft);
+        border: 1px solid var(--madera-border);
+        color: var(--madera-text);
+        border-bottom-left-radius: 4px;
+      }
+
+      .madera-chat__status {
+        font-size: 11px;
+        color: var(--madera-text-soft);
+        padding: 0 2px;
+      }
+
+      .madera-chat__form {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 2px;
+      }
+
+      .madera-chat__input {
+        flex: 1;
+        padding: 9px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--madera-border);
+        background: #111;
+        color: var(--madera-text);
+        font-size: 14px;
+        outline: none;
+      }
+
+      .madera-chat__input::placeholder {
+        color: #666;
+      }
+
+      .madera-chat__input:focus {
+        border-color: var(--madera-accent);
+      }
+
+      .madera-chat__voice,
+      .madera-chat__send {
+        border-radius: 999px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .madera-chat__voice {
+        width: 34px;
+        height: 34px;
+        background: #262626;
+        color: var(--madera-text-soft);
+        font-size: 16px;
+      }
+
+      /* Активное состояние при записи голоса (класс добавляет chat.js) */
+      .madera-chat__voice--active {
+        background: #3d7cff;
+        color: #ffffff;
+      }
+
+      .madera-chat__send {
+        width: 40px;
+        height: 34px;
+        background: var(--madera-accent);
+        color: #000;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .madera-chat__send:hover {
+        background: var(--madera-accent-soft);
+      }
+
+      @media (max-width: 480px) {
+        .madera-chat {
+          right: 8px;
+          left: 8px;
+          bottom: 120px;
+          max-width: none;
+        }
       }
     </style>
   </head>
 
   <body>
-
-    <!-- Корневой контейнер SPA (внутри него работает НОВЫЙ чат .ai-chat) -->
+    <!-- Корневой контейнер SPA (здесь рендерится весь сайт + новый чат .ai-chat) -->
     <div id="app"></div>
 
-
-    <!-- Кнопка старого большого AI-чата -->
+    <!-- Кнопка для открытия большого чата Madera -->
     <button
       class="madera-chat-open-btn"
+      type="button"
       data-madera-chat-open
     >
       AI-ассистент (большой чат)
     </button>
-
 
     <!-- Большой AI-чат Madera -->
     <div class="madera-chat" data-madera-chat>
@@ -81,55 +269,78 @@
         <div>
           <div class="madera-chat__title">AI-ассистент Madera</div>
           <div class="madera-chat__subtitle">
-            Подскажу материалы, рассчитаю стоимость, помогу с идеями.
+            Помогу прикинуть стоимость и подобрать материалы
           </div>
         </div>
-
-        <button class="madera-chat__close" data-madera-chat-close>
+        <button
+          type="button"
+          class="madera-chat__close"
+          data-madera-chat-close
+          aria-label="Закрыть чат"
+        >
           ×
         </button>
       </div>
 
       <div class="madera-chat__body">
-        <div class="madera-chat__messages" data-madera-chat-messages>
+        <div
+          class="madera-chat__messages"
+          data-madera-chat-messages
+        >
           <div class="madera-chat__message madera-chat__message--bot">
             <div class="madera-chat__bubble">
-              Здравствуйте! Я AI-ассистент Madera.
-              Могу рассчитать стоимость кухни (4000/5000 сомони за пог.м),
-              шкафов, гардеробных и другой мебели.
+              Привет! Я AI-ассистент Madera. Могу прикинуть стоимость кухни,
+              шкафа или другой мебели по вашим размерам.
+
+              Можно написать или воспользоваться голосом — нажмите на 🎤.
             </div>
           </div>
         </div>
 
-        <div class="madera-chat__status" data-madera-chat-status>
-          Ассистент онлайн.
+        <div
+          class="madera-chat__status"
+          data-madera-chat-status
+        >
+          Онлайн-ассистент. Точный расчёт всё равно сделает менеджер после
+          замера.
         </div>
 
-        <form class="madera-chat__form" data-madera-chat-form>
+        <form
+          class="madera-chat__form"
+          data-madera-chat-form
+        >
           <input
             type="text"
             class="madera-chat__input"
-            placeholder="Напишите или скажите…"
             data-madera-chat-input
+            placeholder="Напишите или скажите ваш вопрос…"
+            autocomplete="off"
           />
 
-          <button class="madera-chat__voice" data-madera-chat-voice>
+          <button
+            type="button"
+            class="madera-chat__voice"
+            data-madera-chat-voice
+            aria-label="Голосовой ввод"
+          >
             🎤
           </button>
 
-          <button class="madera-chat__send" type="submit">
+          <button
+            type="submit"
+            class="madera-chat__send"
+            aria-label="Отправить"
+          >
             ➤
           </button>
         </form>
       </div>
     </div>
 
-
-    <!-- Логика основного SPA -->
+    <!-- Входная точка SPA (рендерит сайт + новый чат .ai-chat) -->
     <script type="module" src="src/main.js"></script>
 
     <!-- Логика большого чата Madera -->
     <script src="chat.js" defer></script>
-
   </body>
 </html>
