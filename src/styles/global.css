@@ -904,7 +904,8 @@ body .support-bubble {
 }
 
 /* ========================================================================== */
-/*  AI-ЧАТ (если будешь использовать свой .ai-chat)                           */
+/*  /* ========================================================================== */
+/*  AI-ЧАТ (НОВЫЙ ВИДЖЕТ)                                                    */
 /* ========================================================================== */
 
 .ai-chat {
@@ -918,21 +919,41 @@ body .support-bubble {
   gap: 8px;
 }
 
+/* КНОПКА-ИКОНКА 🤖 */
 .ai-chat__toggle {
   border: none;
   border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 12px;
+  width: 52px;
+  height: 52px;
+  padding: 0;
   cursor: pointer;
-  background: linear-gradient(135deg, #e97a00, #ffb347);
+  background: radial-gradient(circle at 30% 0, #ffd18a, #e97a00);
   color: #111;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.7);
+  font-size: 26px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
 }
 
+/* небольшой "пульс", чтобы на мобиле иконка не терялась */
+.ai-chat__toggle::after {
+  content: "";
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  border: 1px solid rgba(233, 122, 0, 0.4);
+  opacity: 0.6;
+}
+
+/* панель чата */
+
 .ai-chat__panel {
-  width: 280px;
-  max-height: 360px;
-  border-radius: 16px;
+  width: 320px;
+  max-height: 70vh;
+  border-radius: 18px;
   background: rgba(10, 10, 10, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 22px 50px rgba(0, 0, 0, 0.9);
@@ -941,9 +962,13 @@ body .support-bubble {
   padding: 10px 10px 8px;
 }
 
+/* когда открыт */
+
 .ai-chat--open .ai-chat__panel {
   display: flex;
 }
+
+/* шапка */
 
 .ai-chat__header {
   display: flex;
@@ -962,15 +987,19 @@ body .support-bubble {
   border: none;
   background: transparent;
   color: #fff;
-  font-size: 16px;
+  font-size: 20px;
   cursor: pointer;
 }
+
+/* текст-подсказка */
 
 .ai-chat__hint {
   font-size: 11px;
   opacity: 0.8;
   margin-bottom: 6px;
 }
+
+/* сообщения */
 
 .ai-chat__messages {
   flex: 1;
@@ -1006,6 +1035,16 @@ body .support-bubble {
   white-space: pre-wrap;
 }
 
+/* статус под чатом */
+
+.ai-chat__status {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+/* ввод */
+
 .ai-chat__input-row {
   display: flex;
   align-items: center;
@@ -1039,12 +1078,27 @@ body .support-bubble {
   color: #111;
 }
 
+/* подпись под строкой ввода */
+
 .ai-chat__note {
   margin-top: 4px;
   font-size: 10px;
   opacity: 0.7;
 }
 
+/* мобильная адаптация */
+
+@media (max-width: 480px) {
+  .ai-chat {
+    right: 10px;
+    bottom: 78px; /* над нижним меню */
+  }
+
+  .ai-chat__panel {
+    width: calc(100vw - 24px);
+    max-height: 65vh;
+  }
+}
 /* Адаптив: на очень маленьких экранах чат чуть поднимаем и сужаем */
 
 @media (max-width: 480px) {
