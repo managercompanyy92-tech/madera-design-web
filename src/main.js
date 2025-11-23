@@ -7,8 +7,11 @@ import { catalogItems } from "./utils/catalogItems.js";
 // Тарифы за погонный метр (сомони)
 const BASE_RATES = {
   standard: 4000, // ЛДСП фасады
-  premium: 5000, // МДФ фасады
+  premium: 5000,  // МДФ фасады
 };
+
+// URL API ассистента (можно поменять под свой backend)
+const ASSISTANT_API_URL = "/api/assistant";
 
 // Корневой контейнер приложения
 const appRoot = document.getElementById("app");
@@ -17,16 +20,17 @@ const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
 
 // Состояние чата
-let isChatOpen = false;
-let isChatSending = false;
+let chatHistory = []; // [{role: "user"|"assistant", content: string}, ...]
 
-// Координаты для свайпа
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartTime = 0;
+// Для свайпа
+let touchStartY = null;
+const SWIPE_START_ZONE_PX = 140; // зона от низа экрана, где начинаем отслеживать свайп
+const SWIPE_THRESHOLD_PX = 40;   // минимальное смещение вверх для открытия
 
 /**
+ * ===========================
  * VIEW-ФУНКЦИИ
+ * ===========================
  */
 
 // Главная страница
@@ -363,7 +367,7 @@ function renderOrder() {
               </div>
 
               <div class="order-form__row order-form__row--full">
-                <label class="order-form__label">Насколько вы настроены на заказ?</label>
+                <label class="order-form__label">Насколько вы настроены на заказ? (отбор «наших» клиентов)</label>
                 <select class="order-form__select" data-order-readiness>
                   <option value="soon">Готов(а) заказать в ближайший месяц</option>
                   <option value="thinking">Пока изучаю варианты и цены</option>
@@ -673,23 +677,23 @@ function setCatalogCategory(categoryId) {
 }
 
 /**
- * Работа с AI-чатом
+ * ===========================
+ *  AI-ЧАТ
+ * ===========================
  */
 
 function getChatRoot() {
-  return appRoot.querySelector("[data-ai-chat]");
+  return appRoot.querySelector("[data-ai-chat-root]");
 }
 
 function openChat() {
   const chatRoot = getChatRoot();
   if (!chatRoot) return;
   chatRoot.classList.add("ai-chat--open");
-  isChatOpen = true;
 
   const input = chatRoot.querySelector("[data-chat-input]");
   if (input) {
-    // небольшая задержка, чтобы панель анимировалась
-    setTimeout(() => input.focus(), 50);
+    input.focus();
   }
 }
 
@@ -697,70 +701,63 @@ function closeChat() {
   const chatRoot = getChatRoot();
   if (!chatRoot) return;
   chatRoot.classList.remove("ai-chat--open");
-  isChatOpen = false;
 }
 
 function toggleChat() {
-  if (isChatOpen) {
+  const chatRoot = getChatRoot();
+  if (!chatRoot) return;
+  if (chatRoot.classList.contains("ai-chat--open")) {
     closeChat();
   } else {
     openChat();
   }
 }
 
-/**
- * Отправка сообщения в AI-чат через API
- * Предполагаем, что backend доступен по /api/ai-chat и возвращает { reply: string }
- */
-async function sendChatToApi(messageText) {
+// Отправка сообщения в API ассистента
+async function sendMessageToAssistant(messageText) {
+  const payload = {
+    message: messageText,
+    history: chatHistory,
+  };
+
   try {
-    const response = await fetch("/api/ai-chat", {
+    const res = await fetch(ASSISTANT_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        message: messageText,
-        source: "madera-web",
-      }),
+      body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    if (!res.ok) {
+      throw new Error("Bad response from assistant API");
     }
 
-    const data = await response.json();
-    if (data && typeof data.reply === "string") {
-      return data.reply;
-    }
-
-    // fallback, если backend вернул что-то странное
-    return "Я получил ваш вопрос, но не смог корректно обработать ответ. Менеджер уточнит детали при связи.";
+    const data = await res.json();
+    const reply = (data && (data.reply || data.answer || data.message)) || null;
+    return (
+      reply ||
+      "Сейчас ассистент недоступен. Менеджер ответит вам после отправки заявки в разделе «Заказ»."
+    );
   } catch (err) {
-    console.error("AI_CHAT_ERROR", err);
-    return "Сейчас сервер ассистента недоступен. Попробуйте ещё раз чуть позже или отправьте заявку через раздел «Заказ».";
+    console.error("ASSISTANT_API_ERROR", err);
+    return "Не удалось получить ответ от AI-ассистента. Попробуйте позже или оставьте заявку в разделе «Заказ».";
   }
 }
 
-/**
- * Обработка отправки сообщения в AI-чат (UI + API)
- */
+// Обработка отправки сообщения в чат
 async function handleChatSend() {
-  if (isChatSending) return;
-
   const chatRoot = getChatRoot();
   if (!chatRoot) return;
 
   const input = chatRoot.querySelector("[data-chat-input]");
   const messages = chatRoot.querySelector("[data-chat-messages]");
-  const status = chatRoot.querySelector(".ai-chat__status");
-
   if (!input || !messages) return;
 
   const text = (input.value || "").trim();
   if (!text) return;
 
-  // Сообщение пользователя
+  // Сообщение пользователя в UI
   const userMsgHtml = `
     <div class="ai-chat__msg ai-chat__msg--user">
       <div class="ai-chat__msg-text">${text}</div>
@@ -768,19 +765,32 @@ async function handleChatSend() {
   `;
   messages.insertAdjacentHTML("beforeend", userMsgHtml);
 
-  // Очистка поля
-  input.value = "";
+  // Обновляем историю
+  chatHistory.push({ role: "user", content: text });
+
+  // Плейсхолдер "ассистент печатает..."
+  const tempId = `bot-temp-${Date.now()}`;
+  const typingHtml = `
+    <div class="ai-chat__msg ai-chat__msg--bot" data-temp-id="${tempId}">
+      <div class="ai-chat__msg-text">Ассистент печатает…</div>
+    </div>
+  `;
+  messages.insertAdjacentHTML("beforeend", typingHtml);
+
+  // Скроллим вниз
   messages.scrollTop = messages.scrollHeight;
 
-  // Статус "печатает"
-  if (status) {
-    status.textContent = "AI-ассистент обрабатывает ваш запрос…";
+  // Очищаем поле ввода
+  input.value = "";
+
+  // Запрашиваем ответ ассистента
+  const replyText = await sendMessageToAssistant(text);
+
+  // Удаляем плейсхолдер
+  const tempNode = messages.querySelector(`[data-temp-id="${tempId}"]`);
+  if (tempNode && tempNode.parentNode) {
+    tempNode.parentNode.removeChild(tempNode);
   }
-
-  isChatSending = true;
-
-  // Получаем ответ с backend
-  const replyText = await sendChatToApi(text);
 
   // Добавляем ответ ассистента
   const botMsgHtml = `
@@ -789,61 +799,61 @@ async function handleChatSend() {
     </div>
   `;
   messages.insertAdjacentHTML("beforeend", botMsgHtml);
+
+  chatHistory.push({ role: "assistant", content: replyText });
+
+  // Скроллим вниз
   messages.scrollTop = messages.scrollHeight;
-
-  if (status) {
-    status.textContent =
-      "Онлайн-ассистент. Ответы носят справочный характер, окончательное решение принимает менеджер.";
-  }
-
-  isChatSending = false;
 }
 
 /**
- * Свайп для открытия чата (снизу вверх)
+ * Свайп снизу вверх для открытия чата
  */
 function setupChatSwipe() {
-  // Свайп отслеживаем на всём окне, но учитываем область старта
   window.addEventListener(
     "touchstart",
-    (event) => {
-      if (!event.touches || event.touches.length === 0) return;
-      const t = event.touches[0];
-      touchStartX = t.clientX;
-      touchStartY = t.clientY;
-      touchStartTime = Date.now();
+    (e) => {
+      if (!e.touches || !e.touches.length) return;
+      const touch = e.touches[0];
+      const screenHeight = window.innerHeight || document.documentElement.clientHeight;
+
+      // Начинаем отслеживать свайп только, если палец в нижней зоне
+      if (touch.clientY > screenHeight - SWIPE_START_ZONE_PX) {
+        touchStartY = touch.clientY;
+      } else {
+        touchStartY = null;
+      }
     },
     { passive: true }
   );
 
   window.addEventListener(
     "touchend",
-    (event) => {
-      const touchEndTime = Date.now();
-      const duration = touchEndTime - touchStartTime;
-      if (!event.changedTouches || event.changedTouches.length === 0) return;
+    (e) => {
+      if (touchStartY === null) return;
+      if (!e.changedTouches || !e.changedTouches.length) {
+        touchStartY = null;
+        return;
+      }
 
-      const t = event.changedTouches[0];
-      const dx = t.clientX - touchStartX;
-      const dy = t.clientY - touchStartY;
+      const touch = e.changedTouches[0];
+      const deltaY = touch.clientY - touchStartY;
 
-      // Пороговые значения
-      const isQuick = duration < 600;
-      const isVerticalSwipeUp = dy < -40 && Math.abs(dy) > Math.abs(dx) * 1.5;
-
-      // Область старта — нижние 120px экрана
-      const startedNearBottom = touchStartY > window.innerHeight - 120;
-
-      if (!isChatOpen && isQuick && isVerticalSwipeUp && startedNearBottom) {
+      // Негативный deltaY — движение вверх
+      if (deltaY < -SWIPE_THRESHOLD_PX) {
         openChat();
       }
+
+      touchStartY = null;
     },
     { passive: true }
   );
 }
 
 /**
- * Простой роутер: клики по data-route, data-category-id, data-action
+ * ===========================
+ * РОУТЕР И ОБРАБОТЧИКИ СОБЫТИЙ
+ * ===========================
  */
 function setupRouter() {
   // Клики
@@ -934,18 +944,33 @@ function renderLayout(initialRoute = "home") {
 
       <main class="app-main" id="app-main"></main>
 
-      <!-- AI-чат (новый виджет) -->
-      <div class="ai-chat" data-ai-chat>
-        <button class="ai-chat__toggle" data-action="chat-toggle">🤖</button>
+      <!-- НОВЫЙ AI-ЧАТ -->
+      <div class="ai-chat" data-ai-chat-root>
+        <button
+          class="ai-chat__toggle"
+          type="button"
+          data-action="chat-toggle"
+          aria-label="Открыть AI-ассистента"
+        >
+          🤖
+        </button>
 
         <div class="ai-chat__panel">
           <div class="ai-chat__header">
             <div class="ai-chat__title">AI-ассистент Madera</div>
-            <button class="ai-chat__close" data-action="chat-toggle">×</button>
+            <button
+              class="ai-chat__close"
+              type="button"
+              data-action="chat-toggle"
+              aria-label="Закрыть чат"
+            >
+              ×
+            </button>
           </div>
 
           <div class="ai-chat__hint">
             Задайте вопрос по стоимости, материалам или планировке — ассистент подскажет общие варианты.
+            Для точного расчёта всё равно потребуется менеджер и замер.
           </div>
 
           <div class="ai-chat__messages" data-chat-messages>
@@ -957,22 +982,25 @@ function renderLayout(initialRoute = "home") {
             </div>
           </div>
 
-          <div class="ai-chat__status">
-            Онлайн-ассистент. Ответы носят справочный характер, окончательное решение принимает менеджер и замерщик.
-          </div>
-
           <div class="ai-chat__input-row">
             <input
               type="text"
               class="ai-chat__input"
-              placeholder="Напишите ваш вопрос..."
+              placeholder="Напишите ваш вопрос…"
               data-chat-input
             />
-            <button class="ai-chat__send" data-action="chat-send">➤</button>
+            <button
+              class="ai-chat__send"
+              type="button"
+              data-action="chat-send"
+              aria-label="Отправить"
+            >
+              ▶
+            </button>
           </div>
 
           <div class="ai-chat__note">
-            Совет: для точного расчёта всё равно отправьте заявку в разделе «Заказ».
+            Важное уточнение: ответы носят справочный характер. Окончательные решения принимает менеджер и замерщик.
           </div>
         </div>
       </div>
@@ -996,8 +1024,12 @@ function renderLayout(initialRoute = "home") {
  * Инициализация приложения
  */
 function initApp() {
+  if (!appRoot) {
+    console.error("Не найден корневой элемент #app");
+    return;
+  }
+
   renderLayout("home");
 }
 
 initApp();
-```0
