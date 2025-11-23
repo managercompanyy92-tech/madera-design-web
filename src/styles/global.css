@@ -23,6 +23,44 @@ body {
 }
 
 /* ========================================================================== */
+/*  СКРЫТИЕ СТАРОГО МАЛЕНЬКОГО AI-АССИСТЕНТА                                 */
+/*  (НЕ ЗАТРАГИВАЕТ НОВЫЙ ЧАТ .ai-chat)                                      */
+/* ========================================================================== */
+
+/* самые типичные классы/ID маленьких виджетов */
+.ai-assistant-small,
+.ai-assistant,
+.ai-assistant-btn,
+.ai-bubble,
+.ai-widget,
+.ai-fab,
+.chat-fab,
+.chat-btn,
+.chat-widget,
+.chat-widget-btn,
+.chat-mini,
+#ai-assistant,
+#ai-assistant-small,
+#ai-bubble,
+#chat-btn,
+#chat-mini,
+#chat-widget,
+#old-chat,
+.old-ai-assistant {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* если мини-виджет добавляется через общий контейнер */
+body .assistant,
+body .floating-chat,
+body .support-bubble {
+  display: none !important;
+}
+
+/* ========================================================================== */
 /*  ОБОЛОЧКА ПРИЛОЖЕНИЯ                                                       */
 /* ========================================================================== */
 
@@ -1055,4 +1093,4 @@ body {
   .catalog-items-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-}
+  }
