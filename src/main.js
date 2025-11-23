@@ -1,13 +1,13 @@
 // src/main.js
 
-// Импорт данных каталога
+// Импорт данных каталога (оставь как у тебя в utils)
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
 
 // Тарифы за погонный метр (сомони)
 const BASE_RATES = {
-  standard: 4000, // ЛДСП фасады
-  premium: 5000, // МДФ фасады
+  standard: 4000,
+  premium: 5000,
 };
 
 // Корневой контейнер приложения
@@ -16,11 +16,10 @@ const appRoot = document.getElementById("app");
 // Состояние выбранной категории каталога (null = список категорий)
 let selectedCatalogCategoryId = null;
 
-/**
- * VIEW-ФУНКЦИИ
- */
+/* ========================================================================== */
+/*  VIEW-ФУНКЦИИ                                                              */
+/* ========================================================================== */
 
-// Главная страница
 function renderHome() {
   return `
     <section class="page page--home">
@@ -42,13 +41,12 @@ function renderHome() {
             </button>
           </div>
           <p class="hero__note">
-            Сделаем интерьер, который впечатляет с первого взгляда
-            — и приносит «вау-эффект» каждый день.
+            Сделаем интерьер, который впечатляет с первого взгляда — и приносит «вау-эффект» каждый день.
           </p>
         </div>
         <div class="hero__side">
           <div class="hero-card">
-            <div class="hero-card__label">AI &amp; МАРКЕТИНГ</div>
+            <div class="hero-card__label">AI &amp; маркетинг</div>
             <ul class="hero-card__list">
               <li>Персональные рекомендации дизайна</li>
               <li>AI-чат 24/7 по мебели и стоимости</li>
@@ -86,7 +84,6 @@ function renderHome() {
   `;
 }
 
-// Каталог
 function renderCatalog() {
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
@@ -170,7 +167,6 @@ function renderCatalog() {
   `;
 }
 
-// Раздел «Заказ»
 function renderOrder() {
   return `
     <section class="page page--order">
@@ -356,7 +352,9 @@ function renderOrder() {
               <div class="order-form__row order-form__row--full order-form__row--checkbox">
                 <label class="order-form__checkbox">
                   <input type="checkbox" data-order-minagree />
-                  <span>Я понимаю, что минимальный объём заказа — 3 погонных метра и согласен(на) с этим условием</span>
+                  <span>
+                    Я понимаю, что минимальный объём заказа — 3 погонных метра и согласен(на) с этим условием
+                  </span>
                 </label>
               </div>
             </div>
@@ -399,10 +397,9 @@ function renderOrder() {
   `;
 }
 
-// Личный кабинет (заглушка)
 function renderProfile() {
   return `
-    <section class="page">
+    <section class="page page--profile">
       <h1 class="page__title">Личный кабинет</h1>
       <p class="page__subtitle">
         Здесь клиент будет видеть статусы заказов, историю, партнёрский промокод,
@@ -415,10 +412,9 @@ function renderProfile() {
   `;
 }
 
-// Раздел «Ещё»
 function renderMore() {
   return `
-    <section class="page">
+    <section class="page page--more">
       <h1 class="page__title">Дополнительно</h1>
       <p class="page__subtitle">
         Информационные разделы: материалы, цены, сроки, документы, акции, о компании,
@@ -431,9 +427,10 @@ function renderMore() {
   `;
 }
 
-/**
- * КАРТА РОУТОВ
- */
+/* ========================================================================== */
+/*  КАРТА РОУТОВ                                                              */
+/* ========================================================================== */
+
 const VIEWS = {
   home: renderHome,
   catalog: renderCatalog,
@@ -442,14 +439,10 @@ const VIEWS = {
   more: renderMore,
 };
 
-/**
- * Рендер определённого раздела
- */
 function renderRoute(route) {
   const viewFn = VIEWS[route] || VIEWS.home;
   const main = document.getElementById("app-main");
   if (!main) return;
-
   main.innerHTML = viewFn();
 
   const navButtons = appRoot.querySelectorAll(".app-nav__item");
@@ -459,9 +452,10 @@ function renderRoute(route) {
   });
 }
 
-/**
- * Обработчик расчёта стоимости
- */
+/* ========================================================================== */
+/*  КАЛЬКУЛЯТОР + ЗАЯВКА                                                      */
+/* ========================================================================== */
+
 function handleCalcPrice() {
   const main = document.getElementById("app-main");
   if (!main) return;
@@ -503,13 +497,9 @@ function handleCalcPrice() {
 
   const lengthField = main.querySelector("[data-order-length-output]");
   const tariffField = main.querySelector("[data-order-tariff-output]");
-
-  if (lengthField) {
-    lengthField.value = length.toFixed(1);
-  }
-  if (tariffField) {
+  if (lengthField) lengthField.value = length.toFixed(1);
+  if (tariffField)
     tariffField.value = tariff === "premium" ? "Премиум" : "Стандарт";
-  }
 
   resultBox.innerHTML = `
     <div class="order-calc__result-ok">
@@ -532,9 +522,6 @@ function handleCalcPrice() {
   `;
 }
 
-/**
- * Обработчик отправки заявки + сегментация лида
- */
 function handleOrderSubmit() {
   const main = document.getElementById("app-main");
   if (!main) return;
@@ -639,17 +626,85 @@ function handleOrderSubmit() {
   `;
 }
 
-/**
- * Роутер: клики по data-route / data-category-id / data-action
- */
+/* ========================================================================== */
+/*  НОВЫЙ ЧАТ MADERA                                                          */
+/* ========================================================================== */
+
+// Простейшая демо-логика (можно заменить реальным backend/API)
+function buildBotReply(userText) {
+  const lower = userText.toLowerCase();
+
+  if (lower.includes("цена") || lower.includes("стоим"))
+    return "Ориентировочная стоимость — 4000 сом/п.м. для ЛДСП и 5000 сом/п.м. для МДФ фасадов. Минимальный объём заказа — 3 погонных метра.";
+
+  if (lower.includes("кредит") || lower.includes("рассроч"))
+    return "Оплата возможна частями и в кредит через партнёрские банки. Конкретные условия менеджер подберёт после расчёта проекта.";
+
+  if (lower.includes("минимал"))
+    return "Минимальный объём заказа — 3 погонных метра. Это помогает поддерживать качество сервиса и работы производства.";
+
+  return "Спасибо за вопрос! Я подскажу ориентиры по стоимости и материалам. Для точного расчёта менеджеру всё равно потребуется замер и детали проекта.";
+}
+
+function handleChatToggle() {
+  const root = document.querySelector(".madera-ai");
+  if (!root) return;
+  root.classList.toggle("madera-ai--open");
+
+  if (root.classList.contains("madera-ai--open")) {
+    const input = root.querySelector(".madera-ai__input");
+    if (input) input.focus();
+  }
+}
+
+function handleChatSend() {
+  const root = document.querySelector(".madera-ai");
+  if (!root) return;
+
+  const input = root.querySelector(".madera-ai__input");
+  const messages = root.querySelector(".madera-ai__messages");
+  const status = root.querySelector(".madera-ai__status");
+
+  if (!input || !messages) return;
+
+  const text = (input.value || "").trim();
+  if (!text) return;
+
+  const userHtml = `
+    <div class="madera-ai__msg madera-ai__msg--user">
+      <div class="madera-ai__msg-text">${text}</div>
+    </div>
+  `;
+  messages.insertAdjacentHTML("beforeend", userHtml);
+  input.value = "";
+
+  if (status) status.textContent = "AI-ассистент думает над ответом…";
+  const botText = buildBotReply(text);
+
+  setTimeout(() => {
+    const botHtml = `
+      <div class="madera-ai__msg madera-ai__msg--bot">
+        <div class="madera-ai__msg-text">${botText}</div>
+      </div>
+    `;
+    messages.insertAdjacentHTML("beforeend", botHtml);
+    messages.scrollTop = messages.scrollHeight;
+    if (status)
+      status.textContent =
+        "Онлайн-ассистент. Точный расчёт всё равно сделает менеджер после замера.";
+  }, 400);
+}
+
+/* ========================================================================== */
+/*  РОУТЕР + СЛУШАТЕЛИ                                                        */
+/* ========================================================================== */
+
 function setupRouter() {
   appRoot.addEventListener("click", (event) => {
     const routeTarget = event.target.closest("[data-route]");
     if (routeTarget) {
       const route = routeTarget.getAttribute("data-route");
-      if (route === "catalog") {
-        selectedCatalogCategoryId = null;
-      }
+      if (route === "catalog") selectedCatalogCategoryId = null;
       renderRoute(route);
       return;
     }
@@ -675,24 +730,58 @@ function setupRouter() {
       return;
     }
 
-    const submitTarget = event.target.closest("[data-action='submit-order']");
+    const submitTarget = event.target.closest(
+      "[data-action='submit-order']"
+    );
     if (submitTarget) {
       handleOrderSubmit();
       return;
     }
   });
+
+  // Чат (глобальные слушатели)
+  document.addEventListener("click", (event) => {
+    const toggleBtn = event.target.closest(
+      ".madera-ai__button, .madera-ai__panel-close"
+    );
+    if (toggleBtn) {
+      handleChatToggle();
+      return;
+    }
+
+    const sendBtn = event.target.closest(".madera-ai__send");
+    if (sendBtn) {
+      handleChatSend();
+      return;
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    const target = event.target;
+    if (
+      target &&
+      target.classList.contains("madera-ai__input") &&
+      event.key === "Enter"
+    ) {
+      event.preventDefault();
+      handleChatSend();
+    }
+  });
 }
 
-/**
- * Рендер оболочки (шапка + контент + нижняя навигация)
- */
+/* ========================================================================== */
+/*  ОБОЛОЧКА ПРИЛОЖЕНИЯ                                                       */
+/* ========================================================================== */
+
 function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
     <div class="app-shell">
       <header class="app-header">
         <div class="app-header__brand">
-          <div class="app-header__logo">Madera Design</div>
-          <div class="app-header__tagline">Партнёр в создании современного интерьера</div>
+          <div class="app-header__logo">MADERA DESIGN</div>
+          <div class="app-header__tagline">
+            Партнёр в создании современного интерьера
+          </div>
         </div>
         <div class="app-header__cta">
           <button class="btn btn--outline" data-route="order">
@@ -711,15 +800,64 @@ function renderLayout(initialRoute = "home") {
         <button class="app-nav__item" data-route="more">Ещё</button>
       </nav>
     </div>
+
+    <!-- Новый AI-ассистент: иконка девушки + панель чата -->
+    <div class="madera-ai">
+      <button class="madera-ai__button" type="button">
+        <img
+          src="src/assets/assistant.webp"
+          alt="AI-ассистент Madera"
+          class="madera-ai__avatar"
+        />
+      </button>
+
+      <div class="madera-ai__panel">
+        <div class="madera-ai__panel-header">
+          <div class="madera-ai__panel-title">AI-ассистент Madera</div>
+          <button class="madera-ai__panel-close" type="button">×</button>
+        </div>
+        <div class="madera-ai__panel-hint">
+          Задайте вопрос по стоимости, материалам или планировке — ассистент подскажет общие варианты.
+          Для точного расчёта всё равно потребуется менеджер и замер.
+        </div>
+
+        <div class="madera-ai__messages">
+          <div class="madera-ai__msg madera-ai__msg--bot">
+            <div class="madera-ai__msg-text">
+              Здравствуйте! Я AI-ассистент Madera Design. Помогу прикинуть стоимость кухни
+              или шкафа по вашим размерам и подсказать по материалам.
+            </div>
+          </div>
+        </div>
+
+        <div class="madera-ai__status">
+          Онлайн-ассистент. Точный расчёт всё равно сделает менеджер после замера.
+        </div>
+
+        <div class="madera-ai__input-row">
+          <input
+            type="text"
+            class="madera-ai__input"
+            placeholder="Напишите ваш вопрос…"
+          />
+          <button class="madera-ai__send" type="button">▶</button>
+        </div>
+
+        <div class="madera-ai__note">
+          Ответы носят справочный характер. Окончательные решения принимает менеджер и замерщик.
+        </div>
+      </div>
+    </div>
   `;
 
   setupRouter();
   renderRoute(initialRoute);
 }
 
-/**
- * Инициализация приложения
- */
+/* ========================================================================== */
+/*  ИНИЦИАЛИЗАЦИЯ                                                             */
+/* ========================================================================== */
+
 function initApp() {
   renderLayout("home");
 }
