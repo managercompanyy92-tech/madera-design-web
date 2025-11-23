@@ -27,7 +27,6 @@ body {
 /*  (НЕ ЗАТРАГИВАЕТ НОВЫЙ ЧАТ Madera)                                         */
 /* ========================================================================== */
 
-/* самые типичные классы/ID маленьких виджетов */
 .ai-assistant-small,
 .ai-assistant,
 .ai-assistant-btn,
@@ -904,7 +903,6 @@ body .support-bubble {
 }
 
 /* ========================================================================== */
-/*  /* ========================================================================== */
 /*  AI-ЧАТ (НОВЫЙ ВИДЖЕТ)                                                    */
 /* ========================================================================== */
 
@@ -935,6 +933,7 @@ body .support-bubble {
   align-items: center;
   justify-content: center;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+  position: relative;
 }
 
 /* небольшой "пульс", чтобы на мобиле иконка не терялась */
@@ -1086,7 +1085,9 @@ body .support-bubble {
   opacity: 0.7;
 }
 
-/* мобильная адаптация */
+/* ========================================================================== */
+/*  АДАПТИВ ДЛЯ ЧАТА                                                          */
+/* ========================================================================== */
 
 @media (max-width: 480px) {
   .ai-chat {
@@ -1095,20 +1096,8 @@ body .support-bubble {
   }
 
   .ai-chat__panel {
-    width: calc(100vw - 24px);
+    width: calc(100vw - 24px); /* почти на всю ширину экрана */
     max-height: 65vh;
-  }
-}
-/* Адаптив: на очень маленьких экранах чат чуть поднимаем и сужаем */
-
-@media (max-width: 480px) {
-  .ai-chat {
-    right: 10px;
-    bottom: 78px;
-  }
-
-  .ai-chat__panel {
-    width: 250px;
   }
 }
 
@@ -1148,13 +1137,3 @@ body .support-bubble {
     grid-template-columns: minmax(0, 1fr);
   }
   }
-/* Полностью отключаем маленький старый AI-чат */
-.ai-chat,
-.ai-chat *,
-.ai-chat__toggle,
-.ai-chat__panel {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
