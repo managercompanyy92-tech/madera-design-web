@@ -1,6 +1,6 @@
-/* ==========================================================================
-   БАЗОВЫЙ СБРОС
-   ========================================================================== */
+/* ========================================================================== */
+/*  БАЗОВЫЙ СБРОС                                                             */
+/* ========================================================================== */
 
 *,
 *::before,
@@ -23,9 +23,42 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ==========================================================================
-   ОБОЛОЧКА ПРИЛОЖЕНИЯ
-   ========================================================================== */
+/* ========================================================================== */
+/*  СКРЫТИЕ СТАРЫХ ВИДЖЕТОВ (ЧТО МОГЛО ПРИЛЕТАТЬ ИЗ СТОРОННИХ СКРИПТОВ)      */
+/*  НОВЫЙ ЧАТ MADERA ИСПОЛЬЗУЕТ ДРУГИЕ КЛАССЫ (madera-ai-*)                   */
+/* ========================================================================== */
+
+.ai-assistant-small,
+.ai-assistant,
+.ai-assistant-btn,
+.ai-bubble,
+.ai-widget,
+.ai-fab,
+.chat-fab,
+.chat-btn,
+.chat-widget,
+.chat-widget-btn,
+.chat-mini,
+#ai-assistant,
+#ai-assistant-small,
+#ai-bubble,
+#chat-btn,
+#chat-mini,
+#chat-widget,
+#old-chat,
+.old-ai-assistant,
+body .assistant,
+body .floating-chat,
+body .support-bubble {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ========================================================================== */
+/*  ОБОЛОЧКА ПРИЛОЖЕНИЯ                                                       */
+/* ========================================================================== */
 
 .app-shell {
   min-height: 100vh;
@@ -36,9 +69,9 @@ body {
   flex-direction: column;
 }
 
-/* ==========================================================================
-   ШАПКА
-   ========================================================================== */
+/* ========================================================================== */
+/*  ШАПКА                                                                     */
+/* ========================================================================== */
 
 .app-header {
   display: flex;
@@ -76,13 +109,9 @@ body {
   opacity: 0.8;
 }
 
-.app-header__cta {
-  flex-shrink: 0;
-}
-
-/* ==========================================================================
-   КНОПКИ
-   ========================================================================== */
+/* ========================================================================== */
+/*  КНОПКИ                                                                    */
+/* ========================================================================== */
 
 .btn {
   border: none;
@@ -130,9 +159,9 @@ body {
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* ==========================================================================
-   ОСНОВНОЙ КОНТЕНТ
-   ========================================================================== */
+/* ========================================================================== */
+/*  ОСНОВНОЙ КОНТЕНТ                                                          */
+/* ========================================================================== */
 
 .app-main {
   flex: 1;
@@ -164,9 +193,9 @@ body {
   opacity: 0.9;
 }
 
-/* ==========================================================================
-   HERO
-   ========================================================================== */
+/* ========================================================================== */
+/*  ГЛАВНЫЙ ЭКРАН HERO                                                        */
+/* ========================================================================== */
 
 .page--home {
   padding-top: 4px;
@@ -222,7 +251,7 @@ body {
   justify-content: center;
 }
 
-/* Карточка AI & маркетинг */
+/* Карточка "AI & Маркетинг" */
 
 .hero-card {
   width: 100%;
@@ -260,9 +289,9 @@ body {
   margin-right: 6px;
 }
 
-/* ==========================================================================
-   ПРЕИМУЩЕСТВА
-   ========================================================================== */
+/* ========================================================================== */
+/*  ПРЕИМУЩЕСТВА                                                              */
+/* ========================================================================== */
 
 .highlights {
   display: grid;
@@ -290,9 +319,9 @@ body {
   opacity: 0.8;
 }
 
-/* ==========================================================================
-   НИЖНЯЯ НАВИГАЦИЯ
-   ========================================================================== */
+/* ========================================================================== */
+/*  НИЖНЯЯ НАВИГАЦИЯ                                                          */
+/* ========================================================================== */
 
 .app-nav {
   position: fixed;
@@ -331,9 +360,9 @@ body {
   color: #ffb347;
 }
 
-/* ==========================================================================
-   КАТАЛОГ
-   ========================================================================== */
+/* ========================================================================== */
+/*  КАТАЛОГ: КАТЕГОРИИ                                                        */
+/* ========================================================================== */
 
 .page--catalog {
   padding-top: 4px;
@@ -414,7 +443,9 @@ body {
   color: #ffb347;
 }
 
-/* Внутренние идеи */
+/* ========================================================================== */
+/*  КАТАЛОГ: ВНУТРЕННИЕ ИДЕИ                                                  */
+/* ========================================================================== */
 
 .catalog-back {
   border: none;
@@ -488,9 +519,9 @@ body {
   font-size: 12px;
 }
 
-/* ==========================================================================
-   ЗАКАЗ: КАЛЬКУЛЯТОР И ФОРМА
-   ========================================================================== */
+/* ========================================================================== */
+/*  РАЗДЕЛ ЗАКАЗА: КАЛЬКУЛЯТОР + ФОРМА                                        */
+/* ========================================================================== */
 
 .page--order {
   padding-top: 4px;
@@ -642,10 +673,15 @@ body {
   color: #ffb347;
 }
 
-.order-calc__result-details,
+.order-calc__result-details {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
 .order-calc__result-next {
   font-size: 12px;
-  opacity: 0.84;
+  opacity: 0.85;
+  margin-top: 2px;
 }
 
 .order-calc__result-error {
@@ -653,7 +689,7 @@ body {
   color: #ff9b9b;
 }
 
-/* Правая колонка */
+/* Правая колонка: инфо и маркетинг */
 
 .order-info {
   display: flex;
@@ -840,7 +876,7 @@ body {
   font-size: 12px;
 }
 
-/* ИИ-подсказка по лидам */
+/* Блок ИИ-подсказки по лидам */
 
 .order-form__result-ai {
   margin-top: 6px;
@@ -861,56 +897,70 @@ body {
   opacity: 0.85;
 }
 
-/* ==========================================================================
-   AI-ЧАТ: ИКОНКА + ПАНЕЛЬ
-   ========================================================================== */
+/* ========================================================================== */
+/*  ЛИЧНЫЙ КАБИНЕТ / ЕЩЁ                                                      */
+/* ========================================================================== */
 
-.ai-chat-button {
-  position: fixed;
-  right: 18px;
-  bottom: 86px; /* над нижней навигацией */
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  overflow: hidden;
-  background: radial-gradient(circle at 30% 0, #ffb347, #e97a00);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 60;
+.page--profile .page__placeholder,
+.page--more .page__placeholder {
+  margin-top: 10px;
 }
 
-.ai-chat-button__avatar {
+/* ========================================================================== */
+/*  НОВЫЙ AI-ЧАТ MADERA (ИКОНКА + ПАНЕЛЬ)                                     */
+/* ========================================================================== */
+
+.madera-ai {
+  position: fixed;
+  right: 16px;
+  bottom: 80px; /* над нижней навигацией */
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* Круглая кнопка с девушкой */
+
+.madera-ai__button {
+  border: none;
+  border-radius: 999px;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  cursor: pointer;
+  background: radial-gradient(circle at 30% 0, #ffcf8a, #e97a00);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.madera-ai__avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  border-radius: 999px;
 }
 
-/* лёгкий "пульс" */
+/* Лёгкий неон по контуру */
 
-.ai-chat-button::after {
+.madera-ai__button::after {
   content: "";
   position: absolute;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  border: 1px solid rgba(233, 122, 0, 0.4);
-  opacity: 0.7;
-  box-shadow: 0 0 18px rgba(233, 122, 0, 0.4);
+  inset: 2px;
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(233, 122, 0, 0.65);
+  pointer-events: none;
 }
 
 /* Панель чата */
 
-.ai-chat-panel {
-  position: fixed;
-  right: 16px;
-  bottom: 86px;
-  width: 360px;
+.madera-ai__panel {
+  width: 340px;
   max-height: 70vh;
   border-radius: 18px;
   background: rgba(10, 10, 10, 0.98);
@@ -919,14 +969,17 @@ body {
   display: none;
   flex-direction: column;
   padding: 10px 10px 8px;
-  z-index: 59;
 }
 
-.ai-chat-panel--open {
+/* когда открыт */
+
+.madera-ai--open .madera-ai__panel {
   display: flex;
 }
 
-.ai-chat-panel__header {
+/* шапка */
+
+.madera-ai__panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -934,12 +987,12 @@ body {
   margin-bottom: 4px;
 }
 
-.ai-chat-panel__title {
+.madera-ai__panel-title {
   font-size: 13px;
   font-weight: 600;
 }
 
-.ai-chat-panel__close {
+.madera-ai__panel-close {
   border: none;
   background: transparent;
   color: #fff;
@@ -947,13 +1000,17 @@ body {
   cursor: pointer;
 }
 
-.ai-chat-panel__hint {
+/* подсказка */
+
+.madera-ai__panel-hint {
   font-size: 11px;
   opacity: 0.8;
   margin-bottom: 6px;
 }
 
-.ai-chat-panel__messages {
+/* сообщения */
+
+.madera-ai__messages {
   flex: 1;
   overflow-y: auto;
   padding: 6px 2px;
@@ -964,7 +1021,7 @@ body {
   background: rgba(0, 0, 0, 0.6);
 }
 
-.ai-chat-msg {
+.madera-ai__msg {
   max-width: 80%;
   padding: 6px 8px;
   border-radius: 12px;
@@ -972,29 +1029,37 @@ body {
   line-height: 1.35;
 }
 
-.ai-chat-msg--bot {
+.madera-ai__msg--bot {
   background: rgba(50, 50, 50, 0.9);
   align-self: flex-start;
 }
 
-.ai-chat-msg--user {
+.madera-ai__msg--user {
   background: rgba(233, 122, 0, 0.9);
   color: #111;
   align-self: flex-end;
 }
 
-.ai-chat-msg__text {
+.madera-ai__msg-text {
   white-space: pre-wrap;
 }
 
-.ai-chat-panel__input-row {
+.madera-ai__status {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+/* ввод */
+
+.madera-ai__input-row {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-top: 6px;
 }
 
-.ai-chat-panel__input {
+.madera-ai__input {
   flex: 1;
   padding: 6px 8px;
   border-radius: 999px;
@@ -1004,36 +1069,33 @@ body {
   font-size: 12px;
 }
 
-.ai-chat-panel__input:focus {
+.madera-ai__input:focus {
   outline: none;
   border-color: rgba(233, 122, 0, 0.9);
 }
 
-.ai-chat-panel__send {
+.madera-ai__send {
   border: none;
   border-radius: 999px;
-  width: 32px;
-  height: 32px;
-  font-size: 14px;
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
   cursor: pointer;
-  background: rgba(233, 122, 0, 0.95);
+  background: rgba(233, 122, 0, 0.9);
   color: #111;
 }
 
-.ai-chat-panel__send:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
+/* подпись под строкой ввода */
 
-.ai-chat-panel__status {
+.madera-ai__note {
   margin-top: 4px;
   font-size: 10px;
   opacity: 0.7;
 }
 
-/* ==========================================================================
-   АДАПТИВ
-   ========================================================================== */
+/* ========================================================================== */
+/*  АДАПТИВ                                                                   */
+/* ========================================================================== */
 
 @media (max-width: 900px) {
   .order-layout {
@@ -1062,25 +1124,24 @@ body {
   .catalog-items-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .ai-chat-panel {
-    right: 10px;
-    left: 10px;
-    width: auto;
-    max-height: 65vh;
-  }
 }
 
 @media (max-width: 480px) {
-  .catalog-categories-grid,
+  .catalog-categories-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .catalog-items-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .ai-chat-button {
-    right: 14px;
-    bottom: 80px;
-    width: 64px;
-    height: 64px;
+  .madera-ai {
+    right: 12px;
+    bottom: 84px;
   }
+
+  .madera-ai__panel {
+    width: calc(100vw - 24px);
+    max-height: 68vh;
   }
+   }
