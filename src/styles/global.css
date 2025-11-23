@@ -1,6 +1,6 @@
-/* ========================================================================== */
-/*  БАЗОВЫЙ СБРОС                                                             */
-/* ========================================================================== */
+/* ==========================================================================
+   БАЗОВЫЙ СБРОС
+   ========================================================================== */
 
 *,
 *::before,
@@ -23,45 +23,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ========================================================================== */
-/*  СКРЫТИЕ СТОРОННИХ МИНИ-ВИДЖЕТОВ (если были)                              */
-/*  (наш новый чат .ai-chat НЕ трогаем)                                      */
-/* ========================================================================== */
-
-.ai-assistant-small,
-.ai-assistant,
-.ai-assistant-btn,
-.ai-bubble,
-.ai-widget,
-.ai-fab,
-.chat-fab,
-.chat-btn,
-.chat-widget,
-.chat-widget-btn,
-.chat-mini,
-#ai-assistant,
-#ai-assistant-small,
-#ai-bubble,
-#chat-btn,
-#chat-mini,
-#chat-widget,
-#old-chat,
-.old-ai-assistant {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-body .assistant,
-body .floating-chat,
-body .support-bubble {
-  display: none !important;
-}
-
-/* ========================================================================== */
-/*  ОБОЛОЧКА ПРИЛОЖЕНИЯ                                                       */
-/* ========================================================================== */
+/* ==========================================================================
+   ОБОЛОЧКА ПРИЛОЖЕНИЯ
+   ========================================================================== */
 
 .app-shell {
   min-height: 100vh;
@@ -72,9 +36,9 @@ body .support-bubble {
   flex-direction: column;
 }
 
-/* ========================================================================== */
-/*  ШАПКА                                                                     */
-/* ========================================================================== */
+/* ==========================================================================
+   ШАПКА
+   ========================================================================== */
 
 .app-header {
   display: flex;
@@ -112,9 +76,13 @@ body .support-bubble {
   opacity: 0.8;
 }
 
-/* ========================================================================== */
-/*  КНОПКИ                                                                    */
-/* ========================================================================== */
+.app-header__cta {
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   КНОПКИ
+   ========================================================================== */
 
 .btn {
   border: none;
@@ -162,9 +130,9 @@ body .support-bubble {
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* ========================================================================== */
-/*  ОСНОВНОЙ КОНТЕНТ                                                          */
-/* ========================================================================== */
+/* ==========================================================================
+   ОСНОВНОЙ КОНТЕНТ
+   ========================================================================== */
 
 .app-main {
   flex: 1;
@@ -196,9 +164,9 @@ body .support-bubble {
   opacity: 0.9;
 }
 
-/* ========================================================================== */
-/*  ГЛАВНЫЙ ЭКРАН HERO                                                        */
-/* ========================================================================== */
+/* ==========================================================================
+   HERO
+   ========================================================================== */
 
 .page--home {
   padding-top: 4px;
@@ -254,7 +222,7 @@ body .support-bubble {
   justify-content: center;
 }
 
-/* Карточка "AI & Маркетинг" */
+/* Карточка AI & маркетинг */
 
 .hero-card {
   width: 100%;
@@ -292,9 +260,9 @@ body .support-bubble {
   margin-right: 6px;
 }
 
-/* ========================================================================== */
-/*  ПРЕИМУЩЕСТВА                                                              */
-/* ========================================================================== */
+/* ==========================================================================
+   ПРЕИМУЩЕСТВА
+   ========================================================================== */
 
 .highlights {
   display: grid;
@@ -322,9 +290,9 @@ body .support-bubble {
   opacity: 0.8;
 }
 
-/* ========================================================================== */
-/*  НИЖНЯЯ НАВИГАЦИЯ                                                          */
-/* ========================================================================== */
+/* ==========================================================================
+   НИЖНЯЯ НАВИГАЦИЯ
+   ========================================================================== */
 
 .app-nav {
   position: fixed;
@@ -363,9 +331,9 @@ body .support-bubble {
   color: #ffb347;
 }
 
-/* ========================================================================== */
-/*  КАТАЛОГ: КАТЕГОРИИ                                                        */
-/* ========================================================================== */
+/* ==========================================================================
+   КАТАЛОГ
+   ========================================================================== */
 
 .page--catalog {
   padding-top: 4px;
@@ -446,9 +414,7 @@ body .support-bubble {
   color: #ffb347;
 }
 
-/* ========================================================================== */
-/*  КАТАЛОГ: ВНУТРЕННИЕ ИДЕИ                                                  */
-/* ========================================================================== */
+/* Внутренние идеи */
 
 .catalog-back {
   border: none;
@@ -522,10 +488,9 @@ body .support-bubble {
   font-size: 12px;
 }
 
-/* ========================================================================== */
-/*  РАЗДЕЛ ЗАКАЗА: КАЛЬКУЛЯТОР И ФОРМА                                       */
-/*  (оставляю как в предыдущем варианте, без изменений логики)               */
-/* ========================================================================== */
+/* ==========================================================================
+   ЗАКАЗ: КАЛЬКУЛЯТОР И ФОРМА
+   ========================================================================== */
 
 .page--order {
   padding-top: 4px;
@@ -677,15 +642,10 @@ body .support-bubble {
   color: #ffb347;
 }
 
-.order-calc__result-details {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
+.order-calc__result-details,
 .order-calc__result-next {
   font-size: 12px;
-  opacity: 0.85;
-  margin-top: 2px;
+  opacity: 0.84;
 }
 
 .order-calc__result-error {
@@ -693,92 +653,280 @@ body .support-bubble {
   color: #ff9b9b;
 }
 
+/* Правая колонка */
+
 .order-info {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* … оставшиеся стили order-form такие же, как в предыдущей версии …
-   (можешь оставить свой старый блок order-form/личного кабинета, 
-    он не влияет на чат)
-*/
+.order-info__card {
+  padding: 14px 14px 16px;
+  border-radius: 18px;
+  background: rgba(10, 10, 10, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.8);
+}
 
-/* ========================================================================== */
-/*  НОВЫЙ AI-ЧАТ С ИКОНКОЙ                                                   */
-/* ========================================================================== */
+.order-info__badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #ffb347;
+  margin-bottom: 6px;
+}
 
-.ai-chat {
-  position: fixed;
-  right: 16px;
-  bottom: 76px; /* над нижней навигацией */
-  z-index: 60;
+.order-info__title {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.order-info__list {
+  list-style: none;
+  font-size: 12px;
+  opacity: 0.85;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  gap: 4px;
+}
+
+.order-info__list li::before {
+  content: "•";
+  color: #e97a00;
+  margin-right: 4px;
+}
+
+.order-info__next {
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(5, 5, 5, 0.9);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-/* КНОПКА-ИКОНКА */
+.order-info__next-text {
+  opacity: 0.85;
+}
 
-.ai-chat__toggle {
-  position: relative;
+/* Форма заявки */
+
+.order-form {
+  margin-top: 14px;
+  padding: 14px 16px 16px;
+  border-radius: 20px;
+  background: rgba(12, 12, 12, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.9);
+}
+
+.order-form__header {
+  margin-bottom: 10px;
+}
+
+.order-form__title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.order-form__subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.order-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+  margin-top: 10px;
+}
+
+.order-form__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-form__row--full {
+  grid-column: 1 / -1;
+}
+
+.order-form__label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.order-form__input,
+.order-form__select,
+.order-form__textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.75);
+  color: #f5f5f5;
+  font-size: 13px;
+}
+
+.order-form__textarea {
+  resize: vertical;
+}
+
+.order-form__input:focus,
+.order-form__select:focus,
+.order-form__textarea:focus {
+  outline: none;
+  border-color: rgba(233, 122, 0, 0.8);
+  box-shadow: 0 0 0 1px rgba(233, 122, 0, 0.6);
+}
+
+.order-form__row--checkbox {
+  margin-top: 4px;
+}
+
+.order-form__checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.order-form__checkbox input[type="checkbox"] {
+  margin-top: 2px;
+}
+
+.order-form__footer {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.order-form__note {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.order-form__result {
+  font-size: 12px;
+}
+
+.order-form__result-ok {
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0, 64, 32, 0.7);
+  border: 1px solid rgba(0, 200, 120, 0.5);
+}
+
+.order-form__result-main {
+  margin-bottom: 2px;
+}
+
+.order-form__result-sub {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.order-form__result-error {
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(80, 0, 0, 0.7);
+  border: 1px solid rgba(255, 120, 120, 0.7);
+  font-size: 12px;
+}
+
+/* ИИ-подсказка по лидам */
+
+.order-form__result-ai {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.order-form__result-ai-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #ffb347;
+  margin-bottom: 2px;
+}
+
+.order-form__result-ai-text {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   AI-ЧАТ: ИКОНКА + ПАНЕЛЬ
+   ========================================================================== */
+
+.ai-chat-button {
+  position: fixed;
+  right: 18px;
+  bottom: 86px; /* над нижней навигацией */
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
   border: none;
-  border-radius: 999px;
-  width: 56px;
-  height: 56px;
   padding: 0;
   cursor: pointer;
-  background: radial-gradient(circle at 30% 0, #ffd18a, #e97a00);
-  color: #111;
-  font-size: 26px;
-  line-height: 1;
-  display: inline-flex;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 0, #ffb347, #e97a00);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+  display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+  z-index: 60;
 }
 
-/* лёгкий пульс */
+.ai-chat-button__avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
-.ai-chat__toggle::after {
+/* лёгкий "пульс" */
+
+.ai-chat-button::after {
   content: "";
   position: absolute;
-  inset: -6px;
-  border-radius: 999px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
   border: 1px solid rgba(233, 122, 0, 0.4);
   opacity: 0.7;
+  box-shadow: 0 0 18px rgba(233, 122, 0, 0.4);
 }
 
-/* панель чата */
+/* Панель чата */
 
-.ai-chat__panel {
-  width: 320px;
+.ai-chat-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 86px;
+  width: 360px;
   max-height: 70vh;
   border-radius: 18px;
   background: rgba(10, 10, 10, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 22px 50px rgba(0, 0, 0, 0.9);
-  display: flex;
+  display: none;
   flex-direction: column;
   padding: 10px 10px 8px;
-  transform: translateY(12px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+  z-index: 59;
 }
 
-/* открыт */
-
-.ai-chat--open .ai-chat__panel {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+.ai-chat-panel--open {
+  display: flex;
 }
 
-/* шапка */
-
-.ai-chat__header {
+.ai-chat-panel__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -786,12 +934,12 @@ body .support-bubble {
   margin-bottom: 4px;
 }
 
-.ai-chat__title {
+.ai-chat-panel__title {
   font-size: 13px;
   font-weight: 600;
 }
 
-.ai-chat__close {
+.ai-chat-panel__close {
   border: none;
   background: transparent;
   color: #fff;
@@ -799,17 +947,13 @@ body .support-bubble {
   cursor: pointer;
 }
 
-/* подсказка */
-
-.ai-chat__hint {
+.ai-chat-panel__hint {
   font-size: 11px;
   opacity: 0.8;
   margin-bottom: 6px;
 }
 
-/* сообщения */
-
-.ai-chat__messages {
+.ai-chat-panel__messages {
   flex: 1;
   overflow-y: auto;
   padding: 6px 2px;
@@ -820,7 +964,7 @@ body .support-bubble {
   background: rgba(0, 0, 0, 0.6);
 }
 
-.ai-chat__msg {
+.ai-chat-msg {
   max-width: 80%;
   padding: 6px 8px;
   border-radius: 12px;
@@ -828,27 +972,29 @@ body .support-bubble {
   line-height: 1.35;
 }
 
-.ai-chat__msg--bot {
+.ai-chat-msg--bot {
   background: rgba(50, 50, 50, 0.9);
   align-self: flex-start;
 }
 
-.ai-chat__msg--user {
+.ai-chat-msg--user {
   background: rgba(233, 122, 0, 0.9);
   color: #111;
   align-self: flex-end;
 }
 
-/* ввод */
+.ai-chat-msg__text {
+  white-space: pre-wrap;
+}
 
-.ai-chat__input-row {
+.ai-chat-panel__input-row {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-top: 6px;
 }
 
-.ai-chat__input {
+.ai-chat-panel__input {
   flex: 1;
   padding: 6px 8px;
   border-radius: 999px;
@@ -858,41 +1004,36 @@ body .support-bubble {
   font-size: 12px;
 }
 
-.ai-chat__input:focus {
+.ai-chat-panel__input:focus {
   outline: none;
   border-color: rgba(233, 122, 0, 0.9);
 }
 
-.ai-chat__send {
+.ai-chat-panel__send {
   border: none;
   border-radius: 999px;
-  width: 30px;
-  height: 30px;
-  font-size: 13px;
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
   cursor: pointer;
-  background: rgba(233, 122, 0, 0.9);
+  background: rgba(233, 122, 0, 0.95);
   color: #111;
 }
 
-/* подпись под строкой */
+.ai-chat-panel__send:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 
-.ai-chat__note {
+.ai-chat-panel__status {
   margin-top: 4px;
   font-size: 10px;
   opacity: 0.7;
 }
 
-/* статус под чатом (если используешь) */
-
-.ai-chat__status {
-  font-size: 10px;
-  opacity: 0.7;
-  margin-top: 4px;
-}
-
-/* ========================================================================== */
-/*  АДАПТИВ ДЛЯ МОБИЛЬНЫХ                                                     */
-/* ========================================================================== */
+/* ==========================================================================
+   АДАПТИВ
+   ========================================================================== */
 
 @media (max-width: 900px) {
   .order-layout {
@@ -921,24 +1062,25 @@ body .support-bubble {
   .catalog-items-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .ai-chat-panel {
+    right: 10px;
+    left: 10px;
+    width: auto;
+    max-height: 65vh;
+  }
 }
 
 @media (max-width: 480px) {
-  .catalog-categories-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
+  .catalog-categories-grid,
   .catalog-items-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .ai-chat {
-    right: 10px;
-    bottom: 82px;
-  }
-
-  .ai-chat__panel {
-    width: calc(100vw - 24px);
-    max-height: 65vh;
+  .ai-chat-button {
+    right: 14px;
+    bottom: 80px;
+    width: 64px;
+    height: 64px;
   }
   }
