@@ -2,18 +2,18 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>Madera Design — Современная корпусная мебель</title>
+    <title>Madera Design — Современная корпусная мебель на заказ</title>
 
-    <!-- Мобильная вёрстка -->
+    <!-- Мобильная адаптивность -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
 
     <!-- SEO -->
     <meta
       name="description"
-      content="Madera Design — корпусная мебель на заказ, онлайн-калькулятор стоимости, AI-ассистент, каталог идей."
+      content="Madera Design — корпусная мебель на заказ в Душанбе: кухни, шкафы, гардеробные, прихожие. Онлайн-калькулятор стоимости, дизайн и прозрачный статус заказа."
     />
 
     <!-- Глобальные стили -->
@@ -21,63 +21,60 @@
   </head>
 
   <body>
-    <!-- Корневой контейнер SPA-приложения -->
+    <!-- Корневой контейнер SPA -->
     <div id="app"></div>
 
-    <!-- ============================= -->
-    <!--       КНОПКА ЧАТА (ИКОНКА)     -->
-    <!-- ============================= -->
-    <button id="ai-chat-toggle" class="ai-chat-toggle">
+    <!-- ====================== -->
+    <!--     ЧАТ-АССИСТЕНТ      -->
+    <!-- ====================== -->
+
+    <!-- Кнопка чата (иконка девушки) -->
+    <button class="ai-chat-button" id="aiChatToggle">
       <img
-        src="src/assets/assistant.webp"
-        alt="AI Assistant"
-        class="ai-chat-avatar"
+        src="assets/chat-assistant.webp"
+        alt="AI-ассистент"
+        class="ai-chat-button__avatar"
       />
     </button>
 
-    <!-- ============================= -->
-    <!--          ПАНЕЛЬ ЧАТА          -->
-    <!-- ============================= -->
-
-    <div class="madera-chat" id="madera-chat">
-      <div class="madera-chat__header">
-        <div>
-          <div class="madera-chat__title">AI-ассистент Madera</div>
-          <div class="madera-chat__subtitle">
-            Помогу прикинуть стоимость и подобрать материалы
-          </div>
-        </div>
-        <button type="button" class="madera-chat__close" id="ai-chat-close">
-          ×
-        </button>
+    <!-- Панель чата -->
+    <div class="ai-chat-panel" id="aiChatPanel">
+      <div class="ai-chat-panel__header">
+        <div class="ai-chat-panel__title">AI-ассистент Madera</div>
+        <button class="ai-chat-panel__close" id="aiChatClose">×</button>
       </div>
 
-      <!-- Сообщения чата -->
-      <div class="madera-chat__messages" id="madera-chat-messages">
-        <div class="madera-chat__message madera-chat__message--bot">
-          <div class="madera-chat__bubble">
-            Здравствуйте! Я AI-ассистент Madera.  
-            Помогу рассчитать стоимость кухни или шкафа и подсказать по материалам.
+      <div class="ai-chat-panel__hint">
+        Задайте вопрос по стоимости, материалам или планировке —
+        ассистент подскажет варианты.
+      </div>
+
+      <div class="ai-chat-panel__messages" id="aiChatMessages">
+        <div class="ai-chat-msg ai-chat-msg--bot">
+          <div class="ai-chat-msg__text">
+            Здравствуйте! Я AI-ассистент Madera Design. Помогу рассчитать кухню
+            или шкаф, подобрать материалы и подскажу по стилю.
           </div>
         </div>
       </div>
 
-      <!-- Поле ввода -->
-      <form class="madera-chat__form" id="madera-chat-form">
+      <div class="ai-chat-panel__input-row">
         <input
           type="text"
-          id="madera-chat-input"
-          class="madera-chat__input"
-          placeholder="Напишите ваш вопрос..."
-          autocomplete="off"
+          class="ai-chat-panel__input"
+          id="aiChatInput"
+          placeholder="Напишите ваш вопрос…"
         />
-        <button type="submit" class="madera-chat__send">➤</button>
-      </form>
+        <button class="ai-chat-panel__send" id="aiChatSend">➤</button>
+      </div>
+
+      <div class="ai-chat-panel__status">
+        Онлайн-ассистент. Для точного расчёта потребуется менеджер и замер.
+      </div>
     </div>
 
-    <!-- ============================= -->
-    <!--        JS-приложение          -->
-    <!-- ============================= -->
+    <!-- Подключение SPA и чата -->
     <script type="module" src="src/main.js"></script>
+    <script src="src/ai-chat.js"></script>
   </body>
 </html>
