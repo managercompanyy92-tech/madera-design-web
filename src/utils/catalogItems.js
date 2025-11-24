@@ -9,7 +9,7 @@ export const catalogItems = [
     title: "Минималистичный порядок",
     description:
       "Спокойные тона и продуманная система хранения для тех, кто ценит тишину и идеальный порядок.",
-    image: "/wardrobes/w1.jpg",
+    image: "/public/wardrobes/w1.jpg",
   },
   {
     id: "wardrobe-2",
