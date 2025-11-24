@@ -1,324 +1,50 @@
-    // src/utils/catalogItems.js
+// src/utils/catalogItems.js
 
 export const catalogItems = [
+  /* ================= ГАРДЕРОБНЫЕ ================= */
 
-    /* ========================= ГАРДЕРОБНЫЕ (w1–w44) ========================= */
+  {
+    id: "wardrobe-1",
+    categoryId: "wardrobes",
+    title: "Минималистичный порядок",
+    description:
+      "Спокойные тона и продуманная система хранения — идеальный вариант для тех, кто ценит тишину и порядок.",
+    image: "/wardrobes/w1.jpg",
+  },
 
-    {
-        id: "wardrobe-1",
-        categoryId: "wardrobes",
-        title: "Минималистичный порядок",
-        description: "Спокойные тона и продуманная система хранения для тех, кто ценит тишину и идеальный порядок.",
-        image: "/wardrobes/w1.jpg",
-    },
-    {
-        id: "wardrobe-2",
-        categoryId: "wardrobes",
-        title: "Подиум для стиля",
-        description: "Длинный коридор-гардеробная с зеркалами и мягким светом — идеальное место для примерок и селфи.",
-        image: "/wardrobes/w2.jpg",
-    },
-    {
-        id: "wardrobe-3",
-        categoryId: "wardrobes",
-        title: "Шкаф со сценой",
-        description: "Элегантный шкаф со стеклянными фасадами и акцентной подсветкой для вдохновения и красоты.",
-        image: "/wardrobes/w3.jpg",
-    },
-    {
-        id: "wardrobe-4",
-        categoryId: "wardrobes",
-        title: "Гардеробная-светлая студия",
-        description: "Светлая, воздушная гардеробная с удобной зоной сидения и умной подсветкой.",
-        image: "/wardrobes/w4.jpg",
-    },
-    {
-        id: "wardrobe-5",
-        categoryId: "wardrobes",
-        title: "Современный стеклянный шкаф",
-        description: "Мягкие линии, прозрачные фасады и просторная система хранения.",
-        image: "/wardrobes/w5.jpg",
-    },
-    {
-        id: "wardrobe-6",
-        categoryId: "wardrobes",
-        title: "Теплая палитра",
-        description: "Гардеробная в натуральных тонах с уютным светом и большим пространством.",
-        image: "/wardrobes/w6.jpg",
-    },
-    {
-        id: "wardrobe-7",
-        categoryId: "wardrobes",
-        title: "Монохромная элегантность",
-        description: "Строгие формы, мягкое освещение и премиальная отделка.",
-        image: "/wardrobes/w7.jpg",
-    },
-    {
-        id: "wardrobe-8",
-        categoryId: "wardrobes",
-        title: "Лофт-пространство",
-        description: "Металл, дерево и благородные оттенки создают атмосферу современного лофта.",
-        image: "/wardrobes/w8.jpg",
-    },
-    {
-        id: "wardrobe-9",
-        categoryId: "wardrobes",
-        title: "Стильная геометрия",
-        description: "Удобная гардеробная с четкими линиями и аккуратно встроенной подсветкой.",
-        image: "/wardrobes/w9.jpg",
-    },
-    {
-        id: "wardrobe-10",
-        categoryId: "wardrobes",
-        title: "Фасады с текстурой",
-        description: "Гардеробная с объёмными материалами, дающими ощущение глубины и стиля.",
-        image: "/wardrobes/w10.jpg",
-    },
+  {
+    id: "wardrobe-2",
+    categoryId: "wardrobes",
+    title: "Современная гармония",
+    description:
+      "Сбалансированное сочетание материалов и освещения — функциональность и стиль в одном решении.",
+    image: "/wardrobes/w10.jpg",
+  },
 
-    // w11–w21
-    {
-        id: "wardrobe-11",
-        categoryId: "wardrobes",
-        title: "Чистая симметрия",
-        description: "Идеально ровные линии, продуманная эргономика и глубокие оттенки.",
-        image: "/wardrobes/w11.jpg",
-    },
-    {
-        id: "wardrobe-12",
-        categoryId: "wardrobes",
-        title: "Графитовый коридор",
-        description: "Стекло, металл и отражения — эффектная гардеробная для современного интерьера.",
-        image: "/wardrobes/w12.jpg",
-    },
-    {
-        id: "wardrobe-13",
-        categoryId: "wardrobes",
-        title: "Белая коллекция",
-        description: "Максимум света, комфорта и места для хранения в одном решении.",
-        image: "/wardrobes/w13.jpg",
-    },
-    {
-        id: "wardrobe-14",
-        categoryId: "wardrobes",
-        title: "Модульная структура",
-        description: "Удобные секции и остров создают пространство премиального уровня.",
-        image: "/wardrobes/w14.jpg",
-    },
-    {
-        id: "wardrobe-15",
-        categoryId: "wardrobes",
-        title: "Натуральное дерево",
-        description: "Теплые древесные тона, подчёркнутые мягким рассеянным светом.",
-        image: "/wardrobes/w15.jpg",
-    },
-    {
-        id: "wardrobe-16",
-        categoryId: "wardrobes",
-        title: "Просторная классика",
-        description: "Элегантная гардеробная с зеркалом и мягким ковром для уюта.",
-        image: "/wardrobes/w16.jpg",
-    },
-    {
-        id: "wardrobe-17",
-        categoryId: "wardrobes",
-        title: "Премиум-свет",
-        description: "Если вам важна эстетика — подсветка в этом шкафу делает вещи экспонатами.",
-        image: "/wardrobes/w17.jpg",
-    },
-    {
-        id: "wardrobe-18",
-        categoryId: "wardrobes",
-        title: "Стильный коридор",
-        description: "Длинная геометричная гардеробная с зеркальными дверцами и идеальной симметрией.",
-        image: "/wardrobes/w18.jpg",
-    },
-    {
-        id: "wardrobe-19",
-        categoryId: "wardrobes",
-        title: "Домашкое ателье",
-        description: "Просторная комната для одежды, аксессуаров и примерок.",
-        image: "/wardrobes/w19.jpg",
-    },
-    {
-        id: "wardrobe-20",
-        categoryId: "wardrobes",
-        title: "Зеркальный шкаф",
-        description: "Стильный шкаф с подсветкой, который освежает и расширяет пространство.",
-        image: "/wardrobes/w20.jpg",
-    },
-    {
-        id: "wardrobe-21",
-        categoryId: "wardrobes",
-        title: "Тонкие линии",
-        description: "Аккуратная гардеробная в спокойных оттенках с продуманной организацией.",
-        image: "/wardrobes/w21.jpg",
-    },
+  {
+    id: "wardrobe-3",
+    categoryId: "wardrobes",
+    title: "Премиальная организация",
+    description:
+      "Гардеробная с максимальным удобством: продуманная компоновка, комфортная зона хранения и премиальные материалы.",
+    image: "/wardrobes/w11.jpg",
+  },
 
-    // w22–w31
-    {
-        id: "wardrobe-22",
-        categoryId: "wardrobes",
-        title: "Изящные фасады",
-        description: "Стильная комбинация стекла и дерева для современного интерьера.",
-        image: "/wardrobes/w22.jpg",
-    },
-    {
-        id: "wardrobe-23",
-        categoryId: "wardrobes",
-        title: "Мягкая классика",
-        description: "Комната с мягким освещением и уютным островом для сидения.",
-        image: "/wardrobes/w23.jpg",
-    },
-    {
-        id: "wardrobe-24",
-        categoryId: "wardrobes",
-        title: "Премиальный шкаф",
-        description: "Впечатляющая система хранения со световыми акцентами.",
-        image: "/wardrobes/w24.jpg",
-    },
-    {
-        id: "wardrobe-25",
-        categoryId: "wardrobes",
-        title: "Комната со световым потолком",
-        description: "Много воздуха, прямые линии и красивый световой короб.",
-        image: "/wardrobes/w25.jpg",
-    },
-    {
-        id: "wardrobe-26",
-        categoryId: "wardrobes",
-        title: "Дымчатое стекло",
-        description: "Большой шкаф с глубокими оттенками и стильной подсветкой.",
-        image: "/wardrobes/w26.jpg",
-    },
-    {
-        id: "wardrobe-27",
-        categoryId: "wardrobes",
-        title: "Гармония симметрии",
-        description: "Стильное решение с организованными секциями и зеркалами.",
-        image: "/wardrobes/w27.jpg",
-    },
-    {
-        id: "wardrobe-28",
-        categoryId: "wardrobes",
-        title: "Гардеробная-бутик",
-        description: "Эстетичное пространство с витринным светом для одежды и аксессуаров.",
-        image: "/wardrobes/w28.jpg",
-    },
-    {
-        id: "wardrobe-29",
-        categoryId: "wardrobes",
-        title: "Лаконичный дизайн",
-        description: "Большие объёмы хранения и сдержанная цветовая палитра.",
-        image: "/wardrobes/w29.jpg",
-    },
-    {
-        id: "wardrobe-30",
-        categoryId: "wardrobes",
-        title: "Светлая геометрия",
-        description: "Чёткая архитектура пространства и мягкое встроенное освещение.",
-        image: "/wardrobes/w30.jpg",
-    },
-    {
-        id: "wardrobe-31",
-        categoryId: "wardrobes",
-        title: "Бутік-классика",
-        description: "Роскошная гардеробная с акцентами и эффектной подсветкой.",
-        image: "/wardrobes/w31.jpg",
-    },
+  {
+    id: "wardrobe-4",
+    categoryId: "wardrobes",
+    title: "Тёплая классика",
+    description:
+      "Уютная древесная палитра, строгие линии и тёплая атмосфера для стильной современной квартиры.",
+    image: "/wardrobes/w12.jpg",
+  },
 
-    // w32–w42
-    {
-        id: "wardrobe-32",
-        categoryId: "wardrobes",
-        title: "Матовая элегантность",
-        description: "Благородные фасады с сочетанием стекла и встроенного света.",
-        image: "/wardrobes/w32.jpg",
-    },
-    {
-        id: "wardrobe-33",
-        categoryId: "wardrobes",
-        title: "Современный коридор",
-        description: "Чистые линии и премиальная атмосфера в каждом сантиметре.",
-        image: "/wardrobes/w33.jpg",
-    },
-    {
-        id: "wardrobe-34",
-        categoryId: "wardrobes",
-        title: "Тёплый минимализм",
-        description: "Удобные элементы хранения в натуральной деревянной отделке.",
-        image: "/wardrobes/w34.jpg",
-    },
-    {
-        id: "wardrobe-35",
-        categoryId: "wardrobes",
-        title: "Эффектная панель",
-        description: "Стильное решение с мощной световой линией и стеклянными фасадами.",
-        image: "/wardrobes/w35.jpg",
-    },
-    {
-        id: "wardrobe-36",
-        categoryId: "wardrobes",
-        title: "Чистая структура",
-        description: "Комбинация стекла, дерева и тёплой подсветки.",
-        image: "/wardrobes/w36.jpg",
-    },
-    {
-        id: "wardrobe-37",
-        categoryId: "wardrobes",
-        title: "Тёплые секции",
-        description: "Гардеробная со встроенными световыми блоками и удобными зонами.",
-        image: "/wardrobes/w37.jpg",
-    },
-    {
-        id: "wardrobe-38",
-        categoryId: "wardrobes",
-        title: "Стильная ниша",
-        description: "Рациональное решение с большим количеством закрытых секций.",
-        image: "/wardrobes/w38.jpg",
-    },
-    {
-        id: "wardrobe-39",
-        categoryId: "wardrobes",
-        title: "Нежный свет",
-        description: "Большое зеркало, уютная атмосфера и ненавязчивая подсветка.",
-        image: "/wardrobes/w39.jpg",
-    },
-    {
-        id: "wardrobe-40",
-        categoryId: "wardrobes",
-        title: "Тёплый премиум",
-        description: "Светлый, элегантный шкаф, подчеркивающий статус и стиль.",
-        image: "/wardrobes/w40.jpg",
-    },
-    {
-        id: "wardrobe-41",
-        categoryId: "wardrobes",
-        title: "Организованное пространство",
-        description: "Всё на своём месте — удобная планировка для вашей одежды.",
-        image: "/wardrobes/w41.jpg",
-    },
-    {
-        id: "wardrobe-42",
-        categoryId: "wardrobes",
-        title: "Тонкая премиальность",
-        description: "Лаконичный шкаф с подсветкой и акцентной геометрией.",
-        image: "/wardrobes/w42.jpg",
-    },
-
-    // w43–w44
-    {
-        id: "wardrobe-43",
-        categoryId: "wardrobes",
-        title: "Гардеробная-галерея",
-        description: "Стильные секции с мягким светом — как выставочное пространство.",
-        image: "/wardrobes/w43.jpg",
-    },
-    {
-        id: "wardrobe-44",
-        categoryId: "wardrobes",
-        title: "Спокойный беж",
-        description: "Эстетичная гардеробная с идеальной организацией хранения.",
-        image: "/wardrobes/w44.jpg",
-    },
-
+  {
+    id: "wardrobe-5",
+    categoryId: "wardrobes",
+    title: "Продуманный стиль",
+    description:
+      "Решение для тех, кто ценит эргономику. Каждая деталь на своём месте — компактно и удобно.",
+    image: "/wardrobes/w13.jpg",
+  },
 ];
