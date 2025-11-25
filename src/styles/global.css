@@ -1219,3 +1219,38 @@ body .support-bubble {
     max-width: none;
   }
   }
+/* КАТЕГОРИИ КАТАЛОГА (верхний уровень) */
+.catalog-category-card__image-wrap {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 24px;        /* под твой дизайн */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #151515;        /* фон, если картинка другой пропорции */
+}
+
+.catalog-category-card__img {
+  display: block;
+  width: 100%;
+  height: auto;               /* главное — не фиксировать высоту */
+  object-fit: cover;          /* можно заменить на contain, если хочешь видеть картинку целиком */
+}
+
+/* КАРТОЧКИ ИДЕЙ ВНУТРИ КАТЕГОРИИ */
+.catalog-item-card__image-wrap {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #151515;
+}
+
+.catalog-item-card__img {
+  display: block;
+  width: 100%;
+  height: auto;               /* перезаписывает height: 100% / 260px и т.п. */
+  object-fit: contain;        /* для прихожих — вся картинка без обрезки */
+}
