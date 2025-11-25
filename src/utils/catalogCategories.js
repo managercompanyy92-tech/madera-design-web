@@ -1,6 +1,6 @@
 // src/utils/catalogCategories.js
 
-const catalogCategories = [
+export const catalogCategories = [
   {
     id: "kitchens",
     name: "Кухни",
@@ -45,4 +45,4 @@ const catalogCategories = [
   },
 ];
 
-
+export default catalogCategories;
