@@ -1492,8 +1492,6 @@ export const catalogItems = [
       "Лаконичная консоль, вертикальная панель и подсветка по контуру стен делают даже небольшую прихожую визуально объёмной и уютной.",
     image: "/public/hallways/h37.jpg",
   },
-  // src/data/kids.js
-const kids = [
   {
     id: 1,
     slug: "k1",
