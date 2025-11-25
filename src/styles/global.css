@@ -1275,4 +1275,29 @@ body .support-bubble {
   height: auto !important;
   max-height: none !important;
   object-fit: contain !important; /* картинка полностью, без обрезки */
+  /* === FIX КАРТИНОК КАТАЛОГА БЕЗ ИСКАЖЕНИЙ === */
+
+/* Обёртки для всех картинок каталога (категории + идеи) */
+.catalog-category-card__image-wrap,
+.catalog-item-card__image-wrap {
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+  display: block !important;
 }
+
+/* Сами изображения во всех карточках (кухни, спальни, гардеробные, прихожие и т.д.) */
+.catalog-category-card__image-wrap img,
+.catalog-item-card__image-wrap img,
+.catalog-category-card__img,
+.catalog-item-card__img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important; /* показываем картинку целиком */
+}
+
