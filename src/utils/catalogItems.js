@@ -1865,7 +1865,3 @@ const kids = [
     tags: ["на двоих", "учеба", "витрины"]
   }
 ];
-
-export default kids;
-];
-
