@@ -4,31 +4,31 @@ export const catalogCategories = [
   {
     id: "kitchens",
     title: "Кухни",
-    image: "https://via.placeholder.com/800x500?text=%D0%9A%D1%83%D1%85%D0%BD%D0%B8"
+    image: "/kitchens/k1.jpg", // превью категории "Кухни"
   },
   {
     id: "bedrooms",
     title: "Спальни",
-    image: "https://via.placeholder.com/800x500?text=%D0%A1%D0%BF%D0%B0%D0%BB%D1%8C%D0%BD%D0%B8"
+    image: "/bedrooms/b1.jpg", // превью категории "Спальни"
   },
   {
-    id: "living",
+    id: "livingrooms",
     title: "Гостиные",
-    image: "https://via.placeholder.com/800x500?text=%D0%93%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D1%8B%D0%B5"
+    image: "/livingrooms/l1.jpg", // превью категории "Гостиные"
   },
   {
     id: "wardrobes",
     title: "Гардеробные",
-    image: "https://via.placeholder.com/800x500?text=%D0%93%D0%B0%D1%80%D0%B4%D0%B5%D1%80%D0%BE%D0%B1%D0%BD%D1%8B%D0%B5"
+    image: "/wardrobes/w1.jpg", // превью категории "Гардеробные"
   },
   {
     id: "hallways",
     title: "Прихожие",
-    image: "https://via.placeholder.com/800x500?text=%D0%9F%D1%80%D0%B8%D1%85%D0%BE%D0%B6%D0%B8%D0%B5"
+    image: "/hallways/h1.jpg", // превью категории "Прихожие"
   },
   {
     id: "kids",
     title: "Детская мебель",
-    image: "https://via.placeholder.com/800x500?text=%D0%94%D0%B5%D1%82%D1%81%D0%BA%D0%B0%D1%8F+%D0%BC%D0%B5%D0%B1%D0%B5%D0%BB%D1%8C"
-  }
+    image: "/kids/c1.jpg", // превью категории "Детская мебель"
+  },
 ];
