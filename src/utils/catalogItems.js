@@ -354,5 +354,273 @@ export const catalogItems = [
     description:
       "Минимум деталей, максимум логики и комфорта при ежедневном использовании.",
     image: "/public/wardrobes/w44.jpg",
-  },
+  // КУХНИ (k1–k33)
+
+{
+  id: "kitchen-1",
+  categoryId: "kitchens",
+  title: "Тёмная кухня с каменным островом",
+  description:
+    "Глубокий тёмный гарнитур и монолитный остров создают атмосферу премиального ресторана дома.",
+  image: "/public/kitchens/k1.jpg",
+},
+{
+  id: "kitchen-2",
+  categoryId: "kitchens",
+  title: "Кухня-столовая для семейных ужинов",
+  description:
+    "Большой стол в центре композиции и мягкий свет — идеальное пространство для семьи и гостей.",
+  image: "/public/kitchens/k2.jpg",
+},
+{
+  id: "kitchen-3",
+  categoryId: "kitchens",
+  title: "Мраморный остров и тёплый свет",
+  description:
+    "Мраморные поверхности и контурная подсветка делают кухню центром притяжения всего интерьера.",
+  image: "/public/kitchens/k3.jpg",
+},
+{
+  id: "kitchen-4",
+  categoryId: "kitchens",
+  title: "Лаконичная кухня-стена",
+  description:
+    "Ровный фасад от стены до стены скрывает максимум хранения и технику, оставляя в кадре только чистую геометрию.",
+  image: "/public/kitchens/k4.jpg",
+},
+{
+  id: "kitchen-5",
+  categoryId: "kitchens",
+  title: "Серая кухня с видом из окна",
+  description:
+    "Спокойные серые фасады, длинный остров и панорамное окно создают настроение современного городского лофта.",
+  image: "/public/kitchens/k5.jpg",
+},
+{
+  id: "kitchen-6",
+  categoryId: "kitchens",
+  title: "Барная зона с золотыми акцентами",
+  description:
+    "Светлая кухня с изящными подвесами и металлическими деталями — для быстрых завтраков и вечернего бокала вина.",
+  image: "/public/kitchens/k6.jpg",
+},
+{
+  id: "kitchen-7",
+  categoryId: "kitchens",
+  title: "Тёплое дерево и мягкий свет",
+  description:
+    "Деревянные фасады и мягкая подсветка делают пространство живым, тактильным и очень домашним.",
+  image: "/public/kitchens/k7.jpg",
+},
+{
+  id: "kitchen-8",
+  categoryId: "kitchens",
+  title: "Светлые витрины и подвесы",
+  description:
+    "Стеклянные витрины, вертикальные рёбра и воздушные светильники создают интерьер уровня дизайн-журнала.",
+  image: "/public/kitchens/k8.jpg",
+},
+{
+  id: "kitchen-9",
+  categoryId: "kitchens",
+  title: "Натуральная кухня для спокойной жизни",
+  description:
+    "Тёплые древесные оттенки и мягкий свет формируют атмосферу спа даже в рабочей зоне.",
+  image: "/public/kitchens/k9.jpg",
+},
+{
+  id: "kitchen-10",
+  categoryId: "kitchens",
+  title: "Кухня с каменной панелью",
+  description:
+    "Крупный каменный рисунок на острове и фартуке — выразительный акцент в лаконичном пространстве.",
+  image: "/public/kitchens/k10.jpg",
+},
+
+{
+  id: "kitchen-11",
+  categoryId: "kitchens",
+  title: "Мраморный остров и шарообразные светильники",
+  description:
+    "Гладкие фасады и крупные подвесы создают ощущение галерейного пространства на вашей кухне.",
+  image: "/public/kitchens/k11.jpg",
+},
+{
+  id: "kitchen-12",
+  categoryId: "kitchens",
+  title: "Спокойная кухня с рифлёным островом",
+  description:
+    "Тёплые оттенки и рельефная панель острова добавляют интерьеру глубину и характер.",
+  image: "/public/kitchens/k12.jpg",
+},
+{
+  id: "kitchen-13",
+  categoryId: "kitchens",
+  title: "Камень и дерево в одном объёме",
+  description:
+    "Массивный каменный остров и деревянные панели создают монолитный, премиальный образ кухни.",
+  image: "/public/kitchens/k13.jpg",
+},
+{
+  id: "kitchen-14",
+  categoryId: "kitchens",
+  title: "Глянцевая светлая кухня",
+  description:
+    "Белые фасады и деревянная столешница визуально расширяют пространство и добавляют тепла.",
+  image: "/public/kitchens/k14.jpg",
+},
+{
+  id: "kitchen-15",
+  categoryId: "kitchens",
+  title: "Галерейная кухня с длинной линией",
+  description:
+    "Параллельные ряды шкафов дают максимум хранения и идеальную эргономику для тех, кто много готовит.",
+  image: "/public/kitchens/k15.jpg",
+},
+{
+  id: "kitchen-16",
+  categoryId: "kitchens",
+  title: "Подсветка по периметру",
+  description:
+    "Световые линии по низу шкафов и потолку создают эффект «парящих» объёмов и атмосферу современного лофта.",
+  image: "/public/kitchens/k16.jpg",
+},
+{
+  id: "kitchen-17",
+  categoryId: "kitchens",
+  title: "Текстурные фасады и светлый объём",
+  description:
+    "Рельефные вертикальные панели и мягкий оттенок фасадов придают кухне архитектурность и стиль.",
+  image: "/public/kitchens/k17.jpg",
+},
+{
+  id: "kitchen-18",
+  categoryId: "kitchens",
+  title: "Двухцветная кухня с островом",
+  description:
+    "Контраст верхних и нижних модулей подчёркивает геометрию, а остров объединяет кухню и гостиную.",
+  image: "/public/kitchens/k18.jpg",
+},
+{
+  id: "kitchen-19",
+  categoryId: "kitchens",
+  title: "Тёмный акцент в светлом пространстве",
+  description:
+    "Тёмные фасады в комбинации со светлой отделкой создают камерную, но не тяжёлую атмосферу.",
+  image: "/public/kitchens/k19.jpg",
+},
+{
+  id: "kitchen-20",
+  categoryId: "kitchens",
+  title: "Кухня с графичными светильниками",
+  description:
+    "Ряд идентичных подвесов над островом задаёт ритм и собирает весь интерьер в единую композицию.",
+  image: "/public/kitchens/k20.jpg",
+},
+
+{
+  id: "kitchen-21",
+  categoryId: "kitchens",
+  title: "Натуральная кухня с широким островом",
+  description:
+    "Широкий остров и открытые полки делают кухню удобной и для готовки, и для неформальных встреч.",
+  image: "/public/kitchens/k21.jpg",
+},
+{
+  id: "kitchen-22",
+  categoryId: "kitchens",
+  title: "Элегантная кухня с мягкими формами",
+  description:
+    "Скруглённые элементы и изящные стулья создают ощущение мягкой, обволакивающей роскоши.",
+  image: "/public/kitchens/k22.jpg",
+},
+{
+  id: "kitchen-23",
+  categoryId: "kitchens",
+  title: "Белый минимализм",
+  description:
+    "Ровные белые фасады и скрытые ручки растворяют кухню в пространстве и дают максимум визуального покоя.",
+  image: "/public/kitchens/k23.jpg",
+},
+{
+  id: "kitchen-24",
+  categoryId: "kitchens",
+  title: "Графичная кухня с серыми фасадами",
+  description:
+    "Контраст серых фасадов и светлого камня создаёт строгий, но очень стильный образ.",
+  image: "/public/kitchens/k24.jpg",
+},
+{
+  id: "kitchen-25",
+  categoryId: "kitchens",
+  title: "Кухня со световым периметром",
+  description:
+    "Подсветка по периметру потолка и мебели превращает кухню в интерьер уровня бутик-отеля.",
+  image: "/public/kitchens/k25.jpg",
+},
+{
+  id: "kitchen-26",
+  categoryId: "kitchens",
+  title: "Тёплая кухня с островом",
+  description:
+    "Выраженная текстура дерева и массивный остров создают уютное пространство для семейных ужинов.",
+  image: "/public/kitchens/k26.jpg",
+},
+{
+  id: "kitchen-27",
+  categoryId: "kitchens",
+  title: "Мраморный фартук и изящные подвесы",
+  description:
+    "Светлый камень и лёгкие светильники добавляют неоклассический шарм в современный интерьер.",
+  image: "/public/kitchens/k27.jpg",
+},
+{
+  id: "kitchen-28",
+  categoryId: "kitchens",
+  title: "Компактная угловая кухня",
+  description:
+    "Продуманная угловая планировка и барная стойка позволяют получить полноценную кухню даже в небольшом пространстве.",
+  image: "/public/kitchens/k28.jpg",
+},
+{
+  id: "kitchen-29",
+  categoryId: "kitchens",
+  title: "Высокие фасады до потолка",
+  description:
+    "Вертикальные линии и высокие шкафы визуально вытягивают помещение и дают максимум хранения.",
+  image: "/public/kitchens/k29.jpg",
+},
+{
+  id: "kitchen-30",
+  categoryId: "kitchens",
+  title: "Светлая кухня с крупными подвесами",
+  description:
+    "Тёплый свет, дерево и крупные светильники создают уют и делают кухню центром дома.",
+  image: "/public/kitchens/k30.jpg",
+},
+
+{
+  id: "kitchen-31",
+  categoryId: "kitchens",
+  title: "Компактная кухня с яркими стульями",
+  description:
+    "Небольшая, но продуманная кухня, где цвет стульев добавляет характер и настроение.",
+  image: "/public/kitchens/k31.jpg",
+},
+{
+  id: "kitchen-32",
+  categoryId: "kitchens",
+  title: "Камень и дерево в атмосферном интерьере",
+  description:
+    "Крупный каменный рисунок и тёмные плоскости создают настроение пентхауса и дизайнерского проекта.",
+  image: "/public/kitchens/k32.jpg",
+},
+{
+  id: "kitchen-33",
+  categoryId: "kitchens",
+  title: "Линейная кухня с длинным островом",
+  description:
+    "Длинный остров и строгие линии превращают эту кухню в сцену для кулинарных шоу и приёмов гостей.",
+  image: "/public/kitchens/k33.jpg",
+},
 ];
