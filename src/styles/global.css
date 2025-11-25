@@ -1300,12 +1300,23 @@ body .support-bubble {
   max-height: none !important;
   object-fit: contain !important; /* показываем картинку целиком */
 }
-/* === FINAL FIX: КАРТИНКИ КАТАЛОГА БЕЗ ИСКАЖЕНИЙ === */
+/* === SUPER FINAL FIX: картинки каталога без искажений и обрезаний === */
 
-/* Обёртки всех картинок каталога (категории + карточки идей) */
+/* Карточки целиком – отключаем фиксированную высоту и обрезку */
+.catalog-category-card,
+.catalog-item-card {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Обёртки всех картинок (категорий и идей) */
 .catalog-category-card__image-wrap,
 .catalog-item-card__image-wrap {
   width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+
   padding: 0 !important;
   margin: 0 !important;
 
@@ -1316,18 +1327,20 @@ body .support-bubble {
   display: block !important;
 }
 
-/* Сами изображения во всех карточках каталога */
+/* Сами изображения во всех карточках */
 .catalog-category-card__image-wrap img,
 .catalog-item-card__image-wrap img,
 .catalog-category-card__img,
 .catalog-item-card__img {
   display: block !important;
 
-  width: 100% !important;
+  /* не растягиваем, а просто вписываем в ширину */
+  width: auto !important;
   max-width: 100% !important;
-  height: auto !important;          /* высота подстраивается под картинку */
-  object-fit: contain !important;   /* показываем картинку целиком, без обрезки */
+  height: auto !important;
 
+  object-fit: contain !important; /* без обрезки */
   border-radius: 24px !important;
 }
+
 
