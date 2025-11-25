@@ -45,4 +45,4 @@ const catalogCategories = [
   },
 ];
 
-export default catalogCategories;
+
