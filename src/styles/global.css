@@ -1234,7 +1234,7 @@ body .support-bubble {
   display: block;
   width: 100%;
   height: auto;               /* главное — не фиксировать высоту */
-  object-fit: cover;          /* можно заменить на contain, если хочешь видеть картинку целиком */
+  object-fit: contain;          /* показываем картинку целиком */
 }
 
 /* КАРТОЧКИ ИДЕЙ ВНУТРИ КАТЕГОРИИ */
