@@ -1,34 +1,48 @@
 // src/utils/catalogCategories.js
 
-export const catalogCategories = [
+const catalogCategories = [
   {
     id: "kitchens",
-    title: "Кухни",
-    image: "/kitchens/k1.jpg", // превью категории "Кухни"
-  },
-  {
-    id: "bedrooms",
-    title: "Спальни",
-    image: "/bedrooms/b1.jpg", // превью категории "Спальни"
-  },
-  {
-    id: "livingrooms",
-    title: "Гостиные",
-    image: "/livingrooms/l1.jpg", // превью категории "Гостиные"
+    name: "Кухни",
+    cover: "/public/catalog/cat-kitchens.jpg",
+    tagline: "Современные кухни под заказ",
+    statsLabel: "33 проекта"
   },
   {
     id: "wardrobes",
-    title: "Гардеробные",
-    image: "/wardrobes/w1.jpg", // превью категории "Гардеробные"
+    name: "Гардеробные",
+    cover: "/public/catalog/cat-wardrobes.jpg",
+    tagline: "Функциональные гардеробные любой сложности",
+    statsLabel: "44 проекта"
+  },
+  {
+    id: "bedrooms",
+    name: "Спальни",
+    cover: "/public/catalog/cat-bedrooms.jpg",
+    tagline: "Комфортные и атмосферные спальные зоны",
+    statsLabel: "38 проектов"
+  },
+  {
+    id: "livingrooms",
+    name: "Гостиные",
+    cover: "/public/catalog/cat-livingrooms.jpg",
+    tagline: "Элегантные ТВ-зоны и стеновые композиции",
+    statsLabel: "33 проекта"
   },
   {
     id: "hallways",
-    title: "Прихожие",
-    image: "/hallways/h1.jpg", // превью категории "Прихожие"
+    name: "Прихожие",
+    cover: "/public/catalog/cat-hallways.jpg",
+    tagline: "Уютные и практичные прихожие под ключ",
+    statsLabel: "37 проектов"
   },
   {
     id: "kids",
-    title: "Детская мебель",
-    image: "/kids/c1.jpg", // превью категории "Детская мебель"
-  },
+    name: "Детские",
+    cover: "/public/catalog/cat-kids.jpg",
+    tagline: "Эргономичные детские комнаты для любого возраста",
+    statsLabel: "46 проектов"
+  }
 ];
+
+export default catalogCategories;
