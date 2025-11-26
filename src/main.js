@@ -248,17 +248,6 @@ function renderCatalog() {
         Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн
         под размеры вашей квартиры и посчитаем стоимость.
       </p>
-
-      <div class="catalog-category-bridge">
-        <div class="catalog-category-bridge__text">
-          Чаще всего такие композиции занимают от 3 до 5 погонных метров. Мы принимаем заказы 
-          от 3 пог. метров и выше. Можно сразу перейти к расчёту:
-        </div>
-        <button class="btn btn--outline" data-route="order">
-          Быстрый расчёт для этой категории
-        </button>
-      </div>
-
       <div class="catalog-items-grid">
         ${
           itemCards ||
