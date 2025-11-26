@@ -78,35 +78,76 @@ function renderHome() {
     </section>
   `;
 }
-// Первый уровень: категории
+
+/* ------------------------ КАТАЛОГ: КАТЕГОРИИ + ИДЕИ ------------------------ */
+
+function renderCatalog() {
+  // Первый уровень: только категории (сеткой)
   if (!selectedCatalogCategoryId) {
+    const cards = catalogCategories
+      .map(
+        (cat) => `
+          <button class="catalog-category-card" data-category-id="${cat.id}">
+            <div class="catalog-category-card__image-wrap">
+              <img
+                src="${cat.image || cat.cover}"
+                alt="${cat.title || cat.name}"
+                class="catalog-category-card__img"
+              />
+              <div class="catalog-category-card__icon">&rsaquo;</div>
+            </div>
+            <div class="catalog-category-card__title">
+              ${cat.title || cat.name}
+            </div>
+            <div class="catalog-category-card__meta">
+              ${
+                cat.tagline
+                  ? `<div class="catalog-category-card__tagline">${cat.tagline}</div>`
+                  : ""
+              }
+              ${
+                cat.statsLabel
+                  ? `<div class="catalog-category-card__stats">${cat.statsLabel}</div>`
+                  : ""
+              }
+            </div>
+          </button>
+        `
+      )
+      .join("");
+
     return `
       <section class="page page--catalog">
-        <h1 class="page__title">ТЕСТОВЫЙ КАТАЛОГ</h1>
-        <p class="page__subtitle">Если ты видишь этот текст — работает renderCatalog.</p>
+        <h1 class="page__title">Каталог мебели</h1>
+        <p class="page__subtitle">
+          Выберите категорию — дальше покажем вдохновляющие идеи, а затем поможем посчитать стоимость и оформить заказ.
+        </p>
 
-        <div class="test-grid">
-          <div class="test-grid__item">1</div>
-          <div class="test-grid__item">2</div>
-          <div class="test-grid__item">3</div>
-          <div class="test-grid__item">4</div>
-          <div class="test-grid__item">5</div>
-          <div class="test-grid__item">6</div>
+        <div class="catalog-categories-grid">
+          ${cards}
         </div>
       </section>
     `;
   }
 
-  // Второй уровень: идеи внутри категории
-  const category = catalogCategories.find((cat) => cat.id === selectedCatalogCategoryId);
-  const items = catalogItems.filter((item) => item.categoryId === selectedCatalogCategoryId);
+  // Второй уровень: идеи внутри выбранной категории
+  const category = catalogCategories.find(
+    (cat) => cat.id === selectedCatalogCategoryId
+  );
+  const items = catalogItems.filter(
+    (item) => item.categoryId === selectedCatalogCategoryId
+  );
 
   const itemCards = items
     .map(
       (item) => `
         <div class="catalog-item-card">
           <div class="catalog-item-card__image-wrap">
-            <img src="${item.image}" alt="${item.title}" class="catalog-item-card__img" />
+            <img
+              src="${item.image}"
+              alt="${item.title}"
+              class="catalog-item-card__img"
+            />
           </div>
           <div class="catalog-item-card__info">
             <div class="catalog-item-card__title">${item.title}</div>
@@ -126,7 +167,9 @@ function renderHome() {
         ← Все категории
       </button>
 
-      <h1 class="page__title">${category ? category.title : "Категория"}</h1>
+      <h1 class="page__title">${
+        category ? category.title || category.name : "Категория"
+      }</h1>
       <p class="page__subtitle">
         Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн под размеры
         вашей квартиры и посчитаем стоимость.
@@ -141,6 +184,8 @@ function renderHome() {
     </section>
   `;
 }
+
+/* ----------------------------- ЗАКАЗ / КАЛЬКУЛЯТОР ----------------------------- */
 
 function renderOrder() {
   return `
