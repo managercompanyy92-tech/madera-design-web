@@ -1,11 +1,7 @@
 // src/main.js
 
-// ---------------------------------------------------------------------------
-//  ДАННЫЕ КАТАЛОГА
-// ---------------------------------------------------------------------------
-
-import catalogCategories from "./data/catalogCategories.js";
-import catalogItems from "./data/catalogItems.js";
+import { catalogCategories } from "./utils/catalogCategories.js";
+import { catalogItems } from "./utils/catalogItems.js";
 
 // Тарифы за погонный метр (сомони)
 const BASE_RATES = {
@@ -13,46 +9,18 @@ const BASE_RATES = {
   premium: 5000,
 };
 
+const STORAGE_KEYS = {
+  route: "madera_current_route",
+  catalogCategory: "madera_catalog_category",
+};
+
 const appRoot = document.getElementById("app");
-let selectedCatalogCategoryId = null;
+let selectedCatalogCategoryId =
+  localStorage.getItem(STORAGE_KEYS.catalogCategory) || null;
 
-// ---------------------------------------------------------------------------
-//  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РОУТИНГА
-// ---------------------------------------------------------------------------
-
-const ROUTE_KEY = "madera-current-route";
-
-function getInitialRoute() {
-  // 1) Пытаемся взять из hash: #home / #catalog / #order / #profile / #more
-  const hash = window.location.hash.replace("#", "");
-  if (hash && VIEWS[hash]) {
-    return hash;
-  }
-
-  // 2) Или берём из localStorage
-  const stored = window.localStorage.getItem(ROUTE_KEY);
-  if (stored && VIEWS[stored]) {
-    return stored;
-  }
-
-  // 3) По умолчанию — главная
-  return "home";
-}
-
-function persistRoute(route) {
-  try {
-    window.localStorage.setItem(ROUTE_KEY, route);
-  } catch (e) {
-    // Игнорируем ошибки localStorage
-  }
-  if (window.location.hash.replace("#", "") !== route) {
-    window.location.hash = route;
-  }
-}
-
-// ---------------------------------------------------------------------------
-//  VIEW-ФУНКЦИИ
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*                                   VIEW                                     */
+/* -------------------------------------------------------------------------- */
 
 function renderHome() {
   return `
@@ -63,8 +31,8 @@ function renderHome() {
             Современная корпусная мебель на заказ в Душанбе
           </h1>
           <p class="hero__subtitle">
-            Премиальный сервис, дизайн с поддержкой искусственного интеллекта, онлайн-калькулятор стоимости
-            и прозрачный статус заказа на каждом этапе.
+            Премиальный сервис, дизайн с поддержкой искусственного интеллекта,
+            онлайн-калькулятор стоимости и прозрачный статус заказа на каждом этапе.
           </p>
           <div class="hero__actions">
             <button class="btn btn--primary" data-route="order">
@@ -93,89 +61,87 @@ function renderHome() {
       </div>
 
       <section class="highlights">
-        <article class="highlights__item">
-          <h2 class="highlights__title">Премиальный тёмный дизайн</h2>
+        <div class="highlights__item">
+          <div class="highlights__title">Премиальный тёмный дизайн</div>
           <p class="highlights__text">
             Фирменная палитра: глубокий графит и благородный оранжевый (#E97A00).
             Интерфейс, который сразу транслирует уровень бренда.
           </p>
-        </article>
-        <article class="highlights__item">
-          <h2 class="highlights__title">Цифровая воронка продаж</h2>
+        </div>
+        <div class="highlights__item">
+          <div class="highlights__title">Цифровая воронка продаж</div>
           <p class="highlights__text">
             От вдохновения до оплаты: каталог, калькулятор, онлайн-заказ, кредиты,
             партнёрская программа — всё в одном веб-приложении.
           </p>
-        </article>
-        <article class="highlights__item">
-          <h2 class="highlights__title">Сделано для Душанбе</h2>
+        </div>
+        <div class="highlights__item">
+          <div class="highlights__title">Сделано для Душанбе</div>
           <p class="highlights__text">
             Локальный бренд, локальное производство, адаптация под реальные квартиры
             и запросы клиентов Душанбе.
           </p>
-        </article>
+        </div>
       </section>
     </section>
   `;
 }
 
-// ---------------------------------------------------------------------------
-//  КАТАЛОГ
-// ---------------------------------------------------------------------------
+/* ------------------------------ КАТАЛОГ ----------------------------------- */
 
 function renderCatalog() {
-  // ---------------------- Верхний уровень: только категории ----------------
+  // Если категория не выбрана — показываем квиз + список категорий
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
       .map(
         (cat) => `
-        <button
-          class="catalog-category-card"
-          data-category-id="${cat.id}"
-        >
-          <div class="catalog-category-card__image-wrap">
-            <img
-              src="${cat.cover || cat.image || ""}"
-              alt="${cat.name || cat.title || ""}"
-              class="catalog-category-card__img"
-            />
-          </div>
-
-          <div class="catalog-category-card__bottom">
-            <div class="catalog-category-card__title">
-              ${cat.name || cat.title || ""}
+          <button
+            class="catalog-category-card"
+            data-category-id="${cat.id}"
+          >
+            <div class="catalog-category-card__image-wrap">
+              <img
+                src="${cat.cover || cat.image || ""}"
+                alt="${cat.name || cat.title || ""}"
+                class="catalog-category-card__img"
+              />
             </div>
-            <div class="catalog-category-card__arrow">&rsaquo;</div>
-          </div>
 
-          <div class="catalog-category-card__info">
-            ${
-              cat.tagline
-                ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
-                : ""
-            }
-            ${
-              cat.benefit
-                ? `<div class="catalog-category-benefit">${cat.benefit}</div>`
-                : ""
-            }
-            ${
-              cat.statsLabel
-                ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
-                : ""
-            }
-          </div>
+            <div class="catalog-category-card__bottom">
+              <div class="catalog-category-card__title">
+                ${cat.name || cat.title || ""}
+              </div>
+              <div class="catalog-category-card__arrow">&rsaquo;</div>
+            </div>
 
-          <div class="catalog-category-card__discount">
-            <span class="catalog-category-card__discount-badge">
-              −10% с промокодом партнёра
-            </span>
-            <span class="catalog-category-card__discount-text">
-              или −5% при заказе напрямую
-            </span>
-          </div>
-        </button>
-      `
+            <div class="catalog-category-card__info">
+              ${
+                cat.tagline
+                  ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
+                  : ""
+              }
+              ${
+                cat.benefit
+                  ? `<div class="catalog-category-benefit">${cat.benefit}</div>`
+                  : ""
+              }
+              ${
+                cat.statsLabel
+                  ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
+                  : ""
+              }
+            </div>
+
+            <div class="catalog-category-card__discount">
+              <div class="catalog-category-card__discount-badge">
+                −10% по промокоду
+              </div>
+              <div class="catalog-category-card__discount-text">
+                −5% сразу, если закажете напрямую через сайт
+              </div>
+            </div>
+          </button>
+        `
       )
       .join("");
 
@@ -205,44 +171,44 @@ function renderCatalog() {
         <div class="catalog-quiz">
           <div class="catalog-quiz__block">
             <div class="catalog-quiz__label">1. ЧТО ПЛАНИРУЕТЕ В ПЕРВУЮ ОЧЕРЕДЬ?</div>
-            <div class="catalog-quiz__buttons">
-              <button class="catalog-quiz__btn">Кухня</button>
-              <button class="catalog-quiz__btn">Гардеробная</button>
-              <button class="catalog-quiz__btn">Спальня</button>
-              <button class="catalog-quiz__btn">Детская</button>
-              <button class="catalog-quiz__btn">Прихожая</button>
-              <button class="catalog-quiz__btn">Гостиная</button>
+            <div class="catalog-quiz__options">
+              <button class="catalog-quiz__option">Кухня</button>
+              <button class="catalog-quiz__option">Гардеробная</button>
+              <button class="catalog-quiz__option">Спальня</button>
+              <button class="catalog-quiz__option">Детская</button>
+              <button class="catalog-quiz__option">Прихожая</button>
+              <button class="catalog-quiz__option">Гостиная</button>
             </div>
           </div>
 
           <div class="catalog-quiz__block">
             <div class="catalog-quiz__label">2. ЦЕЛЬ ПРОЕКТА</div>
-            <div class="catalog-quiz__buttons">
-              <button class="catalog-quiz__btn">Для себя надолго</button>
-              <button class="catalog-quiz__btn">Квартира под сдачу</button>
-              <button class="catalog-quiz__btn">Готовлю к продаже</button>
+            <div class="catalog-quiz__options">
+              <button class="catalog-quiz__option">Для себя надолго</button>
+              <button class="catalog-quiz__option">Квартира под сдачу</button>
+              <button class="catalog-quiz__option">Готовлю к продаже</button>
             </div>
           </div>
 
           <div class="catalog-quiz__block">
             <div class="catalog-quiz__label">3. ПРИМЕРНЫЙ БЮДЖЕТ НА МЕБЕЛЬ</div>
-            <div class="catalog-quiz__buttons">
-              <button class="catalog-quiz__btn">до 15&nbsp;000 сом</button>
-              <button class="catalog-quiz__btn">15–30&nbsp;000 сом</button>
-              <button class="catalog-quiz__btn">выше 30&nbsp;000 сом</button>
+            <div class="catalog-quiz__options">
+              <button class="catalog-quiz__option">до 15&nbsp;000 сом</button>
+              <button class="catalog-quiz__option">15–30&nbsp;000 сом</button>
+              <button class="catalog-quiz__option">выше 30&nbsp;000 сом</button>
             </div>
           </div>
 
           <div class="catalog-quiz__footer">
             <div class="catalog-quiz__note">
-              Даже если вы пока «просто смотрите идеи», квиз помогает подобрать
-              более точные сценарии под вашу ситуацию.
+              Даже если вы пока «просто смотрите идеи», квиз помогает
+              подобрать более точные сценарии под вашу ситуацию.
             </div>
-            <div class="catalog-quiz__actions">
-              <button class="btn btn--outline" data-route="order">
+            <div class="catalog-quiz__buttons">
+              <button class="btn btn--primary" data-route="order">
                 Перейти к быстрому расчёту
               </button>
-              <button class="btn btn--ghost" data-madera-chat-open>
+              <button class="btn btn--outline" data-route="order">
                 Спросить AI-дизайнера, с чего начать
               </button>
             </div>
@@ -258,7 +224,7 @@ function renderCatalog() {
     `;
   }
 
-  // ------------------ Второй уровень: идеи внутри выбранной категории ------
+  // Второй уровень: внутри выбранной категории
   const category = catalogCategories.find(
     (cat) => cat.id === selectedCatalogCategoryId
   );
@@ -269,28 +235,23 @@ function renderCatalog() {
   const itemCards = items
     .map(
       (item) => `
-      <div class="catalog-item-card">
-        <div class="catalog-item-card__image-wrap">
-          <img
-            src="${item.image || ""}"
-            alt="${item.title || ""}"
-            class="catalog-item-card__img"
-          />
-        </div>
-        <div class="catalog-item-card__info">
-          <div class="catalog-item-card__title">${item.title || ""}</div>
-          <div class="catalog-item-card__desc">
-            ${item.description || ""}
+        <div class="catalog-item-card">
+          <div class="catalog-item-card__image-wrap">
+            <img
+              src="${item.image}"
+              alt="${item.title}"
+              class="catalog-item-card__img"
+            />
           </div>
-          <button
-            class="btn btn--primary catalog-item-card__btn"
-            data-route="order"
-          >
-            Рассчитать стоимость
-          </button>
+          <div class="catalog-item-card__info">
+            <div class="catalog-item-card__title">${item.title}</div>
+            <div class="catalog-item-card__desc">${item.description}</div>
+            <button class="btn btn--primary catalog-item-card__btn" data-route="order">
+              Рассчитать стоимость
+            </button>
+          </div>
         </div>
-      </div>
-    `
+      `
     )
     .join("");
 
@@ -300,14 +261,27 @@ function renderCatalog() {
         ← Все категории
       </button>
 
-      <h1 class="page__title">
-        ${category ? category.name || category.title : "Категория мебели"}
-      </h1>
+      <h1 class="page__title">${category ? category.name : "Категория"}</h1>
       <p class="page__subtitle">
-        Подборка идей для вашего интерьера. Мы только запускаем сервис,
-        поэтому сейчас показываем демонстрационные сценарии — на встрече
-        адаптируем их под планировку вашей квартиры и бюджет.
+        Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн
+        под размеры вашей квартиры и посчитаем стоимость.
       </p>
+
+      <div class="catalog-ideas-note">
+        <div class="catalog-ideas-note__title">
+          Эти визуализации — маркетинговые концепции
+        </div>
+        <p class="catalog-ideas-note__text">
+          Сейчас мы запускаем сервис Madera Design и показываем вам тщательно отобранные
+          сценарии и визуализации, которые демонстрируют <strong>уровень дизайна и подход к планировке</strong>.
+          Реальные реализованные объекты клиентов будут добавляться по мере выполнения проектов.
+        </p>
+        <p class="catalog-ideas-note__text">
+          Для вашего заказа мы создадим <strong>персональный проект под размеры квартиры</strong>,
+          поможем выбрать материалы и учтём бытовые привычки семьи. Именно этот проект и станет
+          основой договора и производства.
+        </p>
+      </div>
 
       <div class="catalog-items-grid">
         ${
@@ -319,9 +293,7 @@ function renderCatalog() {
   `;
 }
 
-// ---------------------------------------------------------------------------
-//  РАЗДЕЛ ЗАКАЗА
-// ---------------------------------------------------------------------------
+/* --------------------------- РАЗДЕЛ ЗАКАЗА -------------------------------- */
 
 function renderOrder() {
   return `
@@ -334,7 +306,6 @@ function renderOrder() {
       </p>
 
       <div class="order-layout">
-        <!-- Левая колонка: калькулятор + форма -->
         <div>
           <div class="order-calc">
             <div class="order-calc__header">
@@ -365,12 +336,7 @@ function renderOrder() {
               <div class="order-calc__label">Материал и тариф</div>
               <div class="order-calc__tariffs">
                 <label class="order-calc-tariff">
-                  <input
-                    type="radio"
-                    name="tariff"
-                    value="standard"
-                    checked
-                  />
+                  <input type="radio" name="tariff" value="standard" checked />
                   <span class="order-calc-tariff__body">
                     <span class="order-calc-tariff__name">Стандарт</span>
                     <span class="order-calc-tariff__price">
@@ -383,11 +349,7 @@ function renderOrder() {
                 </label>
 
                 <label class="order-calc-tariff">
-                  <input
-                    type="radio"
-                    name="tariff"
-                    value="premium"
-                  />
+                  <input type="radio" name="tariff" value="premium" />
                   <span class="order-calc-tariff__body">
                     <span class="order-calc-tariff__name">Премиум</span>
                     <span class="order-calc-tariff__price">
@@ -407,8 +369,8 @@ function renderOrder() {
                 Рассчитать стоимость
               </button>
               <div class="order-calc__note">
-                Расчёт предварительный и не учитывает сложные формы,
-                встроенную технику и нестандартные решения.
+                Расчёт предварительный и не учитывает сложные формы, встроенную технику
+                и нестандартные решения.
               </div>
             </div>
 
@@ -417,7 +379,6 @@ function renderOrder() {
             </div>
           </div>
 
-          <!-- Форма заявки -->
           <div class="order-form">
             <div class="order-form__header">
               <div class="order-form__title">Заявка на замер и расчёт</div>
@@ -463,7 +424,7 @@ function renderOrder() {
                   <option value="">Выберите категорию</option>
                   <option value="kitchens">Кухни</option>
                   <option value="bedrooms">Спальни</option>
-                  <option value="livingrooms">Гостиные</option>
+                  <option value="living">Гостиные</option>
                   <option value="wardrobes">Гардеробные</option>
                   <option value="hallways">Прихожие</option>
                   <option value="kids">Детская мебель</option>
@@ -547,7 +508,6 @@ function renderOrder() {
           </div>
         </div>
 
-        <!-- Правая колонка: маркетинг + следующий шаг -->
         <div class="order-info">
           <div class="order-info__card">
             <div class="order-info__badge">Маркетинг & доверие</div>
@@ -575,9 +535,7 @@ function renderOrder() {
   `;
 }
 
-// ---------------------------------------------------------------------------
-//  ЛИЧНЫЙ КАБИНЕТ
-// ---------------------------------------------------------------------------
+/* --------------------------- ЛИЧНЫЙ КАБИНЕТ ------------------------------- */
 
 function renderProfile() {
   return `
@@ -685,9 +643,7 @@ function renderProfile() {
   `;
 }
 
-// ---------------------------------------------------------------------------
-//  РАЗДЕЛ «ЕЩЁ»
-// ---------------------------------------------------------------------------
+/* --------------------------- ИНФОРМАЦИЯ / ЕЩЁ ----------------------------- */
 
 function renderMore() {
   return `
@@ -702,9 +658,8 @@ function renderMore() {
         <article class="highlights__item">
           <h2 class="highlights__title">Материалы и фурнитура</h2>
           <p class="highlights__text">
-            Корпуса — из качественного ЛДСП российских производителей.
-            Фасады — ЛДСП или турецкий МДФ в зависимости от тарифа.
-            Фурнитура — Blum или проверенные аналоги.
+            Корпуса — из качественного ЛДСП российских производителей. Фасады — ЛДСП или
+            турецкий МДФ в зависимости от тарифа. Фурнитура — Blum или проверенные аналоги.
           </p>
         </article>
 
@@ -780,9 +735,9 @@ function renderMore() {
   `;
 }
 
-// ---------------------------------------------------------------------------
-//  РОУТЕР
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*                                   ROUTER                                   */
+/* -------------------------------------------------------------------------- */
 
 const VIEWS = {
   home: renderHome,
@@ -792,28 +747,87 @@ const VIEWS = {
   more: renderMore,
 };
 
-function renderRoute(route, options = {}) {
-  const safeRoute = VIEWS[route] ? route : "home";
+let currentRoute = "home";
+
+function renderRoute(route) {
+  const viewFn = VIEWS[route] || VIEWS.home;
+  currentRoute = route;
+
+  try {
+    localStorage.setItem(STORAGE_KEYS.route, route);
+  } catch (_) {
+    // silent
+  }
+
   const main = document.getElementById("app-main");
   if (!main) return;
 
-  const viewFn = VIEWS[safeRoute];
   main.innerHTML = viewFn();
 
   const navButtons = appRoot.querySelectorAll(".app-nav__item");
   navButtons.forEach((btn) => {
     const r = btn.getAttribute("data-route");
-    btn.classList.toggle("app-nav__item--active", r === safeRoute);
+    btn.classList.toggle("app-nav__item--active", r === route);
   });
-
-  if (!options.skipPersist) {
-    persistRoute(safeRoute);
-  }
 }
 
-// ---------------------------------------------------------------------------
-//  ЛОГИКА КАЛЬКУЛЯТОРА
-// ---------------------------------------------------------------------------
+function setCatalogCategory(categoryId) {
+  selectedCatalogCategoryId = categoryId;
+  try {
+    if (categoryId) {
+      localStorage.setItem(STORAGE_KEYS.catalogCategory, categoryId);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.catalogCategory);
+    }
+  } catch (_) {
+    // silent
+  }
+  renderRoute("catalog");
+}
+
+function setupRouter() {
+  appRoot.addEventListener("click", (event) => {
+    const target = event.target;
+
+    const routeTarget = target.closest("[data-route]");
+    if (routeTarget) {
+      const route = routeTarget.getAttribute("data-route");
+      if (route === "catalog" && !selectedCatalogCategoryId) {
+        setCatalogCategory(null);
+      } else {
+        renderRoute(route);
+      }
+      return;
+    }
+
+    const categoryTarget = target.closest("[data-category-id]");
+    if (categoryTarget) {
+      const categoryId = categoryTarget.getAttribute("data-category-id");
+      setCatalogCategory(categoryId);
+      return;
+    }
+
+    const backTarget = target.closest("[data-action='catalog-back']");
+    if (backTarget) {
+      setCatalogCategory(null);
+      return;
+    }
+
+    const calcTarget = target.closest("[data-action='calc-price']");
+    if (calcTarget) {
+      handleCalcPrice();
+      return;
+    }
+
+    const submitTarget = target.closest("[data-action='submit-order']");
+    if (submitTarget) {
+      handleOrderSubmit();
+      return;
+    }
+  });
+}
+
+/* --------------------------- КАЛЬКУЛЯТОР ---------------------------------- */
 
 function handleCalcPrice() {
   const main = document.getElementById("app-main");
@@ -845,9 +859,8 @@ function handleCalcPrice() {
   if (length < 3) {
     resultBox.innerHTML = `
       <div class="order-calc__result-error">
-        Минимальный объём заказа — 3 погонных метра. Сейчас указано: ${length.toFixed(
-          1
-        )} м.<br />
+        Минимальный объём заказа — 3 погонных метра. Сейчас указано:
+        ${length.toFixed(1)} м.<br />
         Пожалуйста, скорректируйте длину или обсудите с менеджером индивидуально.
       </div>
     `;
@@ -857,9 +870,7 @@ function handleCalcPrice() {
   const lengthField = main.querySelector("[data-order-length-output]");
   const tariffField = main.querySelector("[data-order-tariff-output]");
 
-  if (lengthField) {
-    lengthField.value = length.toFixed(1);
-  }
+  if (lengthField) lengthField.value = length.toFixed(1);
   if (tariffField) {
     tariffField.value = tariff === "premium" ? "Премиум" : "Стандарт";
   }
@@ -875,20 +886,19 @@ function handleCalcPrice() {
         ≈ ${formatter.format(basePrice)} сомони
       </div>
       <div class="order-calc__result-details">
-        Это базовая цена без учёта сложных форм, встроенной техники и нестандартных решений.
-        Точный расчёт вы получите после замера и утверждения дизайн-проекта.
+        Это базовая цена без учёта сложных форм, встроенной техники
+        и нестандартных решений. Точный расчёт вы получите после замера
+        и утверждения дизайн-проекта.
       </div>
       <div class="order-calc__result-next">
-        Следующий шаг: отправьте заявку через форму ниже —
-        менеджер свяжется с вами для точного расчёта.
+        Следующий шаг: отправьте заявку через форму ниже — менеджер
+        свяжется с вами для точного расчёта.
       </div>
     </div>
   `;
 }
 
-// ---------------------------------------------------------------------------
-//  ОТПРАВКА ЗАЯВКИ + СЕГМЕНТАЦИЯ ЛИДА
-// ---------------------------------------------------------------------------
+/* ------------------------- ОТПРАВКА ЗАЯВКИ -------------------------------- */
 
 function handleOrderSubmit() {
   const main = document.getElementById("app-main");
@@ -940,8 +950,8 @@ function handleOrderSubmit() {
   if (!Number.isNaN(length) && length < 3) {
     resultBox.innerHTML = `
       <div class="order-form__result-error">
-        В заявке указана длина менее 3 погонных метров.
-        Уточните длину или обсудите с менеджером возможные варианты.
+        В заявке указана длина менее 3 погонных метров. Уточните длину
+        или обсудите с менеджером возможные варианты.
       </div>
     `;
     return;
@@ -998,76 +1008,9 @@ function handleOrderSubmit() {
   `;
 }
 
-// ---------------------------------------------------------------------------
-//  НАСТРОЙКА РОУТЕРА (DELEGATION)
-// ---------------------------------------------------------------------------
-
-function setCatalogCategory(categoryId) {
-  selectedCatalogCategoryId = categoryId;
-  renderRoute("catalog");
-}
-
-function setupRouter() {
-  appRoot.addEventListener("click", (event) => {
-    const target = event.target;
-
-    // Переход по data-route
-    const routeTarget = target.closest("[data-route]");
-    if (routeTarget) {
-      const route = routeTarget.getAttribute("data-route");
-      if (route === "catalog") {
-        selectedCatalogCategoryId = null;
-      }
-      renderRoute(route);
-      return;
-    }
-
-    // Клик по карточке категории
-    const categoryTarget = target.closest("[data-category-id]");
-    if (categoryTarget) {
-      const categoryId = categoryTarget.getAttribute("data-category-id");
-      setCatalogCategory(categoryId);
-      return;
-    }
-
-    // Назад ко всем категориям
-    const backTarget = target.closest("[data-action='catalog-back']");
-    if (backTarget) {
-      selectedCatalogCategoryId = null;
-      renderRoute("catalog");
-      return;
-    }
-
-    // Калькулятор
-    const calcTarget = target.closest("[data-action='calc-price']");
-    if (calcTarget) {
-      handleCalcPrice();
-      return;
-    }
-
-    // Заявка
-    const submitTarget = target.closest("[data-action='submit-order']");
-    if (submitTarget) {
-      handleOrderSubmit();
-      return;
-    }
-  });
-
-  // Если пользователь вручную меняет hash в адресной строке
-  window.addEventListener("hashchange", () => {
-    const hashRoute = window.location.hash.replace("#", "");
-    if (hashRoute && VIEWS[hashRoute]) {
-      if (hashRoute !== "catalog") {
-        selectedCatalogCategoryId = null;
-      }
-      renderRoute(hashRoute, { skipPersist: true });
-    }
-  });
-}
-
-// ---------------------------------------------------------------------------
-//  РЕНДЕР ОБОЛОЧКИ SPA
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*                             ОБОЛОЧКА ПРИЛОЖЕНИЯ                            */
+/* -------------------------------------------------------------------------- */
 
 function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
@@ -1102,13 +1045,22 @@ function renderLayout(initialRoute = "home") {
   renderRoute(initialRoute);
 }
 
-// ---------------------------------------------------------------------------
-//  ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*                                ИНИЦИАЛИЗАЦИЯ                               */
+/* -------------------------------------------------------------------------- */
 
 function initApp() {
-  const initialRoute = getInitialRoute();
-  selectedCatalogCategoryId = null; // при загрузке всегда открываем верхний уровень каталога
+  let initialRoute = "home";
+
+  try {
+    const savedRoute = localStorage.getItem(STORAGE_KEYS.route);
+    if (savedRoute && VIEWS[savedRoute]) {
+      initialRoute = savedRoute;
+    }
+  } catch (_) {
+    // silent
+  }
+
   renderLayout(initialRoute);
 }
 
