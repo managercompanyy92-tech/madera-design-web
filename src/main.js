@@ -1,7 +1,11 @@
 // src/main.js
 
-import { catalogCategories } from "./utils/catalogCategories.js";
-import { catalogItems } from "./utils/catalogItems.js";
+// ---------------------------------------------------------------------------
+//  ДАННЫЕ КАТАЛОГА
+// ---------------------------------------------------------------------------
+
+import catalogCategories from "./data/catalogCategories.js";
+import catalogItems from "./data/catalogItems.js";
 
 // Тарифы за погонный метр (сомони)
 const BASE_RATES = {
@@ -11,13 +15,44 @@ const BASE_RATES = {
 
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
-// Состояние мини-квиза каталога (будем использовать дальше в калькуляторе и AI-чате)
-const catalogQuizState = {
-  type: null,   // kitchens, wardrobes, bedrooms, kids, hallways, livingrooms
-  goal: null,   // self, rent, sale
-  budget: null, // low, mid, high
-};
-/* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
+
+// ---------------------------------------------------------------------------
+//  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РОУТИНГА
+// ---------------------------------------------------------------------------
+
+const ROUTE_KEY = "madera-current-route";
+
+function getInitialRoute() {
+  // 1) Пытаемся взять из hash: #home / #catalog / #order / #profile / #more
+  const hash = window.location.hash.replace("#", "");
+  if (hash && VIEWS[hash]) {
+    return hash;
+  }
+
+  // 2) Или берём из localStorage
+  const stored = window.localStorage.getItem(ROUTE_KEY);
+  if (stored && VIEWS[stored]) {
+    return stored;
+  }
+
+  // 3) По умолчанию — главная
+  return "home";
+}
+
+function persistRoute(route) {
+  try {
+    window.localStorage.setItem(ROUTE_KEY, route);
+  } catch (e) {
+    // Игнорируем ошибки localStorage
+  }
+  if (window.location.hash.replace("#", "") !== route) {
+    window.location.hash = route;
+  }
+}
+
+// ---------------------------------------------------------------------------
+//  VIEW-ФУНКЦИИ
+// ---------------------------------------------------------------------------
 
 function renderHome() {
   return `
@@ -40,8 +75,8 @@ function renderHome() {
             </button>
           </div>
           <p class="hero__note">
-            Сделаем интерьер, который впечатляет с первого взгляда
-            — и приносит «вау-эффект» каждый день.
+            Сделаем интерьер, который впечатляет с первого взгляда —
+            и приносит «вау-эффект» каждый день.
           </p>
         </div>
         <div class="hero__side">
@@ -58,38 +93,38 @@ function renderHome() {
       </div>
 
       <section class="highlights">
-        <div class="highlights__item">
-          <div class="highlights__title">Премиальный тёмный дизайн</div>
+        <article class="highlights__item">
+          <h2 class="highlights__title">Премиальный тёмный дизайн</h2>
           <p class="highlights__text">
             Фирменная палитра: глубокий графит и благородный оранжевый (#E97A00).
             Интерфейс, который сразу транслирует уровень бренда.
           </p>
-        </div>
-        <div class="highlights__item">
-          <div class="highlights__title">Цифровая воронка продаж</div>
+        </article>
+        <article class="highlights__item">
+          <h2 class="highlights__title">Цифровая воронка продаж</h2>
           <p class="highlights__text">
             От вдохновения до оплаты: каталог, калькулятор, онлайн-заказ, кредиты,
             партнёрская программа — всё в одном веб-приложении.
           </p>
-        </div>
-        <div class="highlights__item">
-          <div class="highlights__title">Сделано для Душанбе</div>
+        </article>
+        <article class="highlights__item">
+          <h2 class="highlights__title">Сделано для Душанбе</h2>
           <p class="highlights__text">
             Локальный бренд, локальное производство, адаптация под реальные квартиры
             и запросы клиентов Душанбе.
           </p>
-        </div>
+        </article>
       </section>
     </section>
   `;
 }
 
-/* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
-
-/* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
+// ---------------------------------------------------------------------------
+//  КАТАЛОГ
+// ---------------------------------------------------------------------------
 
 function renderCatalog() {
-  // Первый уровень: только категории + мини-квиз
+  // ---------------------- Верхний уровень: только категории ----------------
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
       .map(
@@ -105,12 +140,14 @@ function renderCatalog() {
               class="catalog-category-card__img"
             />
           </div>
+
           <div class="catalog-category-card__bottom">
             <div class="catalog-category-card__title">
               ${cat.name || cat.title || ""}
             </div>
-            <div class="catalog-category-card__arrow">›</div>
+            <div class="catalog-category-card__arrow">&rsaquo;</div>
           </div>
+
           <div class="catalog-category-card__info">
             ${
               cat.tagline
@@ -128,92 +165,92 @@ function renderCatalog() {
                 : ""
             }
           </div>
+
+          <div class="catalog-category-card__discount">
+            <span class="catalog-category-card__discount-badge">
+              −10% с промокодом партнёра
+            </span>
+            <span class="catalog-category-card__discount-text">
+              или −5% при заказе напрямую
+            </span>
+          </div>
         </button>
       `
       )
       .join("");
 
+    const discountInfoBlock = `
+      <div class="catalog-discount-info">
+        <div class="catalog-discount-info__title">Скидки и на заказ</div>
+        <ul class="catalog-discount-info__list">
+          <li>5% скидка — если оформляете заказ напрямую через компанию</li>
+          <li>10% скидка — если укажете промокод партнёра</li>
+          <li>Партнёры получают 5% от суммы каждого приведённого заказа</li>
+        </ul>
+        <div class="catalog-discount-info__note">
+          Мы принимаем заказы от 3 погонных метров и выше.
+        </div>
+      </div>
+    `;
+
     return `
       <section class="page page--catalog">
         <h1 class="page__title">Каталог мебели</h1>
         <p class="page__subtitle">
-          Выберите направление, в котором планируете начинать интерьер. Дальше покажем идеи,
-          а затем — ориентировочный расчёт стоимости под вашу квартиру.
+          Выберите направление, в котором планируете начинать интерьер.
+          Дальше покажем идеи, а затем — ориентировочный расчёт стоимости под вашу квартиру.
         </p>
 
-        <!-- Мини-квиз: с чего начинаем -->
+        <!-- Мини-квиз: с чего начинаем интерьер -->
         <div class="catalog-quiz">
           <div class="catalog-quiz__block">
-            <div class="catalog-quiz__label">1. Что планируете в первую очередь?</div>
-            <div class="catalog-quiz__options">
-              <button class="catalog-quiz__option" data-quiz-type="kitchens">Кухня</button>
-              <button class="catalog-quiz__option" data-quiz-type="wardrobes">Гардеробная</button>
-              <button class="catalog-quiz__option" data-quiz-type="bedrooms">Спальня</button>
-              <button class="catalog-quiz__option" data-quiz-type="kids">Детская</button>
-              <button class="catalog-quiz__option" data-quiz-type="hallways">Прихожая</button>
-              <button class="catalog-quiz__option" data-quiz-type="livingrooms">Гостиная</button>
+            <div class="catalog-quiz__label">1. ЧТО ПЛАНИРУЕТЕ В ПЕРВУЮ ОЧЕРЕДЬ?</div>
+            <div class="catalog-quiz__buttons">
+              <button class="catalog-quiz__btn">Кухня</button>
+              <button class="catalog-quiz__btn">Гардеробная</button>
+              <button class="catalog-quiz__btn">Спальня</button>
+              <button class="catalog-quiz__btn">Детская</button>
+              <button class="catalog-quiz__btn">Прихожая</button>
+              <button class="catalog-quiz__btn">Гостиная</button>
             </div>
           </div>
 
           <div class="catalog-quiz__block">
-            <div class="catalog-quiz__label">2. Цель проекта</div>
-            <div class="catalog-quiz__options">
-              <button class="catalog-quiz__option" data-quiz-goal="self">
-                Для себя надолго
-              </button>
-              <button class="catalog-quiz__option" data-quiz-goal="rent">
-                Квартира под сдачу
-              </button>
-              <button class="catalog-quiz__option" data-quiz-goal="sale">
-                Готовлю к продаже
-              </button>
+            <div class="catalog-quiz__label">2. ЦЕЛЬ ПРОЕКТА</div>
+            <div class="catalog-quiz__buttons">
+              <button class="catalog-quiz__btn">Для себя надолго</button>
+              <button class="catalog-quiz__btn">Квартира под сдачу</button>
+              <button class="catalog-quiz__btn">Готовлю к продаже</button>
             </div>
           </div>
 
           <div class="catalog-quiz__block">
-            <div class="catalog-quiz__label">3. Примерный бюджет на мебель</div>
-            <div class="catalog-quiz__options">
-              <button class="catalog-quiz__option" data-quiz-budget="low">
-                до 15&nbsp;000 сом
-              </button>
-              <button class="catalog-quiz__option" data-quiz-budget="mid">
-                15–30&nbsp;000 сом
-              </button>
-              <button class="catalog-quiz__option" data-quiz-budget="high">
-                выше 30&nbsp;000 сом
-              </button>
+            <div class="catalog-quiz__label">3. ПРИМЕРНЫЙ БЮДЖЕТ НА МЕБЕЛЬ</div>
+            <div class="catalog-quiz__buttons">
+              <button class="catalog-quiz__btn">до 15&nbsp;000 сом</button>
+              <button class="catalog-quiz__btn">15–30&nbsp;000 сом</button>
+              <button class="catalog-quiz__btn">выше 30&nbsp;000 сом</button>
             </div>
           </div>
 
           <div class="catalog-quiz__footer">
-            <div class="catalog-quiz__hint">
-              Даже если вы пока «просто смотрите идеи», квиз помогает подобрать более точные сценарии
-              под вашу ситуацию.
+            <div class="catalog-quiz__note">
+              Даже если вы пока «просто смотрите идеи», квиз помогает подобрать
+              более точные сценарии под вашу ситуацию.
             </div>
             <div class="catalog-quiz__actions">
-              <button class="btn btn--ghost" data-route="order">
+              <button class="btn btn--outline" data-route="order">
                 Перейти к быстрому расчёту
               </button>
-              <button class="btn btn--outline" data-action="open-chat">
+              <button class="btn btn--ghost" data-madera-chat-open>
                 Спросить AI-дизайнера, с чего начать
               </button>
             </div>
           </div>
         </div>
-const discountInfoBlock = `
-  <div class="catalog-discount-info">
-    <div class="catalog-discount-info__title">Скидки на заказ</div>
-    <ul class="catalog-discount-info__list">
-      <li>5% скидка — если оформляете заказ напрямую через компанию</li>
-      <li>10% скидка — если укажете промокод партнёра</li>
-      <li>Партнёры получают 5% от суммы каждого приведённого заказа</li>
-    </ul>
-    <div class="catalog-discount-info__note">
-      Мы принимаем заказы от 3 погонных метров и выше.
-    </div>
-  </div>
-`;
-${discountInfoBlock}
+
+        ${discountInfoBlock}
+
         <div class="catalog-categories-grid">
           ${cards}
         </div>
@@ -221,7 +258,7 @@ ${discountInfoBlock}
     `;
   }
 
-  // Второй уровень: идеи внутри выбранной категории
+  // ------------------ Второй уровень: идеи внутри выбранной категории ------
   const category = catalogCategories.find(
     (cat) => cat.id === selectedCatalogCategoryId
   );
@@ -232,26 +269,28 @@ ${discountInfoBlock}
   const itemCards = items
     .map(
       (item) => `
-        <div class="catalog-item-card">
-          <div class="catalog-item-card__image-wrap">
-            <img
-              src="${item.image}"
-              alt="${item.title}"
-              class="catalog-item-card__img"
-            />
-          </div>
-          <div class="catalog-item-card__info">
-            <div class="catalog-item-card__title">${item.title}</div>
-            <div class="catalog-item-card__desc">${item.description}</div>
-            <button
-              class="btn btn--primary catalog-item-card__btn"
-              data-route="order"
-            >
-              Рассчитать такую же композицию под мою квартиру
-            </button>
-          </div>
+      <div class="catalog-item-card">
+        <div class="catalog-item-card__image-wrap">
+          <img
+            src="${item.image || ""}"
+            alt="${item.title || ""}"
+            class="catalog-item-card__img"
+          />
         </div>
-      `
+        <div class="catalog-item-card__info">
+          <div class="catalog-item-card__title">${item.title || ""}</div>
+          <div class="catalog-item-card__desc">
+            ${item.description || ""}
+          </div>
+          <button
+            class="btn btn--primary catalog-item-card__btn"
+            data-route="order"
+          >
+            Рассчитать стоимость
+          </button>
+        </div>
+      </div>
+    `
     )
     .join("");
 
@@ -261,43 +300,37 @@ ${discountInfoBlock}
         ← Все категории
       </button>
 
-      <h1 class="page__title">${category ? category.name || category.title : "Категория"}</h1>
+      <h1 class="page__title">
+        ${category ? category.name || category.title : "Категория мебели"}
+      </h1>
       <p class="page__subtitle">
-        Здесь собраны визуализации и сценарии для категории «${
-          category ? category.name || category.title : ""
-        }».
-        На следующем шаге адаптируем идею под вашу планировку и посчитаем стоимость.
+        Подборка идей для вашего интерьера. Мы только запускаем сервис,
+        поэтому сейчас показываем демонстрационные сценарии — на встрече
+        адаптируем их под планировку вашей квартиры и бюджет.
       </p>
-
-      <div class="catalog-category-bridge">
-        <div class="catalog-category-bridge__text">
-          Чаще всего такие композиции занимают от 3 до 5 погонных метров. Мы принимаем заказы 
-          от 3 пог. метров и выше. Можно сразу перейти к расчёту:
-        </div>
-        <button class="btn btn--outline" data-route="order">
-          Быстрый расчёт для этой категории
-        </button>
-      </div>
 
       <div class="catalog-items-grid">
         ${
           itemCards ||
-          "<div class='page__placeholder'>Идеи для этой категории появятся чуть позже. Сейчас мы готовим новые 3D-сценарии специально под рынок Душанбе.</div>"
+          "<div class='page__placeholder'>Идеи для этой категории появятся чуть позже.</div>"
         }
       </div>
     </section>
   `;
 }
 
-/* ----------------------------- РАЗДЕЛ «ЗАКАЗ» ----------------------------- */
+// ---------------------------------------------------------------------------
+//  РАЗДЕЛ ЗАКАЗА
+// ---------------------------------------------------------------------------
 
 function renderOrder() {
   return `
     <section class="page page--order">
       <h1 class="page__title">Онлайн-калькулятор и заказ мебели</h1>
       <p class="page__subtitle">
-        Оцените базовую стоимость вашего проекта за несколько секунд. Это ориентировочный расчёт — 
-        точную цену вы получите после замера и согласования дизайн-проекта.
+        Оцените базовую стоимость вашего проекта за несколько секунд.
+        Это ориентировочный расчёт — точную цену вы получите после замера
+        и согласования дизайн-проекта.
       </p>
 
       <div class="order-layout">
@@ -323,14 +356,13 @@ function renderOrder() {
                 data-calc-length
               />
               <div class="order-calc__hint">
-                Минимальный объём заказа — <strong>3 пог. метра</strong>. Меньшие проекты мы не принимаем.
+                Минимальный объём заказа — <strong>3 пог. метра</strong>.
+                Меньшие проекты мы не принимаем.
               </div>
             </div>
 
             <div class="order-calc__row">
-              <div class="order-calc__label">
-                Материал и тариф
-              </div>
+              <div class="order-calc__label">Материал и тариф</div>
               <div class="order-calc__tariffs">
                 <label class="order-calc-tariff">
                   <input
@@ -341,9 +373,9 @@ function renderOrder() {
                   />
                   <span class="order-calc-tariff__body">
                     <span class="order-calc-tariff__name">Стандарт</span>
-                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.standard.toLocaleString(
-                      "ru-RU"
-                    )} сом / п.м.</span>
+                    <span class="order-calc-tariff__price">
+                      ≈ ${BASE_RATES.standard.toLocaleString("ru-RU")} сом / п.м.
+                    </span>
                     <span class="order-calc-tariff__desc">
                       Корпус и фасады из ЛДСП, фурнитура Blum или аналог высокого качества.
                     </span>
@@ -358,11 +390,12 @@ function renderOrder() {
                   />
                   <span class="order-calc-tariff__body">
                     <span class="order-calc-tariff__name">Премиум</span>
-                    <span class="order-calc-tariff__price">≈ ${BASE_RATES.premium.toLocaleString(
-                      "ru-RU"
-                    )} сом / п.м.</span>
+                    <span class="order-calc-tariff__price">
+                      ≈ ${BASE_RATES.premium.toLocaleString("ru-RU")} сом / п.м.
+                    </span>
                     <span class="order-calc-tariff__desc">
-                      Корпус из ЛДСП, фасады из турецкого МДФ, фурнитура Blum. Премиальный внешний вид.
+                      Корпус из ЛДСП, фасады из турецкого МДФ, фурнитура Blum.
+                      Премиальный внешний вид.
                     </span>
                   </span>
                 </label>
@@ -374,7 +407,8 @@ function renderOrder() {
                 Рассчитать стоимость
               </button>
               <div class="order-calc__note">
-                Расчёт предварительный и не учитывает сложные формы, встроенную технику и нестандартные решения.
+                Расчёт предварительный и не учитывает сложные формы,
+                встроенную технику и нестандартные решения.
               </div>
             </div>
 
@@ -383,12 +417,13 @@ function renderOrder() {
             </div>
           </div>
 
-          <!-- Форма заявки, связанная с калькулятором -->
+          <!-- Форма заявки -->
           <div class="order-form">
             <div class="order-form__header">
               <div class="order-form__title">Заявка на замер и расчёт</div>
               <div class="order-form__subtitle">
-                Заполните контактные данные — менеджер свяжется с вами, уточнит детали и сделает точный расчёт.
+                Заполните контактные данные — менеджер свяжется с вами,
+                уточнит детали и сделает точный расчёт.
               </div>
             </div>
 
@@ -436,7 +471,9 @@ function renderOrder() {
               </div>
 
               <div class="order-form__row">
-                <label class="order-form__label">Длина проекта, пог. метры (из калькулятора)</label>
+                <label class="order-form__label">
+                  Длина проекта, пог. метры (из калькулятора)
+                </label>
                 <input
                   type="text"
                   class="order-form__input"
@@ -476,7 +513,9 @@ function renderOrder() {
               </div>
 
               <div class="order-form__row order-form__row--full">
-                <label class="order-form__label">Насколько вы настроены на заказ? (отбор «наших» клиентов)</label>
+                <label class="order-form__label">
+                  Насколько вы настроены на заказ? (отбор «наших» клиентов)
+                </label>
                 <select class="order-form__select" data-order-readiness>
                   <option value="soon">Готов(а) заказать в ближайший месяц</option>
                   <option value="thinking">Пока изучаю варианты и цены</option>
@@ -487,7 +526,10 @@ function renderOrder() {
               <div class="order-form__row order-form__row--full order-form__row--checkbox">
                 <label class="order-form__checkbox">
                   <input type="checkbox" data-order-minagree />
-                  <span>Я понимаю, что минимальный объём заказа — 3 погонных метра и согласен(на) с этим условием</span>
+                  <span>
+                    Я понимаю, что минимальный объём заказа — 3 погонных метра
+                    и согласен(на) с этим условием
+                  </span>
                 </label>
               </div>
             </div>
@@ -497,7 +539,8 @@ function renderOrder() {
                 Отправить заявку на расчёт
               </button>
               <div class="order-form__note">
-                Нажимая на кнопку, вы отправляете заявку менеджеру Madera Design. Мы не передаём данные третьим лицам.
+                Нажимая на кнопку, вы отправляете заявку менеджеру Madera Design.
+                Мы не передаём данные третьим лицам.
               </div>
               <div class="order-form__result" data-order-result></div>
             </div>
@@ -519,7 +562,8 @@ function renderOrder() {
 
           <div class="order-info__next">
             <div class="order-info__next-text">
-              Готовы обсудить проект? После заявки менеджер свяжется с вами и создаст заказ в системе с отслеживанием статуса.
+              Готовы обсудить проект? После заявки менеджер свяжется с вами
+              и создаст заказ в системе с отслеживанием статуса.
             </div>
             <button class="btn btn--outline" data-route="profile">
               Перейти к оформлению и статусам заказов
@@ -531,7 +575,9 @@ function renderOrder() {
   `;
 }
 
-/* -------------------------- ЛИЧНЫЙ КАБИНЕТ -------------------------- */
+// ---------------------------------------------------------------------------
+//  ЛИЧНЫЙ КАБИНЕТ
+// ---------------------------------------------------------------------------
 
 function renderProfile() {
   return `
@@ -543,9 +589,7 @@ function renderProfile() {
       </p>
 
       <div class="order-layout">
-        <!-- Левая колонка: заказы + профиль -->
         <div>
-          <!-- Мои заказы -->
           <div class="order-form" style="margin-top: 0;">
             <div class="order-form__header">
               <div class="order-form__title">Мои заказы</div>
@@ -563,7 +607,6 @@ function renderProfile() {
             </div>
           </div>
 
-          <!-- Профиль клиента -->
           <div class="order-form">
             <div class="order-form__header">
               <div class="order-form__title">Профиль клиента</div>
@@ -616,9 +659,7 @@ function renderProfile() {
           </div>
         </div>
 
-        <!-- Правая колонка: партнёрка + план развития -->
         <div class="order-info">
-          <!-- Партнёрская программа -->
           <div class="order-info__card">
             <div class="order-info__badge">Партнёрская программа</div>
             <h2 class="order-info__title">Зарабатывайте вместе с Madera Design</h2>
@@ -629,7 +670,6 @@ function renderProfile() {
             </ul>
           </div>
 
-          <!-- Как будет работать личный кабинет -->
           <div class="order-info__next">
             <div class="order-info__next-text">
               <strong>Дальнейшее развитие личного кабинета:</strong><br/><br/>
@@ -645,24 +685,26 @@ function renderProfile() {
   `;
 }
 
-/* ------------------------- РАЗДЕЛ «ЕЩЁ» / ИНФО ------------------------- */
+// ---------------------------------------------------------------------------
+//  РАЗДЕЛ «ЕЩЁ»
+// ---------------------------------------------------------------------------
 
 function renderMore() {
   return `
     <section class="page page--more">
       <h1 class="page__title">Информация о сервисе Madera Design</h1>
       <p class="page__subtitle">
-        Ответы на частые вопросы: из чего делаем мебель, какие реальные сроки, как формируется цена,
-        какие условия гарантии и как работает сервис после монтажа.
+        Ответы на частые вопросы: из чего делаем мебель, какие реальные сроки,
+        как формируется цена, какие условия гарантии и как работает сервис после монтажа.
       </p>
 
       <section class="highlights">
         <article class="highlights__item">
           <h2 class="highlights__title">Материалы и фурнитура</h2>
           <p class="highlights__text">
-            Корпуса — из качественного ЛДСП российских производителей. Фасады — ЛДСП или турецкий МДФ
-            в зависимости от тарифа. Фурнитура — Blum или проверенные аналоги (направляющие, петли,
-            механизмы плавного закрывания).
+            Корпуса — из качественного ЛДСП российских производителей.
+            Фасады — ЛДСП или турецкий МДФ в зависимости от тарифа.
+            Фурнитура — Blum или проверенные аналоги.
           </p>
         </article>
 
@@ -687,7 +729,6 @@ function renderMore() {
 
       <div class="order-layout" style="margin-top: 18px;">
         <div>
-          <!-- Оплата и рассрочка -->
           <div class="order-info__card">
             <div class="order-info__badge">Оплата и рассрочка</div>
             <h2 class="order-info__title">Как можно оплатить заказ</h2>
@@ -699,7 +740,6 @@ function renderMore() {
             </ul>
           </div>
 
-          <!-- Гарантия и сервис -->
           <div class="order-info__card">
             <div class="order-info__badge">Гарантия и сервис</div>
             <h2 class="order-info__title">Что мы гарантируем</h2>
@@ -712,7 +752,6 @@ function renderMore() {
         </div>
 
         <div class="order-info">
-          <!-- О компании -->
           <div class="order-info__card">
             <div class="order-info__badge">О компании</div>
             <h2 class="order-info__title">Madera Design — мебель нового формата</h2>
@@ -723,12 +762,12 @@ function renderMore() {
             </ul>
           </div>
 
-          <!-- Частые вопросы -->
           <div class="order-info__next">
             <div class="order-info__next-text">
               <strong>Частые вопросы (FAQ):</strong><br/><br/>
               <strong>— Можно ли заказать меньше 3 пог. метров?</strong><br/>
-              Обычно нет, так как это нерентабельно. Но можно обсудить комбинированный проект (например, кухня + шкаф).<br/><br/>
+              Обычно нет, так как это нерентабельно. Но можно обсудить комбинированный проект
+              (например, кухня + шкаф).<br/><br/>
               <strong>— Делаете ли вы выезд на замер?</strong><br/>
               Да, после предварительного расчёта и согласия клиента.<br/><br/>
               <strong>— Можно ли принести свой дизайн?</strong><br/>
@@ -741,7 +780,9 @@ function renderMore() {
   `;
 }
 
-/* --------------------------------- ROUTES --------------------------------- */
+// ---------------------------------------------------------------------------
+//  РОУТЕР
+// ---------------------------------------------------------------------------
 
 const VIEWS = {
   home: renderHome,
@@ -751,33 +792,28 @@ const VIEWS = {
   more: renderMore,
 };
 
-function renderRoute(route) {
-  const viewFn = VIEWS[route] || VIEWS.home;
+function renderRoute(route, options = {}) {
+  const safeRoute = VIEWS[route] ? route : "home";
   const main = document.getElementById("app-main");
   if (!main) return;
 
+  const viewFn = VIEWS[safeRoute];
   main.innerHTML = viewFn();
 
-  // Подсветка активной кнопки в нижнем меню
   const navButtons = appRoot.querySelectorAll(".app-nav__item");
   navButtons.forEach((btn) => {
     const r = btn.getAttribute("data-route");
-    btn.classList.toggle("app-nav__item--active", r === route);
+    btn.classList.toggle("app-nav__item--active", r === safeRoute);
   });
-}
 
-// Читаем маршрут из #hash при первой загрузке
-function getInitialRoute() {
-  if (typeof window === "undefined") return "home";
-
-  const hash = window.location.hash.replace("#", "").trim();
-  if (hash && VIEWS[hash]) {
-    return hash;
+  if (!options.skipPersist) {
+    persistRoute(safeRoute);
   }
-  return "home";
 }
 
-/* ------------------------- ЛОГИКА КАЛЬКУЛЯТОРА --------------------------- */
+// ---------------------------------------------------------------------------
+//  ЛОГИКА КАЛЬКУЛЯТОРА
+// ---------------------------------------------------------------------------
 
 function handleCalcPrice() {
   const main = document.getElementById("app-main");
@@ -843,13 +879,16 @@ function handleCalcPrice() {
         Точный расчёт вы получите после замера и утверждения дизайн-проекта.
       </div>
       <div class="order-calc__result-next">
-        Следующий шаг: отправьте заявку через форму ниже — менеджер свяжется с вами для точного расчёта.
+        Следующий шаг: отправьте заявку через форму ниже —
+        менеджер свяжется с вами для точного расчёта.
       </div>
     </div>
   `;
 }
 
-/* ------------------------ ОТПРАВКА ЗАЯВКИ + СЕГМЕНТ ----------------------- */
+// ---------------------------------------------------------------------------
+//  ОТПРАВКА ЗАЯВКИ + СЕГМЕНТАЦИЯ ЛИДА
+// ---------------------------------------------------------------------------
 
 function handleOrderSubmit() {
   const main = document.getElementById("app-main");
@@ -891,7 +930,8 @@ function handleOrderSubmit() {
   if (!minAgree) {
     resultBox.innerHTML = `
       <div class="order-form__result-error">
-        Для продолжения необходимо подтвердить, что вы согласны с минимальным объёмом заказа 3 погонных метра.
+        Для продолжения необходимо подтвердить, что вы согласны
+        с минимальным объёмом заказа 3 погонных метра.
       </div>
     `;
     return;
@@ -900,7 +940,8 @@ function handleOrderSubmit() {
   if (!Number.isNaN(length) && length < 3) {
     resultBox.innerHTML = `
       <div class="order-form__result-error">
-        В заявке указана длина менее 3 погонных метров. Уточните длину или обсудите с менеджером возможные варианты.
+        В заявке указана длина менее 3 погонных метров.
+        Уточните длину или обсудите с менеджером возможные варианты.
       </div>
     `;
     return;
@@ -940,10 +981,12 @@ function handleOrderSubmit() {
   resultBox.innerHTML = `
     <div class="order-form__result-ok">
       <div class="order-form__result-main">
-        Заявка отправлена. Менеджер Madera Design свяжется с вами для уточнения деталей и точного расчёта.
+        Заявка отправлена. Менеджер Madera Design свяжется с вами
+        для уточнения деталей и точного расчёта.
       </div>
       <div class="order-form__result-sub">
-        Если вы указали WhatsApp или Telegram, ответ придёт туда. В рабочее время мы обычно отвечаем в течение дня.
+        Если вы указали WhatsApp или Telegram, ответ придёт туда.
+        В рабочее время мы обычно отвечаем в течение дня.
       </div>
       <div class="order-form__result-ai">
         <div class="order-form__result-ai-label">${leadLabel}</div>
@@ -955,120 +998,43 @@ function handleOrderSubmit() {
   `;
 }
 
-/* -------------------------------- РОУТЕР ---------------------------------- */
+// ---------------------------------------------------------------------------
+//  НАСТРОЙКА РОУТЕРА (DELEGATION)
+// ---------------------------------------------------------------------------
 
 function setCatalogCategory(categoryId) {
   selectedCatalogCategoryId = categoryId;
   renderRoute("catalog");
-  if (typeof window !== "undefined") {
-    window.location.hash = "catalog";
-  }
 }
 
-// Навигация внутри приложения
-// Навигация внутри приложения
 function setupRouter() {
   appRoot.addEventListener("click", (event) => {
     const target = event.target;
 
-    // Кнопки с data-route (нижнее меню, CTA в шапке и т.п.)
+    // Переход по data-route
     const routeTarget = target.closest("[data-route]");
     if (routeTarget) {
       const route = routeTarget.getAttribute("data-route");
-
       if (route === "catalog") {
         selectedCatalogCategoryId = null;
       }
-
       renderRoute(route);
-
-      if (typeof window !== "undefined") {
-        window.location.hash = route;
-      }
       return;
     }
 
-    // Клик по категории каталога (карточка)
+    // Клик по карточке категории
     const categoryTarget = target.closest("[data-category-id]");
     if (categoryTarget) {
       const categoryId = categoryTarget.getAttribute("data-category-id");
       setCatalogCategory(categoryId);
-      // запомним тип в состоянии квиза
-      catalogQuizState.type = categoryId;
       return;
     }
 
-    // Кнопка "← Все категории"
+    // Назад ко всем категориям
     const backTarget = target.closest("[data-action='catalog-back']");
     if (backTarget) {
       selectedCatalogCategoryId = null;
       renderRoute("catalog");
-      if (typeof window !== "undefined") {
-        window.location.hash = "catalog";
-      }
-      return;
-    }
-
-    // === ЛОГИКА МИНИ-КВИЗА В КАТАЛОГЕ ===
-
-    // 1) Тип: Кухня / Гардеробная / Спальня / Детская / Прихожая / Гостиная
-    const quizTypeTarget = target.closest("[data-quiz-type]");
-    if (quizTypeTarget) {
-      const categoryId = quizTypeTarget.getAttribute("data-quiz-type");
-      catalogQuizState.type = categoryId;
-
-      // Сразу открываем нужную категорию каталога
-      setCatalogCategory(categoryId);
-      return;
-    }
-
-    // 2) Цель проекта: для себя / под аренду / под продажу
-    const quizGoalTarget = target.closest("[data-quiz-goal]");
-    if (quizGoalTarget) {
-      const goal = quizGoalTarget.getAttribute("data-quiz-goal");
-      catalogQuizState.goal = goal;
-
-      // Подсветим выбранную опцию в пределах блока
-      const block = quizGoalTarget.closest(".catalog-quiz__block");
-      if (block) {
-        block
-          .querySelectorAll(".catalog-quiz__option")
-          .forEach((btn) => btn.classList.remove("catalog-quiz__option--active"));
-      }
-      quizGoalTarget.classList.add("catalog-quiz__option--active");
-
-      console.log("CATALOG_QUIZ_GOAL", catalogQuizState);
-      return;
-    }
-
-    // 3) Бюджет на мебель
-    const quizBudgetTarget = target.closest("[data-quiz-budget]");
-    if (quizBudgetTarget) {
-      const budget = quizBudgetTarget.getAttribute("data-quiz-budget");
-      catalogQuizState.budget = budget;
-
-      // Подсветим выбранную опцию в пределах блока
-      const block = quizBudgetTarget.closest(".catalog-quiz__block");
-      if (block) {
-        block
-          .querySelectorAll(".catalog-quiz__option")
-          .forEach((btn) => btn.classList.remove("catalog-quiz__option--active"));
-      }
-      quizBudgetTarget.classList.add("catalog-quiz__option--active");
-
-      console.log("CATALOG_QUIZ_BUDGET", catalogQuizState);
-      return;
-    }
-
-    // 4) Кнопка "Спросить AI-дизайнера, с чего начать"
-    const openChatTarget = target.closest("[data-action='open-chat']");
-    if (openChatTarget) {
-      // Пока просто пишем в консоль. На следующих шагах привяжем к твоему AI-чату.
-      console.log("OPEN_CHAT_FROM_CATALOG", catalogQuizState);
-
-      // Здесь позже можно будет:
-      // - открыть кастомный чат,
-      // - передать туда catalogQuizState как контекст.
       return;
     }
 
@@ -1079,16 +1045,29 @@ function setupRouter() {
       return;
     }
 
-    // Отправка заявки
+    // Заявка
     const submitTarget = target.closest("[data-action='submit-order']");
     if (submitTarget) {
       handleOrderSubmit();
       return;
     }
   });
+
+  // Если пользователь вручную меняет hash в адресной строке
+  window.addEventListener("hashchange", () => {
+    const hashRoute = window.location.hash.replace("#", "");
+    if (hashRoute && VIEWS[hashRoute]) {
+      if (hashRoute !== "catalog") {
+        selectedCatalogCategoryId = null;
+      }
+      renderRoute(hashRoute, { skipPersist: true });
+    }
+  });
 }
 
-/* ------------------------- РЕНДЕР ОБОЛОЧКИ SPA --------------------------- */
+// ---------------------------------------------------------------------------
+//  РЕНДЕР ОБОЛОЧКИ SPA
+// ---------------------------------------------------------------------------
 
 function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
@@ -1096,7 +1075,9 @@ function renderLayout(initialRoute = "home") {
       <header class="app-header">
         <div class="app-header__brand">
           <div class="app-header__logo">Madera Design</div>
-          <div class="app-header__tagline">Партнёр в создании современного интерьера</div>
+          <div class="app-header__tagline">
+            Партнёр в создании современного интерьера
+          </div>
         </div>
         <div class="app-header__cta">
           <button class="btn btn--outline" data-route="order">
@@ -1118,14 +1099,16 @@ function renderLayout(initialRoute = "home") {
   `;
 
   setupRouter();
-  setupHashListener();
   renderRoute(initialRoute);
 }
 
-/* ------------------------------ ИНИЦИАЛИЗАЦИЯ ----------------------------- */
+// ---------------------------------------------------------------------------
+//  ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+// ---------------------------------------------------------------------------
 
 function initApp() {
   const initialRoute = getInitialRoute();
+  selectedCatalogCategoryId = null; // при загрузке всегда открываем верхний уровень каталога
   renderLayout(initialRoute);
 }
 
