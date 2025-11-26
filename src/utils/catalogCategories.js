@@ -8,7 +8,7 @@ export const catalogCategories = [
   },
   {
     id: "kitchens",
-    title: "Кухни на заказ",
+    title: "Кухонные гарнитуры",
     image: "/public/catalog/kitchens-cover.jpg",
   },
   {
