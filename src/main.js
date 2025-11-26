@@ -79,48 +79,59 @@ function renderHome() {
   `;
 }
 
-/* ------------------------ КАТАЛОГ: КАТЕГОРИИ + ИДЕИ ------------------------ */
+/* ---------------------------- КАТАЛОГ: КАТЕГОРИИ --------------------------- */
 
 function renderCatalog() {
-  // Первый уровень: только категории (сеткой)
+  // Первый уровень: только категории (сетка карточек)
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
-      .map(
-        (cat) => `
-          <button class="catalog-category-card" data-category-id="${cat.id}">
+      .map((cat) => {
+        const title = cat.title || cat.name;
+        const image = cat.image || cat.cover; // поддерживаем оба варианта полей
+        const tagline = cat.tagline || "";
+        const statsLabel = cat.statsLabel || "";
+
+        return `
+          <button
+            class="catalog-category-card"
+            data-category-id="${cat.id}"
+          >
             <div class="catalog-category-card__image-wrap">
               <img
-                src="${cat.image || cat.cover}"
-                alt="${cat.title || cat.name}"
+                src="${image}"
+                alt="${title}"
                 class="catalog-category-card__img"
               />
               <div class="catalog-category-card__icon">&rsaquo;</div>
             </div>
+
             <div class="catalog-category-card__title">
-              ${cat.title || cat.name}
+              ${title}
             </div>
-            <div class="catalog-category-card__meta">
+
+            <div class="catalog-category-card__tagline">
               ${
-                cat.tagline
-                  ? `<div class="catalog-category-card__tagline">${cat.tagline}</div>`
+                tagline
+                  ? `<div class="catalog-category-card__tagline-text">${tagline}</div>`
                   : ""
               }
               ${
-                cat.statsLabel
-                  ? `<div class="catalog-category-card__stats">${cat.statsLabel}</div>`
+                statsLabel
+                  ? `<div class="catalog-category-card__stats">${statsLabel}</div>`
                   : ""
               }
             </div>
           </button>
-        `
-      )
+        `;
+      })
       .join("");
 
     return `
       <section class="page page--catalog">
         <h1 class="page__title">Каталог мебели</h1>
         <p class="page__subtitle">
-          Выберите категорию — дальше покажем вдохновляющие идеи, а затем поможем посчитать стоимость и оформить заказ.
+          Выберите категорию — дальше покажем вдохновляющие идеи, а затем поможем посчитать
+          стоимость и оформить заказ.
         </p>
 
         <div class="catalog-categories-grid">
@@ -134,31 +145,39 @@ function renderCatalog() {
   const category = catalogCategories.find(
     (cat) => cat.id === selectedCatalogCategoryId
   );
+
   const items = catalogItems.filter(
     (item) => item.categoryId === selectedCatalogCategoryId
   );
 
   const itemCards = items
-    .map(
-      (item) => `
+    .map((item) => {
+      const image = item.image;
+      const title = item.title;
+      const description = item.description || "";
+
+      return `
         <div class="catalog-item-card">
           <div class="catalog-item-card__image-wrap">
             <img
-              src="${item.image}"
-              alt="${item.title}"
+              src="${image}"
+              alt="${title}"
               class="catalog-item-card__img"
             />
           </div>
           <div class="catalog-item-card__info">
-            <div class="catalog-item-card__title">${item.title}</div>
-            <div class="catalog-item-card__desc">${item.description}</div>
-            <button class="btn btn--primary catalog-item-card__btn" data-route="order">
+            <div class="catalog-item-card__title">${title}</div>
+            <div class="catalog-item-card__desc">${description}</div>
+            <button
+              class="btn btn--primary catalog-item-card__btn"
+              data-route="order"
+            >
               Рассчитать стоимость
             </button>
           </div>
         </div>
-      `
-    )
+      `;
+    })
     .join("");
 
   return `
@@ -167,9 +186,7 @@ function renderCatalog() {
         ← Все категории
       </button>
 
-      <h1 class="page__title">${
-        category ? category.title || category.name : "Категория"
-      }</h1>
+      <h1 class="page__title">${category ? category.title || category.name : "Категория"}</h1>
       <p class="page__subtitle">
         Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн под размеры
         вашей квартиры и посчитаем стоимость.
@@ -185,7 +202,7 @@ function renderCatalog() {
   `;
 }
 
-/* ----------------------------- ЗАКАЗ / КАЛЬКУЛЯТОР ----------------------------- */
+/* --------------------------- СТРАНИЦА «ЗАКАЗ» ----------------------------- */
 
 function renderOrder() {
   return `
