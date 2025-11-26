@@ -1522,6 +1522,48 @@ body .support-bubble {
 .catalog-ideas-note__text + .catalog-ideas-note__text {
   margin-top: 4px;
 }
+/* Блок "Скидки и партнёры" под квизом в каталоге */
+
+.catalog-discount-info {
+  margin: 16px 0 20px;
+  padding: 14px 16px 16px;
+  border-radius: 18px;
+  background: radial-gradient(
+      circle at top left,
+      rgba(255, 186, 120, 0.18),
+      transparent 55%
+    ),
+    rgba(10, 10, 10, 0.95);
+  border: 1px solid rgba(233, 122, 0, 0.35);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7);
+}
+
+.catalog-discount-info__title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffb347;
+  margin-bottom: 8px;
+}
+
+.catalog-discount-info__list {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #ffffff;
+}
+
+.catalog-discount-info__list li + li {
+  margin-top: 4px;
+}
+
+.catalog-discount-info__note {
+  font-size: 12px;
+  opacity: 0.85;
+  color: #ffffff;
+}
 /* Адаптив для блока скидок */
 @media (max-width: 768px) {
   .catalog-discount-info {
