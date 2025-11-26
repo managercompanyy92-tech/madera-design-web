@@ -78,11 +78,23 @@ function renderHome() {
     </section>
   `;
 }
-
 // Первый уровень: категории
   if (!selectedCatalogCategoryId) {
-    ...
-    return `...`;
+    return `
+      <section class="page page--catalog">
+        <h1 class="page__title">ТЕСТОВЫЙ КАТАЛОГ</h1>
+        <p class="page__subtitle">Если ты видишь этот текст — работает renderCatalog.</p>
+
+        <div class="test-grid">
+          <div class="test-grid__item">1</div>
+          <div class="test-grid__item">2</div>
+          <div class="test-grid__item">3</div>
+          <div class="test-grid__item">4</div>
+          <div class="test-grid__item">5</div>
+          <div class="test-grid__item">6</div>
+        </div>
+      </section>
+    `;
   }
 
   // Второй уровень: идеи внутри категории
