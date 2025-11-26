@@ -194,6 +194,21 @@ function renderCatalog() {
           </div>
         </div>
 
+        <!-- Блок про скидки и партнёров -->
+        <div class="catalog-discount-info">
+          <div class="catalog-discount-info__title">
+            Скидки и партнёрская программа
+          </div>
+          <ul class="catalog-discount-info__list">
+            <li>−5% — если вы оформляете заказ напрямую через компанию.</li>
+            <li>−10% — при заказе по промокоду партнёра.</li>
+            <li>Партнёры получают 5% от суммы каждого приведённого заказа.</li>
+          </ul>
+          <div class="catalog-discount-info__note">
+            Мы принимаем заказы от 3 погонных метров и выше.
+          </div>
+        </div>
+
         <div class="catalog-categories-grid">
           ${cards}
         </div>
@@ -248,6 +263,17 @@ function renderCatalog() {
         Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн
         под размеры вашей квартиры и посчитаем стоимость.
       </p>
+
+      <div class="catalog-category-bridge">
+        <div class="catalog-category-bridge__text">
+          Чаще всего такие композиции занимают от 3 до 5 погонных метров. Мы принимаем заказы 
+          от 3 пог. метров и выше. Можно сразу перейти к расчёту:
+        </div>
+        <button class="btn btn--outline" data-route="order">
+          Быстрый расчёт для этой категории
+        </button>
+      </div>
+
       <div class="catalog-items-grid">
         ${
           itemCards ||
