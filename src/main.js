@@ -79,51 +79,50 @@ function renderHome() {
   `;
 }
 
-/* ---------------------------- КАТАЛОГ: КАТЕГОРИИ --------------------------- */
+/* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
 
 function renderCatalog() {
-  // Первый уровень: только категории (сетка карточек)
+  // Первый уровень: только категории
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
-      .map((cat) => {
-        const title = cat.title || cat.name;
-        const image = cat.image || cat.cover; // поддерживаем оба варианта полей
-        const tagline = cat.tagline || "";
-        const statsLabel = cat.statsLabel || "";
-
-        return `
-          <button
-            class="catalog-category-card"
-            data-category-id="${cat.id}"
-          >
-            <div class="catalog-category-card__image-wrap">
-              <img
-                src="${image}"
-                alt="${title}"
-                class="catalog-category-card__img"
-              />
-              <div class="catalog-category-card__icon">&rsaquo;</div>
-            </div>
-
+      .map(
+        (cat) => `
+        <button
+          class="catalog-category-card"
+          data-category-id="${cat.id}"
+        >
+          <div class="catalog-category-card__image-wrap">
+            <img
+              src="${cat.cover || cat.image || ""}"
+              alt="${cat.name || cat.title || ""}"
+              class="catalog-category-card__img"
+            />
+          </div>
+          <div class="catalog-category-card__bottom">
             <div class="catalog-category-card__title">
-              ${title}
+              ${cat.name || cat.title || ""}
             </div>
-
-            <div class="catalog-category-card__tagline">
-              ${
-                tagline
-                  ? `<div class="catalog-category-card__tagline-text">${tagline}</div>`
-                  : ""
-              }
-              ${
-                statsLabel
-                  ? `<div class="catalog-category-card__stats">${statsLabel}</div>`
-                  : ""
-              }
-            </div>
-          </button>
-        `;
-      })
+            <div class="catalog-category-card__arrow">›</div>
+          </div>
+          ${
+            cat.tagline || cat.statsLabel
+              ? `<div class="catalog-category-card__info">
+                  ${
+                    cat.tagline
+                      ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
+                      : ""
+                  }
+                  ${
+                    cat.statsLabel
+                      ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
+                      : ""
+                  }
+                </div>`
+              : ""
+          }
+        </button>
+      `
+      )
       .join("");
 
     return `
@@ -145,29 +144,24 @@ function renderCatalog() {
   const category = catalogCategories.find(
     (cat) => cat.id === selectedCatalogCategoryId
   );
-
   const items = catalogItems.filter(
     (item) => item.categoryId === selectedCatalogCategoryId
   );
 
   const itemCards = items
-    .map((item) => {
-      const image = item.image;
-      const title = item.title;
-      const description = item.description || "";
-
-      return `
+    .map(
+      (item) => `
         <div class="catalog-item-card">
           <div class="catalog-item-card__image-wrap">
             <img
-              src="${image}"
-              alt="${title}"
+              src="${item.image}"
+              alt="${item.title}"
               class="catalog-item-card__img"
             />
           </div>
           <div class="catalog-item-card__info">
-            <div class="catalog-item-card__title">${title}</div>
-            <div class="catalog-item-card__desc">${description}</div>
+            <div class="catalog-item-card__title">${item.title}</div>
+            <div class="catalog-item-card__desc">${item.description}</div>
             <button
               class="btn btn--primary catalog-item-card__btn"
               data-route="order"
@@ -176,8 +170,8 @@ function renderCatalog() {
             </button>
           </div>
         </div>
-      `;
-    })
+      `
+    )
     .join("");
 
   return `
@@ -186,7 +180,7 @@ function renderCatalog() {
         ← Все категории
       </button>
 
-      <h1 class="page__title">${category ? category.title || category.name : "Категория"}</h1>
+      <h1 class="page__title">${category ? category.name || category.title : "Категория"}</h1>
       <p class="page__subtitle">
         Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн под размеры
         вашей квартиры и посчитаем стоимость.
@@ -202,7 +196,7 @@ function renderCatalog() {
   `;
 }
 
-/* --------------------------- СТРАНИЦА «ЗАКАЗ» ----------------------------- */
+/* ----------------------------- РАЗДЕЛ «ЗАКАЗ» ----------------------------- */
 
 function renderOrder() {
   return `
@@ -341,7 +335,7 @@ function renderOrder() {
                   <option value="">Выберите категорию</option>
                   <option value="kitchens">Кухни</option>
                   <option value="bedrooms">Спальни</option>
-                  <option value="living">Гостиные</option>
+                  <option value="livingrooms">Гостиные</option>
                   <option value="wardrobes">Гардеробные</option>
                   <option value="hallways">Прихожие</option>
                   <option value="kids">Детская мебель</option>
@@ -671,11 +665,23 @@ function renderRoute(route) {
 
   main.innerHTML = viewFn();
 
+  // Подсветка активной кнопки в нижнем меню
   const navButtons = appRoot.querySelectorAll(".app-nav__item");
   navButtons.forEach((btn) => {
     const r = btn.getAttribute("data-route");
     btn.classList.toggle("app-nav__item--active", r === route);
   });
+}
+
+// Читаем маршрут из #hash при первой загрузке
+function getInitialRoute() {
+  if (typeof window === "undefined") return "home";
+
+  const hash = window.location.hash.replace("#", "").trim();
+  if (hash && VIEWS[hash]) {
+    return hash;
+  }
+  return "home";
 }
 
 /* ------------------------- ЛОГИКА КАЛЬКУЛЯТОРА --------------------------- */
@@ -861,22 +867,34 @@ function handleOrderSubmit() {
 function setCatalogCategory(categoryId) {
   selectedCatalogCategoryId = categoryId;
   renderRoute("catalog");
+  if (typeof window !== "undefined") {
+    window.location.hash = "catalog";
+  }
 }
 
+// Навигация внутри приложения
 function setupRouter() {
   appRoot.addEventListener("click", (event) => {
     const target = event.target;
 
+    // Кнопки с data-route (нижнее меню, CTA в шапке и т.п.)
     const routeTarget = target.closest("[data-route]");
     if (routeTarget) {
       const route = routeTarget.getAttribute("data-route");
+
       if (route === "catalog") {
         selectedCatalogCategoryId = null;
       }
+
       renderRoute(route);
+
+      if (typeof window !== "undefined") {
+        window.location.hash = route;
+      }
       return;
     }
 
+    // Клик по категории каталога
     const categoryTarget = target.closest("[data-category-id]");
     if (categoryTarget) {
       const categoryId = categoryTarget.getAttribute("data-category-id");
@@ -884,24 +902,46 @@ function setupRouter() {
       return;
     }
 
+    // Кнопка "← Все категории"
     const backTarget = target.closest("[data-action='catalog-back']");
     if (backTarget) {
       selectedCatalogCategoryId = null;
       renderRoute("catalog");
+      if (typeof window !== "undefined") {
+        window.location.hash = "catalog";
+      }
       return;
     }
 
+    // Калькулятор
     const calcTarget = target.closest("[data-action='calc-price']");
     if (calcTarget) {
       handleCalcPrice();
       return;
     }
 
+    // Отправка заявки
     const submitTarget = target.closest("[data-action='submit-order']");
     if (submitTarget) {
       handleOrderSubmit();
       return;
     }
+  });
+}
+
+// Реакция на кнопки "Назад/Вперёд" в браузере
+function setupHashListener() {
+  if (typeof window === "undefined") return;
+
+  window.addEventListener("hashchange", () => {
+    const hash = window.location.hash.replace("#", "").trim();
+    if (!hash || !VIEWS[hash]) return;
+
+    if (hash === "catalog") {
+      selectedCatalogCategoryId = null;
+    }
+
+    renderRoute(hash);
   });
 }
 
@@ -935,13 +975,15 @@ function renderLayout(initialRoute = "home") {
   `;
 
   setupRouter();
+  setupHashListener();
   renderRoute(initialRoute);
 }
 
 /* ------------------------------ ИНИЦИАЛИЗАЦИЯ ----------------------------- */
 
 function initApp() {
-  renderLayout("home");
+  const initialRoute = getInitialRoute();
+  renderLayout(initialRoute);
 }
 
 initApp();
