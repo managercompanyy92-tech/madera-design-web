@@ -87,24 +87,7 @@ function renderCatalog() {
     const cards = catalogCategories
       .map(
         (cat) => `
-        <button
-          class="catalog-category-card"
-          data-category-id="${cat.id}"
-        >
-          <div class="catalog-category-card__image-wrap">
-            <img
-              src="${cat.cover || cat.image || ""}"
-              alt="${cat.name || cat.title || ""}"
-              class="catalog-category-card__img"
-            />
-          </div>
-          <div class="catalog-category-card__bottom">
-            <div class="catalog-category-card__title">
-              ${cat.name || cat.title || ""}
-            </div>
-            <div class="catalog-category-card__arrow">›</div>
-          </div>
-          <div class="catalog-category-card__info">
+        <div class="catalog-category-card__info">
             ${
               cat.tagline
                 ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
@@ -120,8 +103,16 @@ function renderCatalog() {
                 ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
                 : ""
             }
+            <!-- Блок про скидки и партнёров прямо на карточке -->
+            <div class="catalog-category-card__discount">
+              <div class="catalog-category-card__discount-badge">
+                Скидки и партнёры
+              </div>
+              <div class="catalog-category-card__discount-text">
+                −5% при заказе напрямую • −10% по промокоду партнёра
+              </div>
+            </div>
           </div>
-        </button>
       `
       )
       .join("");
