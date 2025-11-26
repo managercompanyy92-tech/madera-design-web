@@ -3,7 +3,7 @@
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
 
-// Тарифы за погонный метр (сомони)
+// Базовые тарифы за погонный метр (сомони)
 const BASE_RATES = {
   standard: 4000,
   premium: 5000,
@@ -12,7 +12,9 @@ const BASE_RATES = {
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
 
-/* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
+/* -------------------------------------------------------------------------- */
+/*                                   HOME                                     */
+/* -------------------------------------------------------------------------- */
 
 function renderHome() {
   return `
@@ -79,63 +81,85 @@ function renderHome() {
   `;
 }
 
-/* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                                КАТАЛОГ                                     */
+/* -------------------------------------------------------------------------- */
+
+/** Маркетинговый блок "Скидки и партнёры" под квизом каталога */
+function renderCatalogDiscountInfo() {
+  return `
+    <div class="catalog-discount-info">
+      <div class="catalog-discount-info__title">Скидки и партнёры</div>
+      <ul class="catalog-discount-info__list">
+        <li>5% скидка — если оформляете заказ напрямую через компанию Madera Design.</li>
+        <li>10% скидка — если укажете промокод партнёра.</li>
+        <li>Партнёры получают 5% от суммы каждого приведённого заказа.</li>
+      </ul>
+      <div class="catalog-discount-info__note">
+        Мы принимаем заказы от 3 погонных метров и выше.
+      </div>
+    </div>
+  `;
+}
 
 function renderCatalog() {
-  // Первый уровень: только категории + мини-квиз
+  // Первый уровень: мини-квиз + список категорий
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
       .map(
         (cat) => `
-          <button
-            class="catalog-category-card"
-            data-category-id="${cat.id}"
-          >
-            <div class="catalog-category-card__image-wrap">
-              <img
-                src="${cat.cover || cat.image || ""}"
-                alt="${cat.name || cat.title || ""}"
-                class="catalog-category-card__img"
-              />
-            </div>
-
-            <div class="catalog-category-card__bottom">
-              <div class="catalog-category-card__title-row">
-                <div class="catalog-category-card__title">
-                  ${cat.name || cat.title || ""}
-                </div>
-                <div class="catalog-category-card__arrow">›</div>
+        <button
+          class="catalog-category-card"
+          data-category-id="${cat.id}"
+        >
+          <div class="catalog-category-card__image-wrap">
+            <img
+              src="${cat.cover || cat.image || ""}"
+              alt="${cat.name || cat.title || ""}"
+              class="catalog-category-card__img"
+            />
+          </div>
+          <div class="catalog-category-card__bottom">
+            <div class="catalog-category-card__title-row">
+              <div class="catalog-category-card__title">
+                ${cat.name || cat.title || ""}
               </div>
-
-              <div class="catalog-category-card__info">
-                ${
-                  cat.tagline
-                    ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
-                    : ""
-                }
-                ${
-                  cat.benefit
-                    ? `<div class="catalog-category-benefit">${cat.benefit}</div>`
-                    : ""
-                }
-                ${
-                  cat.statsLabel
-                    ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
-                    : ""
-                }
-
-                <div class="catalog-category-card__discount">
-                  <div class="catalog-category-card__discount-badge">
-                    СКИДКИ И ПАРТНЁРЫ
-                  </div>
-                  <div class="catalog-category-card__discount-text">
-                    −5% при заказе напрямую • −10% по промокоду партнёра
-                  </div>
-                </div>
-              </div>
+              <div class="catalog-category-card__arrow">›</div>
             </div>
-          </button>
-        `
+            <div class="catalog-category-card__info">
+              ${
+                cat.tagline
+                  ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
+                  : ""
+              }
+              ${
+                cat.benefit
+                  ? `<div class="catalog-category-benefit">${cat.benefit}</div>`
+                  : ""
+              }
+              ${
+                cat.statsLabel
+                  ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
+                  : ""
+              }
+              ${
+                cat.discountLabel
+                  ? `
+                  <div class="catalog-category-card__discount">
+                    <div class="catalog-category-card__discount-badge">
+                      Скидки и партнёры
+                    </div>
+                    <div class="catalog-category-card__discount-text">
+                      ${cat.discountLabel}
+                    </div>
+                  </div>
+                `
+                  : ""
+              }
+            </div>
+          </div>
+        </button>
+      `
       )
       .join("");
 
@@ -207,6 +231,8 @@ function renderCatalog() {
           </div>
         </div>
 
+        ${renderCatalogDiscountInfo()}
+
         <div class="catalog-categories-grid">
           ${cards}
         </div>
@@ -235,7 +261,11 @@ function renderCatalog() {
           </div>
           <div class="catalog-item-card__info">
             <div class="catalog-item-card__title">${item.title}</div>
-            <div class="catalog-item-card__desc">${item.description}</div>
+            ${
+              item.description
+                ? `<div class="catalog-item-card__desc">${item.description}</div>`
+                : ""
+            }
             <button
               class="btn btn--primary catalog-item-card__btn"
               data-route="order"
@@ -258,10 +288,9 @@ function renderCatalog() {
         category ? category.name || category.title : "Категория"
       }</h1>
       <p class="page__subtitle">
-        Здесь собраны визуализации и сценарии для категории «${
+        Здесь собраны идеи и визуализации для категории «${
           category ? category.name || category.title : ""
-        }».
-        На следующем шаге адаптируем идею под вашу планировку и посчитаем стоимость.
+        }». На следующем шаге адаптируем концепцию под вашу планировку и посчитаем стоимость.
       </p>
 
       <div class="catalog-category-bridge">
@@ -284,7 +313,9 @@ function renderCatalog() {
   `;
 }
 
-/* ----------------------------- РАЗДЕЛ «ЗАКАЗ» ----------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                                 ЗАКАЗ                                      */
+/* -------------------------------------------------------------------------- */
 
 function renderOrder() {
   return `
@@ -526,7 +557,9 @@ function renderOrder() {
   `;
 }
 
-/* -------------------------- ЛИЧНЫЙ КАБИНЕТ -------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                                 ПРОФИЛЬ                                    */
+/* -------------------------------------------------------------------------- */
 
 function renderProfile() {
   return `
@@ -640,7 +673,9 @@ function renderProfile() {
   `;
 }
 
-/* ------------------------- РАЗДЕЛ «ЕЩЁ» / ИНФО ------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                                  ЕЩЁ                                       */
+/* -------------------------------------------------------------------------- */
 
 function renderMore() {
   return `
@@ -736,7 +771,9 @@ function renderMore() {
   `;
 }
 
-/* --------------------------------- ROUTES --------------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                                 ROUTES                                     */
+/* -------------------------------------------------------------------------- */
 
 const VIEWS = {
   home: renderHome,
@@ -772,7 +809,9 @@ function getInitialRoute() {
   return "home";
 }
 
-/* ------------------------- ЛОГИКА КАЛЬКУЛЯТОРА --------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                         ЛОГИКА КАЛЬКУЛЯТОРА                                */
+/* -------------------------------------------------------------------------- */
 
 function handleCalcPrice() {
   const main = document.getElementById("app-main");
@@ -844,7 +883,9 @@ function handleCalcPrice() {
   `;
 }
 
-/* ------------------------ ОТПРАВКА ЗАЯВКИ + СЕГМЕНТ ----------------------- */
+/* -------------------------------------------------------------------------- */
+/*                      ОТПРАВКА ЗАЯВКИ + СЕГМЕНТАЦИЯ                         */
+/* -------------------------------------------------------------------------- */
 
 function handleOrderSubmit() {
   const main = document.getElementById("app-main");
@@ -950,7 +991,9 @@ function handleOrderSubmit() {
   `;
 }
 
-/* -------------------------------- РОУТЕР ---------------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                               РОУТЕР SPA                                   */
+/* -------------------------------------------------------------------------- */
 
 function setCatalogCategory(categoryId) {
   selectedCatalogCategoryId = categoryId;
@@ -1033,7 +1076,9 @@ function setupHashListener() {
   });
 }
 
-/* ------------------------- РЕНДЕР ОБОЛОЧКИ SPA --------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                         РЕНДЕР ОБОЛОЧКИ SPA                                */
+/* -------------------------------------------------------------------------- */
 
 function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
@@ -1060,14 +1105,16 @@ function renderLayout(initialRoute = "home") {
         <button class="app-nav__item" data-route="more">Ещё</button>
       </nav>
     </div>
-  `;
+  ";
 
   setupRouter();
   setupHashListener();
   renderRoute(initialRoute);
 }
 
-/* ------------------------------ ИНИЦИАЛИЗАЦИЯ ----------------------------- */
+/* -------------------------------------------------------------------------- */
+/*                              ИНИЦИАЛИЗАЦИЯ                                 */
+/* -------------------------------------------------------------------------- */
 
 function initApp() {
   const initialRoute = getInitialRoute();
