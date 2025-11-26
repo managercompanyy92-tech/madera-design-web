@@ -213,6 +213,7 @@ const discountInfoBlock = `
     </div>
   </div>
 `;
+${discountInfoBlock}
         <div class="catalog-categories-grid">
           ${cards}
         </div>
