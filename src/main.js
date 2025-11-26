@@ -193,8 +193,7 @@ function renderCatalog() {
             </div>
           </div>
         </div>
-
-        <!-- Блок про скидки и партнёров -->
+       <!-- Блок про скидки и партнёров -->
         <div class="catalog-discount-info">
           <div class="catalog-discount-info__title">
             Скидки и партнёрская программа
@@ -208,7 +207,6 @@ function renderCatalog() {
             Мы принимаем заказы от 3 погонных метров и выше.
           </div>
         </div>
-
         <div class="catalog-categories-grid">
           ${cards}
         </div>
