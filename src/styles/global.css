@@ -355,9 +355,17 @@ body .support-bubble {
 
 .catalog-categories-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
     margin-top: 20px;
+}
+
+/* На больших экранах – 3 карточки в ряд */
+@media (min-width: 1024px) {
+    .catalog-categories-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
 }
 .catalog-category-card {
     border: none;
