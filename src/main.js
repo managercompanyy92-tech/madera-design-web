@@ -83,26 +83,21 @@ function renderCatalog() {
   // Первый уровень: категории
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
-  .map(
-    (cat) => `
-      <button class="catalog-category-card" data-id="${cat.id}">
-        <div class="catalog-category-card__image-wrap">
-          <img src="${cat.image}" class="catalog-category-card__img" />
+      .map(
+        (cat) => `
+          <button class="catalog-category-card" data-id="${cat.id}">
+            <div class="catalog-category-card__image-wrap">
+              <img class="catalog-category-card__img" src="${cat.image}" alt="${cat.title}">
+              <div class="catalog-category-card__icon">☰</div>
+            </div>
 
-          <div class="catalog-category-card__icon">
-            ☰
-          </div>
-        </div>
-
-        <div class="catalog-category-info">
-          <div class="catalog-category-title">
-            ${cat.title}
-          </div>
-        </div>
-      </button>
-    `
-  )
-  .join("");
+            <div class="catalog-category-card__info">
+              <span class="catalog-category-card__title">${cat.title}</span>
+            </div>
+          </button>
+        `
+      )
+      .join("");
      return `
       <section class="page page--catalog">
        <h1 class="page__title">Каталог мебели</h1>
