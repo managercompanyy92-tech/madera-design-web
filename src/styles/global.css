@@ -1494,7 +1494,34 @@ body .support-bubble {
   padding-top: 6px;
   margin-top: 4px;
 }
+/* Маркетинговый блок-пояснение для идей внутри категории */
+.catalog-ideas-note {
+  margin-top: 10px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
 
+.catalog-ideas-note__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffb347;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.catalog-ideas-note__text {
+  font-size: 12px;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+.catalog-ideas-note__text + .catalog-ideas-note__text {
+  margin-top: 4px;
+}
 /* Адаптив для блока скидок */
 @media (max-width: 768px) {
   .catalog-discount-info {
