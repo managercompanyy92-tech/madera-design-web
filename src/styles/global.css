@@ -346,96 +346,99 @@ body .support-bubble {
 }
 
 /* ========================================================================== */
-/*  КАТАЛОГ: КАТЕГОРИИ                                                        */
+/*  КАТАЛОГ: КАТЕГОРИИ (ВЕРХНИЙ УРОВЕНЬ)                                     */
 /* ========================================================================== */
 
 .page--catalog {
   padding-top: 4px;
 }
 
+/* Сетка карточек категорий */
 .catalog-categories-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
 }
 
 /* На больших экранах – 3 карточки в ряд */
 @media (min-width: 1024px) {
-    .catalog-categories-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+  .catalog-categories-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
-}
+
+/* Карточка категории */
 .catalog-category-card {
-    border: none;
-    padding: 0;
-    margin: 0;
-    background: #1c1c1c;
-    border-radius: 16px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: #1c1c1c;
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: left;
+  color: #fff;
 }
 
 .catalog-category-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
 }
 
-}
-
-.catalog-category-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
-}
-
+/* Обёртка картинки категории */
 .catalog-category-card__image-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
   overflow: hidden;
+  border-radius: 18px;
+  background: #151515;
 }
 
-.catalog-category-card img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    display: block;
+/* Картинка категории (обложки) */
+.catalog-category-card__img,
+.catalog-category-card__image-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain; /* показываем целиком, без обрезки */
 }
 
-.catalog-category-info {
-    padding: 14px;
-}
-
-.catalog-category-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #fff;
-}
-
-.catalog-category-tagline {
-    font-size: 14px;
-    color: #c2c2c2;
-    margin-top: 6px;
-}
-}
-
-.catalog-category-card__bottom {
+/* Иконка-стрелка поверх картинки (если нужно) */
+.catalog-category-card__icon {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px 12px;
-  background: #333;
-}
-
-.catalog-category-card__title {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.catalog-category-card__arrow {
+  justify-content: center;
   font-size: 18px;
+  color: #ffb347;
+}
+
+/* Текстовая часть категории */
+.catalog-category-card__title {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 14px 4px;
+}
+
+.catalog-category-card__tagline {
+  padding: 0 14px 4px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.catalog-category-card__stats {
+  padding: 0 14px 12px;
+  font-size: 12px;
+  opacity: 0.7;
   color: #ffb347;
 }
 
@@ -480,17 +483,21 @@ body .support-bubble {
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
 }
 
+/* Обёртка картинок в карточках идей */
 .catalog-item-card__image-wrap {
   width: 100%;
-  aspect-ratio: 4 / 3;
   overflow: hidden;
+  border-radius: 18px;
+  background: #151515;
 }
 
-.catalog-item-card__img {
+/* Картинки внутри категорий */
+.catalog-item-card__img,
+.catalog-item-card__image-wrap img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
   display: block;
+  object-fit: contain; /* чтобы вертикальные/прихожие не обрезались */
 }
 
 .catalog-item-card__info {
@@ -1229,130 +1236,11 @@ body .support-bubble {
     bottom: 170px;
     max-width: none;
   }
-  }
-/* КАТЕГОРИИ КАТАЛОГА (верхний уровень) */
-.catalog-category-card__image-wrap {
-  width: 100%;
-  overflow: hidden;
-  border-radius: 24px;        /* под твой дизайн */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #151515;        /* фон, если картинка другой пропорции */
 }
 
-.catalog-category-card__img {
-  display: block;
-  width: 100%;
-  height: auto;               /* главное — не фиксировать высоту */
-  object-fit: contain;          /* показываем картинку целиком */
-}
-
-/* КАРТОЧКИ ИДЕЙ ВНУТРИ КАТЕГОРИИ */
-.catalog-item-card__image-wrap {
-  width: 100%;
-  overflow: hidden;
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #151515;
-}
-
-.catalog-item-card__img {
-  display: block;
-  width: 100%;
-  height: auto;               /* перезаписывает height: 100% / 260px и т.п. */
-  object-fit: contain;        /* для прихожих — вся картинка без обрезки */
-}
-/* === FIX: картинки каталога без обрезаний и искажений === */
-
-/* Обёртка картинок в карточках категорий и идей */
-.catalog-category-card__image-wrap,
-.catalog-item-card__image-wrap {
-  width: 100% !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  overflow: hidden;        /* оставляем, чтобы работало скругление */
-  border-radius: 24px;
-}
-
-/* Сами изображения во всех карточках каталога */
-.catalog-category-card__img,
-.catalog-item-card__img {
-  display: block;
-  width: 100%;
-  height: auto !important;
-  max-height: none !important;
-  object-fit: contain !important; /* картинка полностью, без обрезки */
-  /* === FIX КАРТИНОК КАТАЛОГА БЕЗ ИСКАЖЕНИЙ === */
-
-/* Обёртки для всех картинок каталога (категории + идеи) */
-.catalog-category-card__image-wrap,
-.catalog-item-card__image-wrap {
-  width: 100% !important;
-  height: auto !important;
-  max-height: none !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-  border-radius: 24px !important;
-  display: block !important;
-}
-
-/* Сами изображения во всех карточках (кухни, спальни, гардеробные, прихожие и т.д.) */
-.catalog-category-card__image-wrap img,
-.catalog-item-card__image-wrap img,
-.catalog-category-card__img,
-.catalog-item-card__img {
-  display: block !important;
-  width: 100% !important;
-  height: auto !important;
-  max-height: none !important;
-  object-fit: contain !important; /* показываем картинку целиком */
-}
-/* === SUPER FINAL FIX: картинки каталога без искажений и обрезаний === */
-
-/* Карточки целиком – отключаем фиксированную высоту и обрезку */
-.catalog-category-card,
-.catalog-item-card {
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-
-/* Обёртки всех картинок (категорий и идей) */
-.catalog-category-card__image-wrap,
-.catalog-item-card__image-wrap {
-  width: 100% !important;
-  height: auto !important;
-  max-height: none !important;
-
-  padding: 0 !important;
-  margin: 0 !important;
-
-  background: #151515 !important;
-  border-radius: 24px !important;
-
-  overflow: visible !important;
-  display: block !important;
-}
-
-/* Сами изображения во всех карточках */
-.catalog-category-card__image-wrap img,
-.catalog-item-card__image-wrap img,
-.catalog-category-card__img,
-.catalog-item-card__img {
-  display: block !important;
-
-  /* не растягиваем, а просто вписываем в ширину */
-  width: auto !important;
-  max-width: 100% !important;
-  height: auto !important;
-
-  object-fit: contain !important; /* без обрезки */
-  border-radius: 24px !important;
-}
+/* ========================================================================== */
+/*  ТЕСТОВАЯ СЕТКА (МОЖНО ИСПОЛЬЗОВАТЬ ДЛЯ ОТЛАДКИ)                          */
+/* ========================================================================== */
 
 .test-grid {
   display: grid;
@@ -1367,4 +1255,4 @@ body .support-bubble {
   text-align: center;
   padding: 20px 0;
   border-radius: 8px;
-}
+                         }
