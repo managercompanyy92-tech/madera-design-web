@@ -85,14 +85,18 @@ function renderCatalog() {
     const cards = catalogCategories
   .map(
     (cat) => `
-      <button class="catalog-card" data-id="${cat.id}">
-        <div class="catalog-card__image-wrapper">
-          <img src="${cat.image}" class="catalog-card__image" />
+      <button class="catalog-category-card" data-id="${cat.id}">
+        <div class="catalog-category-card__image-wrap">
+          <img src="${cat.image}" class="catalog-category-card__img" />
 
-          <div class="catalog-card__gradient"></div>
+          <div class="catalog-category-card__icon">
+            ☰
+          </div>
+        </div>
 
-          <div class="catalog-card__title-block">
-            <span class="catalog-card__title">${cat.title}</span>
+        <div class="catalog-category-info">
+          <div class="catalog-category-title">
+            ${cat.title}
           </div>
         </div>
       </button>
