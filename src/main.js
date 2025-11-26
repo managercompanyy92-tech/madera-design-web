@@ -81,8 +81,10 @@ function renderHome() {
 
 /* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
 
+/* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
+
 function renderCatalog() {
-  // Первый уровень: только категории
+  // Первый уровень: только категории + мини-квиз
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
       .map(
@@ -104,22 +106,23 @@ function renderCatalog() {
             </div>
             <div class="catalog-category-card__arrow">›</div>
           </div>
-          ${
-            cat.tagline || cat.statsLabel
-              ? `<div class="catalog-category-card__info">
-                  ${
-                    cat.tagline
-                      ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
-                      : ""
-                  }
-                  ${
-                    cat.statsLabel
-                      ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
-                      : ""
-                  }
-                </div>`
-              : ""
-          }
+          <div class="catalog-category-card__info">
+            ${
+              cat.tagline
+                ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
+                : ""
+            }
+            ${
+              cat.benefit
+                ? `<div class="catalog-category-benefit">${cat.benefit}</div>`
+                : ""
+            }
+            ${
+              cat.statsLabel
+                ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
+                : ""
+            }
+          </div>
         </button>
       `
       )
@@ -129,9 +132,69 @@ function renderCatalog() {
       <section class="page page--catalog">
         <h1 class="page__title">Каталог мебели</h1>
         <p class="page__subtitle">
-          Выберите категорию — дальше покажем вдохновляющие идеи, а затем поможем посчитать
-          стоимость и оформить заказ.
+          Выберите направление, в котором планируете начинать интерьер. Дальше покажем идеи,
+          а затем — ориентировочный расчёт стоимости под вашу квартиру.
         </p>
+
+        <!-- Мини-квиз: с чего начинаем -->
+        <div class="catalog-quiz">
+          <div class="catalog-quiz__block">
+            <div class="catalog-quiz__label">1. Что планируете в первую очередь?</div>
+            <div class="catalog-quiz__options">
+              <button class="catalog-quiz__option" data-quiz-type="kitchens">Кухня</button>
+              <button class="catalog-quiz__option" data-quiz-type="wardrobes">Гардеробная</button>
+              <button class="catalog-quiz__option" data-quiz-type="bedrooms">Спальня</button>
+              <button class="catalog-quiz__option" data-quiz-type="kids">Детская</button>
+              <button class="catalog-quiz__option" data-quiz-type="hallways">Прихожая</button>
+              <button class="catalog-quiz__option" data-quiz-type="livingrooms">Гостиная</button>
+            </div>
+          </div>
+
+          <div class="catalog-quiz__block">
+            <div class="catalog-quiz__label">2. Цель проекта</div>
+            <div class="catalog-quiz__options">
+              <button class="catalog-quiz__option" data-quiz-goal="self">
+                Для себя надолго
+              </button>
+              <button class="catalog-quiz__option" data-quiz-goal="rent">
+                Квартира под сдачу
+              </button>
+              <button class="catalog-quiz__option" data-quiz-goal="sale">
+                Готовлю к продаже
+              </button>
+            </div>
+          </div>
+
+          <div class="catalog-quiz__block">
+            <div class="catalog-quiz__label">3. Примерный бюджет на мебель</div>
+            <div class="catalog-quiz__options">
+              <button class="catalog-quiz__option" data-quiz-budget="low">
+                до 15&nbsp;000 сом
+              </button>
+              <button class="catalog-quiz__option" data-quiz-budget="mid">
+                15–30&nbsp;000 сом
+              </button>
+              <button class="catalog-quiz__option" data-quiz-budget="high">
+                выше 30&nbsp;000 сом
+              </button>
+            </div>
+          </div>
+
+          <div class="catalog-quiz__footer">
+            <div class="catalog-quiz__hint">
+              Даже если вы пока «просто смотрите идеи», квиз помогает подобрать более точные сценарии
+              под вашу ситуацию.
+            </div>
+            <div class="catalog-quiz__actions">
+              <button class="btn btn--ghost" data-route="order">
+                Перейти к быстрому расчёту
+              </button>
+              <button class="btn btn--outline" data-action="open-chat">
+                Спросить AI-дизайнера, с чего начать
+              </button>
+            </div>
+          </div>
+        </div>
 
         <div class="catalog-categories-grid">
           ${cards}
@@ -166,7 +229,7 @@ function renderCatalog() {
               class="btn btn--primary catalog-item-card__btn"
               data-route="order"
             >
-              Рассчитать стоимость
+              Рассчитать такую же композицию под мою квартиру
             </button>
           </div>
         </div>
@@ -182,14 +245,26 @@ function renderCatalog() {
 
       <h1 class="page__title">${category ? category.name || category.title : "Категория"}</h1>
       <p class="page__subtitle">
-        Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн под размеры
-        вашей квартиры и посчитаем стоимость.
+        Здесь собраны визуализации и сценарии для категории «${
+          category ? category.name || category.title : ""
+        }».
+        На следующем шаге адаптируем идею под вашу планировку и посчитаем стоимость.
       </p>
+
+      <div class="catalog-category-bridge">
+        <div class="catalog-category-bridge__text">
+          Чаще всего такие композиции занимают от 3 до 5 погонных метров. Мы принимаем заказы 
+          от 3 пог. метров и выше. Можно сразу перейти к расчёту:
+        </div>
+        <button class="btn btn--outline" data-route="order">
+          Быстрый расчёт для этой категории
+        </button>
+      </div>
 
       <div class="catalog-items-grid">
         ${
           itemCards ||
-          "<div class='page__placeholder'>Идеи для этой категории появятся чуть позже.</div>"
+          "<div class='page__placeholder'>Идеи для этой категории появятся чуть позже. Сейчас мы готовим новые 3D-сценарии специально под рынок Душанбе.</div>"
         }
       </div>
     </section>
