@@ -101,7 +101,7 @@ function renderCatalog() {
   .join("");
      return `
       <section class="page page--catalog">
-        <h1 class="page__title">Каталог мебели</h1>
+       <h1 class="page__title">Каталог мебели</h1>
         <p class="page__subtitle">
           Выберите категорию — дальше покажем вдохновляющие идеи, а затем поможем посчитать стоимость и оформить заказ.
         </p>
