@@ -3,7 +3,7 @@
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
 
-// Базовые тарифы за погонный метр (сомони)
+// Тарифы за погонный метр (сомони)
 const BASE_RATES = {
   standard: 4000,
   premium: 5000,
@@ -12,9 +12,7 @@ const BASE_RATES = {
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
 
-/* -------------------------------------------------------------------------- */
-/*                                   HOME                                     */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
 
 function renderHome() {
   return `
@@ -81,29 +79,10 @@ function renderHome() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                КАТАЛОГ                                     */
-/* -------------------------------------------------------------------------- */
-
-/** Маркетинговый блок "Скидки и партнёры" под квизом каталога */
-function renderCatalogDiscountInfo() {
-  return `
-    <div class="catalog-discount-info">
-      <div class="catalog-discount-info__title">Скидки и партнёры</div>
-      <ul class="catalog-discount-info__list">
-        <li>5% скидка — если оформляете заказ напрямую через компанию Madera Design.</li>
-        <li>10% скидка — если укажете промокод партнёра.</li>
-        <li>Партнёры получают 5% от суммы каждого приведённого заказа.</li>
-      </ul>
-      <div class="catalog-discount-info__note">
-        Мы принимаем заказы от 3 погонных метров и выше.
-      </div>
-    </div>
-  `;
-}
+/* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
 
 function renderCatalog() {
-  // Первый уровень: мини-квиз + список категорий
+  // ПЕРВЫЙ УРОВЕНЬ: список категорий + квиз
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
       .map(
@@ -142,20 +121,14 @@ function renderCatalog() {
                   ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
                   : ""
               }
-              ${
-                cat.discountLabel
-                  ? `
-                  <div class="catalog-category-card__discount">
-                    <div class="catalog-category-card__discount-badge">
-                      Скидки и партнёры
-                    </div>
-                    <div class="catalog-category-card__discount-text">
-                      ${cat.discountLabel}
-                    </div>
-                  </div>
-                `
-                  : ""
-              }
+              <div class="catalog-category-card__discount">
+                <div class="catalog-category-card__discount-badge">
+                  СКИДКИ И ПАРТНЁРЫ
+                </div>
+                <div class="catalog-category-card__discount-text">
+                  −5% при заказе напрямую • −10% по промокоду партнёра
+                </div>
+              </div>
             </div>
           </div>
         </button>
@@ -231,7 +204,18 @@ function renderCatalog() {
           </div>
         </div>
 
-        ${renderCatalogDiscountInfo()}
+        <!-- Маркетинговый блок про скидки и партнёров -->
+        <div class="catalog-discount-info">
+          <div class="catalog-discount-info__title">Скидки и партнёры</div>
+          <ul class="catalog-discount-info__list">
+            <li>5% скидка — если оформляете заказ напрямую через компанию.</li>
+            <li>10% скидка — если укажете промокод партнёра.</li>
+            <li>Партнёры получают 5% от суммы каждого приведённого заказа.</li>
+          </ul>
+          <div class="catalog-discount-info__note">
+            Мы принимаем заказы от 3 погонных метров и выше.
+          </div>
+        </div>
 
         <div class="catalog-categories-grid">
           ${cards}
@@ -240,7 +224,7 @@ function renderCatalog() {
     `;
   }
 
-  // Второй уровень: идеи внутри выбранной категории
+  // ВТОРОЙ УРОВЕНЬ: идеи внутри выбранной категории
   const category = catalogCategories.find(
     (cat) => cat.id === selectedCatalogCategoryId
   );
@@ -261,11 +245,7 @@ function renderCatalog() {
           </div>
           <div class="catalog-item-card__info">
             <div class="catalog-item-card__title">${item.title}</div>
-            ${
-              item.description
-                ? `<div class="catalog-item-card__desc">${item.description}</div>`
-                : ""
-            }
+            <div class="catalog-item-card__desc">${item.description}</div>
             <button
               class="btn btn--primary catalog-item-card__btn"
               data-route="order"
@@ -290,7 +270,7 @@ function renderCatalog() {
       <p class="page__subtitle">
         Здесь собраны идеи и визуализации для категории «${
           category ? category.name || category.title : ""
-        }». На следующем шаге адаптируем концепцию под вашу планировку и посчитаем стоимость.
+        }». На следующем шаге адаптируем их под вашу планировку и посчитаем стоимость.
       </p>
 
       <div class="catalog-category-bridge">
@@ -313,9 +293,7 @@ function renderCatalog() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                 ЗАКАЗ                                      */
-/* -------------------------------------------------------------------------- */
+/* ----------------------------- РАЗДЕЛ «ЗАКАЗ» ----------------------------- */
 
 function renderOrder() {
   return `
@@ -557,9 +535,7 @@ function renderOrder() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                 ПРОФИЛЬ                                    */
-/* -------------------------------------------------------------------------- */
+/* -------------------------- ЛИЧНЫЙ КАБИНЕТ -------------------------- */
 
 function renderProfile() {
   return `
@@ -673,9 +649,7 @@ function renderProfile() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                  ЕЩЁ                                       */
-/* -------------------------------------------------------------------------- */
+/* ------------------------- РАЗДЕЛ «ЕЩЁ» / ИНФО ------------------------- */
 
 function renderMore() {
   return `
@@ -771,9 +745,7 @@ function renderMore() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                 ROUTES                                     */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------- ROUTES --------------------------------- */
 
 const VIEWS = {
   home: renderHome,
@@ -809,9 +781,7 @@ function getInitialRoute() {
   return "home";
 }
 
-/* -------------------------------------------------------------------------- */
-/*                         ЛОГИКА КАЛЬКУЛЯТОРА                                */
-/* -------------------------------------------------------------------------- */
+/* ------------------------- ЛОГИКА КАЛЬКУЛЯТОРА --------------------------- */
 
 function handleCalcPrice() {
   const main = document.getElementById("app-main");
@@ -883,9 +853,7 @@ function handleCalcPrice() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                      ОТПРАВКА ЗАЯВКИ + СЕГМЕНТАЦИЯ                         */
-/* -------------------------------------------------------------------------- */
+/* ------------------------ ОТПРАВКА ЗАЯВКИ + СЕГМЕНТ ----------------------- */
 
 function handleOrderSubmit() {
   const main = document.getElementById("app-main");
@@ -991,9 +959,7 @@ function handleOrderSubmit() {
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                               РОУТЕР SPA                                   */
-/* -------------------------------------------------------------------------- */
+/* -------------------------------- РОУТЕР ---------------------------------- */
 
 function setCatalogCategory(categoryId) {
   selectedCatalogCategoryId = categoryId;
@@ -1076,9 +1042,7 @@ function setupHashListener() {
   });
 }
 
-/* -------------------------------------------------------------------------- */
-/*                         РЕНДЕР ОБОЛОЧКИ SPA                                */
-/* -------------------------------------------------------------------------- */
+/* ------------------------- РЕНДЕР ОБОЛОЧКИ SPA --------------------------- */
 
 function renderLayout(initialRoute = "home") {
   appRoot.innerHTML = `
@@ -1105,16 +1069,14 @@ function renderLayout(initialRoute = "home") {
         <button class="app-nav__item" data-route="more">Ещё</button>
       </nav>
     </div>
-  ";
+  `;
 
   setupRouter();
   setupHashListener();
   renderRoute(initialRoute);
 }
 
-/* -------------------------------------------------------------------------- */
-/*                              ИНИЦИАЛИЗАЦИЯ                                 */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------ ИНИЦИАЛИЗАЦИЯ ----------------------------- */
 
 function initApp() {
   const initialRoute = getInitialRoute();
