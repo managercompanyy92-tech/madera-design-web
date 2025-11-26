@@ -79,37 +79,10 @@ function renderHome() {
   `;
 }
 
-function renderCatalog() {
-  // Первый уровень: категории
+// Первый уровень: категории
   if (!selectedCatalogCategoryId) {
-    const cards = catalogCategories
-      .map(
-        (cat) => `
-          <button class="catalog-category-card" data-id="${cat.id}">
-            <div class="catalog-category-card__image-wrap">
-              <img class="catalog-category-card__img" src="${cat.image}" alt="${cat.title}">
-              <div class="catalog-category-card__icon">☰</div>
-            </div>
-
-           <div class="catalog-category-card__info">
-              <span class="catalog-category-card__title">${cat.title}</span>
-            </div>
-          </button>
-        `
-      )
-      .join("");
-     return `
-      <section class="page page--catalog">
-       <h1 class="page__title">Каталог мебели</h1>
-        <p class="page__subtitle">
-          Выберите категорию — дальше покажем вдохновляющие идеи, а затем поможем посчитать стоимость и оформить заказ.
-        </p>
-
-        <div class="catalog-categories-grid">
-          ${cards}
-        </div>
-      </section>
-    `;
+    ...
+    return `...`;
   }
 
   // Второй уровень: идеи внутри категории
