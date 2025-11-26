@@ -81,8 +81,6 @@ function renderHome() {
 
 /* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
 
-/* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
-
 function renderCatalog() {
   // Первый уровень: только категории + мини-квиз
   if (!selectedCatalogCategoryId) {
@@ -243,12 +241,12 @@ function renderCatalog() {
         ← Все категории
       </button>
 
-      <h1 class="page__title">${category ? category.name || category.title : "Категория"}</h1>
+      <h1 class="page__title">
+        ${category ? category.name || category.title : "Категория"}
+      </h1>
       <p class="page__subtitle">
-        Здесь собраны визуализации и сценарии для категории «${
-          category ? category.name || category.title : ""
-        }».
-        На следующем шаге адаптируем идею под вашу планировку и посчитаем стоимость.
+        Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн
+        под размеры вашей квартиры и посчитаем стоимость.
       </p>
 
       <div class="catalog-category-bridge">
