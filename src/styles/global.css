@@ -1256,3 +1256,144 @@ body .support-bubble {
   padding: 20px 0;
   border-radius: 8px;
                          }
+/* ========================================================================== */
+/*  КАТАЛОГ: МИНИ-КВИЗ И ДОП. БЛОКИ                                          */
+/* ========================================================================== */
+
+.catalog-quiz {
+  margin-top: 16px;
+  margin-bottom: 18px;
+  padding: 14px 14px 12px;
+  border-radius: 20px;
+  background: radial-gradient(circle at top left, rgba(233, 122, 0, 0.18), rgba(10, 10, 10, 0.95));
+  border: 1px solid rgba(233, 122, 0, 0.4);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.catalog-quiz__block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.catalog-quiz__label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #ffb347;
+  opacity: 0.95;
+}
+
+.catalog-quiz__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.catalog-quiz__option {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #f5f5f5;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: all 0.16s ease-out;
+}
+
+.catalog-quiz__option:hover {
+  background: rgba(233, 122, 0, 0.18);
+  border-color: rgba(233, 122, 0, 0.8);
+}
+
+.catalog-quiz__option--active {
+  background: rgba(233, 122, 0, 0.9);
+  color: #111;
+  border-color: rgba(233, 122, 0, 1);
+  box-shadow: 0 0 0 1px rgba(233, 122, 0, 0.7);
+}
+
+.catalog-quiz__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+.catalog-quiz__hint {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.catalog-quiz__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* На мобильных чуть компактнее */
+@media (max-width: 768px) {
+  .catalog-quiz {
+    padding: 12px 10px;
+  }
+}
+
+/* Дополнительная информация на карточках категорий */
+
+.catalog-category-card__info {
+  padding: 8px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(8, 8, 8, 0.95);
+}
+
+.catalog-category-tagline {
+  font-size: 12px;
+  color: #ffb347;
+}
+
+.catalog-category-benefit {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.catalog-category-stats {
+  font-size: 11px;
+  opacity: 0.75;
+  color: #c8c8c8;
+}
+
+/* Мостик из идей в калькулятор */
+
+.catalog-category-bridge {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(12, 12, 12, 0.96);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.catalog-category-bridge__text {
+  font-size: 12px;
+  opacity: 0.85;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .catalog-category-bridge {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
