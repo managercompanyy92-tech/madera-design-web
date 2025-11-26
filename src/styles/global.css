@@ -1354,4 +1354,17 @@ body .support-bubble {
   border-radius: 24px !important;
 }
 
+.test-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
 
+.test-grid__item {
+  background: #222;
+  color: #fff;
+  text-align: center;
+  padding: 20px 0;
+  border-radius: 8px;
+}
