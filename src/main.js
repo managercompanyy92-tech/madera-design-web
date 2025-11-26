@@ -11,7 +11,12 @@ const BASE_RATES = {
 
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
-
+// Состояние мини-квиза каталога (будем использовать дальше в калькуляторе и AI-чате)
+const catalogQuizState = {
+  type: null,   // kitchens, wardrobes, bedrooms, kids, hallways, livingrooms
+  goal: null,   // self, rent, sale
+  budget: null, // low, mid, high
+};
 /* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
 
 function renderHome() {
@@ -948,6 +953,7 @@ function setCatalogCategory(categoryId) {
 }
 
 // Навигация внутри приложения
+// Навигация внутри приложения
 function setupRouter() {
   appRoot.addEventListener("click", (event) => {
     const target = event.target;
@@ -969,11 +975,13 @@ function setupRouter() {
       return;
     }
 
-    // Клик по категории каталога
+    // Клик по категории каталога (карточка)
     const categoryTarget = target.closest("[data-category-id]");
     if (categoryTarget) {
       const categoryId = categoryTarget.getAttribute("data-category-id");
       setCatalogCategory(categoryId);
+      // запомним тип в состоянии квиза
+      catalogQuizState.type = categoryId;
       return;
     }
 
@@ -985,6 +993,69 @@ function setupRouter() {
       if (typeof window !== "undefined") {
         window.location.hash = "catalog";
       }
+      return;
+    }
+
+    // === ЛОГИКА МИНИ-КВИЗА В КАТАЛОГЕ ===
+
+    // 1) Тип: Кухня / Гардеробная / Спальня / Детская / Прихожая / Гостиная
+    const quizTypeTarget = target.closest("[data-quiz-type]");
+    if (quizTypeTarget) {
+      const categoryId = quizTypeTarget.getAttribute("data-quiz-type");
+      catalogQuizState.type = categoryId;
+
+      // Сразу открываем нужную категорию каталога
+      setCatalogCategory(categoryId);
+      return;
+    }
+
+    // 2) Цель проекта: для себя / под аренду / под продажу
+    const quizGoalTarget = target.closest("[data-quiz-goal]");
+    if (quizGoalTarget) {
+      const goal = quizGoalTarget.getAttribute("data-quiz-goal");
+      catalogQuizState.goal = goal;
+
+      // Подсветим выбранную опцию в пределах блока
+      const block = quizGoalTarget.closest(".catalog-quiz__block");
+      if (block) {
+        block
+          .querySelectorAll(".catalog-quiz__option")
+          .forEach((btn) => btn.classList.remove("catalog-quiz__option--active"));
+      }
+      quizGoalTarget.classList.add("catalog-quiz__option--active");
+
+      console.log("CATALOG_QUIZ_GOAL", catalogQuizState);
+      return;
+    }
+
+    // 3) Бюджет на мебель
+    const quizBudgetTarget = target.closest("[data-quiz-budget]");
+    if (quizBudgetTarget) {
+      const budget = quizBudgetTarget.getAttribute("data-quiz-budget");
+      catalogQuizState.budget = budget;
+
+      // Подсветим выбранную опцию в пределах блока
+      const block = quizBudgetTarget.closest(".catalog-quiz__block");
+      if (block) {
+        block
+          .querySelectorAll(".catalog-quiz__option")
+          .forEach((btn) => btn.classList.remove("catalog-quiz__option--active"));
+      }
+      quizBudgetTarget.classList.add("catalog-quiz__option--active");
+
+      console.log("CATALOG_QUIZ_BUDGET", catalogQuizState);
+      return;
+    }
+
+    // 4) Кнопка "Спросить AI-дизайнера, с чего начать"
+    const openChatTarget = target.closest("[data-action='open-chat']");
+    if (openChatTarget) {
+      // Пока просто пишем в консоль. На следующих шагах привяжем к твоему AI-чату.
+      console.log("OPEN_CHAT_FROM_CATALOG", catalogQuizState);
+
+      // Здесь позже можно будет:
+      // - открыть кастомный чат,
+      // - передать туда catalogQuizState как контекст.
       return;
     }
 
@@ -1001,22 +1072,6 @@ function setupRouter() {
       handleOrderSubmit();
       return;
     }
-  });
-}
-
-// Реакция на кнопки "Назад/Вперёд" в браузере
-function setupHashListener() {
-  if (typeof window === "undefined") return;
-
-  window.addEventListener("hashchange", () => {
-    const hash = window.location.hash.replace("#", "").trim();
-    if (!hash || !VIEWS[hash]) return;
-
-    if (hash === "catalog") {
-      selectedCatalogCategoryId = null;
-    }
-
-    renderRoute(hash);
   });
 }
 
