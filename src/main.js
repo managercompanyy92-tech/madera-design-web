@@ -91,7 +91,7 @@ function renderCatalog() {
               <div class="catalog-category-card__icon">☰</div>
             </div>
 
-            <div class="catalog-category-card__info">
+           <div class="catalog-category-card__info">
               <span class="catalog-category-card__title">${cat.title}</span>
             </div>
           </button>
