@@ -1447,3 +1447,93 @@ body .support-bubble {
   opacity: 0.75;
   margin-top: 4px;
 }
+/* ========================================================================== */
+/*  КАТАЛОГ: БЛОК СО СКИДКАМИ ПОД КВИЗОМ                                      */
+/* ========================================================================== */
+
+.catalog-discount-info {
+  margin-top: 18px;
+  margin-bottom: 10px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: radial-gradient(circle at top left, rgba(233, 122, 0, 0.18), rgba(10, 10, 10, 0.96));
+  border: 1px solid rgba(233, 122, 0, 0.45);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+}
+
+.catalog-discount-info__title {
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffb347;
+  margin-bottom: 8px;
+}
+
+.catalog-discount-info__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.catalog-discount-info__list li + li {
+  margin-top: 4px;
+}
+
+.catalog-discount-info__list li::before {
+  content: "•";
+  color: #e97a00;
+  margin-right: 6px;
+}
+
+.catalog-discount-info__note {
+  font-size: 12px;
+  opacity: 0.85;
+  border-top: 1px dashed rgba(255, 255, 255, 0.18);
+  padding-top: 6px;
+  margin-top: 4px;
+}
+
+/* Адаптив для блока скидок */
+@media (max-width: 768px) {
+  .catalog-discount-info {
+    padding: 12px 12px;
+    margin-top: 16px;
+  }
+}
+
+/* ========================================================================== */
+/*  КАТАЛОГ: БЕЙДЖ СО СКИДКОЙ НА КАРТОЧКЕ КАТЕГОРИИ                           */
+/* ========================================================================== */
+
+.catalog-category-card__discount {
+  padding: 10px 14px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  background: linear-gradient(135deg, rgba(233, 122, 0, 0.22), rgba(10, 10, 10, 0.95));
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.catalog-category-card__discount-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: #e97a00;
+  color: #111;
+  box-shadow: 0 8px 18px rgba(233, 122, 0, 0.6);
+}
+
+.catalog-category-card__discount-text {
+  font-size: 11px;
+  opacity: 0.85;
+  color: #ffb347;
+}
