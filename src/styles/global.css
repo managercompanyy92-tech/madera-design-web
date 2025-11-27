@@ -1445,6 +1445,28 @@ body .support-bubble {
   color: rgba(255, 255, 255, 0.78);
 }
 }
+/* Мини-блок "Скидки и партнёры" в карточке категории */
+.catalog-category-card__discount {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 10% 0%, #ff6f4a 0%, #b01613 45%, #4b0505 100%);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+}
+
+.catalog-category-card__discount-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.catalog-category-card__discount-text {
+  font-size: 11px;
+  color: #ffe8d2;
+}
 @media (max-width: 768px) {
   .catalog-category-bridge {
     flex-direction: column;
