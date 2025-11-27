@@ -1,84 +1,72 @@
 // api/ai-designer.js
-// Vercel Serverless Function: принимает JSON { message } и возвращает ответ от OpenAI
 
-let openaiClientPromise;
+import OpenAI from "openai";
 
-/**
- * Ленивое создание клиента OpenAI (ESM-библиотека внутри CommonJS файла)
- */
-async function getOpenAIClient() {
-  if (!openaiClientPromise) {
-    openaiClientPromise = import("openai").then(({ default: OpenAI }) => {
-      return new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
-    });
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Вспомогательная функция: читаем "сырое" тело запроса и парсим JSON
+async function readJsonBody(req) {
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(chunk);
   }
-  return openaiClientPromise;
+  const raw = Buffer.concat(chunks).toString("utf8") || "{}";
+
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn("Bad JSON body:", e);
+    return {};
+  }
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
+  // Разрешаем только POST
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
+    res.statusCode = 405;
+    res.setHeader("Allow", "POST");
+    res.json({ error: "Method Not Allowed" });
     return;
   }
 
   try {
-    const { message } = req.body || {};
+    const body = await readJsonBody(req);
+    const userMessage = (body.message || "").toString().slice(0, 2000).trim();
 
-    if (!message || typeof message !== "string") {
-      res.status(400).json({ error: "Message is required" });
+    if (!userMessage) {
+      res.statusCode = 400;
+      res.json({ error: "Пустой запрос" });
       return;
     }
 
-    const openai = await getOpenAIClient();
-
-    // Настраиваем промпт под твой кейс (AI-дизайнер мебели / интерьера)
-    const systemPrompt =
-      "Ты AI-дизайнер Madera. Ты помогаешь клиентам " +
-      "подбирать материалы, цвета и ориентировочную стоимость " +
-      "корпусной мебели на заказ в Душанбе. Отвечай кратко, по делу, " +
-      "на русском языке, дружелюбно и профессионально. " +
-      "Если не хватает данных (нет размеров, материалов и т.п.), " +
-      "задай уточняющие вопросы.";
-
-    const response = await openai.responses.create({
+    // Вызов OpenAI Responses API
+    const response = await client.responses.create({
       model: "gpt-4.1-mini",
-      input: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
-        {
-          role: "user",
-          content: message,
-        },
-      ],
+      input: `
+Ты — AI-дизайнер Madera Design в Душанбе.
+Задача:
+- Помогать клиенту с планировкой кухни, шкафов, гардеробных и другой корпусной мебели.
+- Уточнять размеры, стиль, бюджет и особенности помещения.
+- Предлагать 2–3 варианта решения на понятном, простом русском.
+- Отвечать коротко, по делу, без "воды".
+Сообщение клиента: "${userMessage}"
+      `.trim(),
     });
 
-    // Разбор ответа из OpenAI Responses API
-    let reply = "";
+    // Достаём текстовый ответ из Responses API
+    const replyText =
+      response.output?.[0]?.content?.[0]?.text?.trim() ||
+      "Извини, сейчас не получилось сформировать ответ. Попробуй ещё раз чуть позже.";
 
-    if (response.output && Array.isArray(response.output)) {
-      reply = response.output
-        .flatMap((item) => item.content || [])
-        .map((block) => (block.text && block.text.value) || "")
-        .join("\n")
-        .trim();
-    }
-
-    if (!reply) {
-      reply =
-        "Мне не удалось сформировать ответ. Попробуйте переформулировать запрос или указать размеры и пожелания.";
-    }
-
-    res.status(200).json({ reply });
-  } catch (error) {
-    console.error("AI Designer error:", error);
-    res.status(500).json({
-      error: "AI error",
-      reply:
-        "Извините, сейчас сервис AI-дизайнера временно недоступен. Попробуйте ещё раз чуть позже.",
+    res.statusCode = 200;
+    res.json({ reply: replyText });
+  } catch (err) {
+    console.error("AI designer error:", err);
+    res.statusCode = 500;
+    res.json({
+      error: "Внутренняя ошибка сервера AI",
     });
   }
-};
+}
