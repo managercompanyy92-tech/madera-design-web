@@ -193,7 +193,29 @@ function renderCatalog() {
             </div>
           </div>
         </div>
+       <!-- Блок "Скидки и партнёры" под квизом -->
 
+      <div class="catalog-discount-info">
+
+        <div class="catalog-discount-info__title">Скидки и партнёры</div>
+
+        <ul class="catalog-discount-info__list">
+
+          <li>5% скидка — если оформляете заказ напрямую через компанию</li>
+
+          <li>10% скидка — если укажете промокод партнёра</li>
+
+          <li>Партнёры получают 5% от суммы каждого приведённого заказа</li>
+
+        </ul>
+
+        <div class="catalog-discount-info__note">
+
+          Мы принимаем заказы от 3 погонных метров и выше.
+
+        </div>
+
+      
         <div class="catalog-categories-grid">
           ${cards}
         </div>
