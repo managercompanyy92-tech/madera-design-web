@@ -751,7 +751,150 @@ function renderMore() {
     </section>
   `;
 }
+/* --------------------------- AI-ДИЗАЙНЕР (CHAT) --------------------------- */
 
+let aiChatRoot = null;
+let aiChatMessagesEl = null;
+let aiChatInputEl = null;
+let aiChatIsSending = false;
+
+function initAiDesignerChat() {
+  if (typeof document === "undefined") return;
+  if (aiChatRoot) return;
+
+  aiChatRoot = document.createElement("div");
+  aiChatRoot.className = "ai-chat";
+  aiChatRoot.innerHTML = `
+    <div class="ai-chat__window">
+      <div class="ai-chat__header">
+        <div class="ai-chat__title">AI-дизайнер Madera Design</div>
+        <button type="button" class="ai-chat__close" data-ai-chat-close>×</button>
+      </div>
+      <div class="ai-chat__subtitle">
+        Задайте вопрос про интерьер или мебель — подберём идеи и поможем подготовиться к заказу.
+      </div>
+      <div class="ai-chat__messages"></div>
+      <form class="ai-chat__form">
+        <textarea
+          class="ai-chat__input"
+          rows="2"
+          placeholder="Опишите комнату, стиль и бюджет. Например: «Кухня 4 м, современный стиль, тёплые оттенки»"
+        ></textarea>
+        <button type="submit" class="ai-chat__send">Отправить</button>
+      </form>
+    </div>
+  `.trim();
+
+  document.body.appendChild(aiChatRoot);
+
+  aiChatMessagesEl = aiChatRoot.querySelector(".ai-chat__messages");
+  aiChatInputEl = aiChatRoot.querySelector(".ai-chat__input");
+
+  const closeBtn = aiChatRoot.querySelector("[data-ai-chat-close]");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", hideAiChat);
+  }
+
+  const form = aiChatRoot.querySelector(".ai-chat__form");
+  if (form) {
+    form.addEventListener("submit", handleAiChatSubmit);
+  }
+}
+
+function showAiChat(initialQuestion = "") {
+  if (!aiChatRoot) return;
+  aiChatRoot.classList.add("ai-chat--visible");
+
+  // первое приветствие — только один раз
+  if (aiChatMessagesEl && aiChatMessagesEl.children.length === 0) {
+    appendAiMessage(
+      "assistant",
+      "Здравствуйте! Я AI-дизайнер Madera Design. Расскажите, какую комнату хотите оформить и в каком стиле — предложу идеи и помогу подготовиться к расчёту проекта."
+    );
+  }
+
+  if (initialQuestion && aiChatInputEl && !aiChatInputEl.value) {
+    aiChatInputEl.value = initialQuestion;
+  }
+
+  setTimeout(() => {
+    aiChatInputEl && aiChatInputEl.focus();
+  }, 50);
+}
+
+function hideAiChat() {
+  if (!aiChatRoot) return;
+  aiChatRoot.classList.remove("ai-chat--visible");
+}
+
+function appendAiMessage(role, text) {
+  if (!aiChatMessagesEl) return null;
+
+  const item = document.createElement("div");
+  item.className =
+    "ai-chat__message " +
+    (role === "user" ? "ai-chat__message--user" : "ai-chat__message--assistant");
+  item.textContent = text;
+  aiChatMessagesEl.appendChild(item);
+
+  aiChatMessagesEl.scrollTop = aiChatMessagesEl.scrollHeight;
+  return item;
+}
+
+async function handleAiChatSubmit(event) {
+  event.preventDefault();
+  if (!aiChatInputEl || aiChatIsSending) return;
+
+  const text = (aiChatInputEl.value || "").trim();
+  if (!text) return;
+
+  aiChatIsSending = true;
+  appendAiMessage("user", text);
+  aiChatInputEl.value = "";
+
+  const typingPlaceholder = appendAiMessage(
+    "assistant",
+    "Думаю над идеями для вашего интерьера…"
+  );
+  if (typingPlaceholder) {
+    typingPlaceholder.classList.add("ai-chat__message--typing");
+  }
+
+  try {
+    const res = await fetch("/api/ai-designer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+    });
+
+    let reply =
+      "Извините, сейчас сервис временно недоступен. Попробуйте ещё раз чуть позже.";
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.reply === "string" && data.reply.trim()) {
+        reply = data.reply.trim();
+      }
+    }
+
+    if (typingPlaceholder) {
+      typingPlaceholder.textContent = reply;
+      typingPlaceholder.classList.remove("ai-chat__message--typing");
+    }
+  } catch (error) {
+    console.error("AI_CHAT_ERROR", error);
+    if (typingPlaceholder) {
+      typingPlaceholder.textContent =
+        "Не удалось получить ответ. Проверьте интернет и попробуйте ещё раз.";
+      typingPlaceholder.classList.remove("ai-chat__message--typing");
+    }
+  } finally {
+    aiChatIsSending = false;
+    if (aiChatMessagesEl) {
+      aiChatMessagesEl.scrollTop = aiChatMessagesEl.scrollHeight;
+    }
+  }
+}
 /* --------------------------------- ROUTES --------------------------------- */
 
 const VIEWS = {
