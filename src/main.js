@@ -758,6 +758,12 @@ let aiChatMessagesEl = null;
 let aiChatInputEl = null;
 let aiChatIsSending = false;
 
+// состояние вложений
+let aiChatFiles = [];
+let aiChatVoiceBlob = null;
+let aiChatIsRecording = false;
+let aiChatMediaRecorder = null;
+
 function initAiDesignerChat() {
   if (typeof document === "undefined") return;
   if (aiChatRoot) return;
@@ -770,15 +776,41 @@ function initAiDesignerChat() {
         <div class="ai-chat__title">AI-дизайнер Madera Design</div>
         <button type="button" class="ai-chat__close" data-ai-chat-close>×</button>
       </div>
+
       <div class="ai-chat__subtitle">
-        Задайте вопрос про интерьер или мебель — подберём идеи и поможем подготовиться к заказу.
+        Задайте вопрос про интерьер или загрузите фото/план квартиры — предложу решения и помогу подготовиться к заказу.
       </div>
+
       <div class="ai-chat__messages"></div>
+
+      <div class="ai-chat__attachments">
+        <div class="ai-chat__attachments-list" data-ai-chat-attachments></div>
+      </div>
+
+      <div class="ai-chat__toolbar">
+        <button type="button" class="ai-chat__icon-btn" data-ai-chat-file>
+          📎
+        </button>
+        <button type="button" class="ai-chat__icon-btn" data-ai-chat-mic>
+          🎙
+        </button>
+        <span class="ai-chat__toolbar-hint">
+          Можно прикрепить фото, видео, PDF или записать голосовое.
+        </span>
+        <input
+          type="file"
+          data-ai-chat-file-input
+          multiple
+          accept="image/*,video/*,application/pdf,application/vnd.*,.pdf"
+          style="display: none;"
+        />
+      </div>
+
       <form class="ai-chat__form">
         <textarea
           class="ai-chat__input"
           rows="2"
-          placeholder="Опишите комнату, стиль и бюджет. Например: «Кухня 4 м, современный стиль, тёплые оттенки»"
+          placeholder="Например: «Кухня 4 м, современный стиль, тёплые оттенки, нужен остров и высокий шкаф под технику»"
         ></textarea>
         <button type="submit" class="ai-chat__send">Отправить</button>
       </form>
@@ -791,13 +823,22 @@ function initAiDesignerChat() {
   aiChatInputEl = aiChatRoot.querySelector(".ai-chat__input");
 
   const closeBtn = aiChatRoot.querySelector("[data-ai-chat-close]");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", hideAiChat);
-  }
+  if (closeBtn) closeBtn.addEventListener("click", hideAiChat);
 
   const form = aiChatRoot.querySelector(".ai-chat__form");
-  if (form) {
-    form.addEventListener("submit", handleAiChatSubmit);
+  if (form) form.addEventListener("submit", handleAiChatSubmit);
+
+  const fileBtn = aiChatRoot.querySelector("[data-ai-chat-file]");
+  const fileInput = aiChatRoot.querySelector("[data-ai-chat-file-input]");
+  const micBtn = aiChatRoot.querySelector("[data-ai-chat-mic]");
+
+  if (fileBtn && fileInput) {
+    fileBtn.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", handleAiChatFilesSelected);
+  }
+
+  if (micBtn) {
+    micBtn.addEventListener("click", () => toggleAiChatRecording(micBtn));
   }
 }
 
@@ -805,11 +846,10 @@ function showAiChat(initialQuestion = "") {
   if (!aiChatRoot) return;
   aiChatRoot.classList.add("ai-chat--visible");
 
-  // первое приветствие — только один раз
   if (aiChatMessagesEl && aiChatMessagesEl.children.length === 0) {
     appendAiMessage(
       "assistant",
-      "Здравствуйте! Я AI-дизайнер Madera Design. Расскажите, какую комнату хотите оформить и в каком стиле — предложу идеи и помогу подготовиться к расчёту проекта."
+      "Здравствуйте! Я AI-дизайнер Madera Design. Можете описать задачу, прикрепить фото комнаты или PDF-план. Я предложу варианты планировки, цвета и мебели и помогу подготовиться к заказу."
     );
   }
 
@@ -834,62 +874,242 @@ function appendAiMessage(role, text) {
   item.className =
     "ai-chat__message " +
     (role === "user" ? "ai-chat__message--user" : "ai-chat__message--assistant");
-  item.textContent = text;
-  aiChatMessagesEl.appendChild(item);
 
+  if (text) {
+    const p = document.createElement("p");
+    p.className = "ai-chat__message-text";
+    p.textContent = text;
+    item.appendChild(p);
+  }
+
+  aiChatMessagesEl.appendChild(item);
   aiChatMessagesEl.scrollTop = aiChatMessagesEl.scrollHeight;
   return item;
 }
+
+/* ---------- работа с файлами ---------- */
+
+function handleAiChatFilesSelected(event) {
+  const input = event.target;
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+
+  aiChatFiles = aiChatFiles.concat(files);
+  input.value = "";
+
+  renderAiChatAttachments();
+}
+
+function renderAiChatAttachments() {
+  const container = aiChatRoot?.querySelector("[data-ai-chat-attachments]");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!aiChatFiles.length && !aiChatVoiceBlob) {
+    container.style.display = "none";
+    return;
+  }
+
+  container.style.display = "flex";
+
+  aiChatFiles.forEach((file, index) => {
+    const tag = document.createElement("button");
+    tag.type = "button";
+    tag.className = "ai-chat__attachment-tag";
+    tag.textContent = file.name;
+    tag.title = file.name;
+    tag.addEventListener("click", () => {
+      aiChatFiles.splice(index, 1);
+      renderAiChatAttachments();
+    });
+    container.appendChild(tag);
+  });
+
+  if (aiChatVoiceBlob) {
+    const tag = document.createElement("button");
+    tag.type = "button";
+    tag.className = "ai-chat__attachment-tag ai-chat__attachment-tag--voice";
+    tag.textContent = "Голосовое сообщение";
+    tag.addEventListener("click", () => {
+      aiChatVoiceBlob = null;
+      renderAiChatAttachments();
+    });
+    container.appendChild(tag);
+  }
+}
+
+/* ---------- голосовые сообщения ---------- */
+
+async function toggleAiChatRecording(micBtn) {
+  if (aiChatIsRecording) {
+    // стоп записи
+    aiChatIsRecording = false;
+    micBtn.classList.remove("ai-chat__icon-btn--active");
+    if (aiChatMediaRecorder && aiChatMediaRecorder.state !== "inactive") {
+      aiChatMediaRecorder.stop();
+    }
+    return;
+  }
+
+  // старт записи
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const chunks = [];
+    aiChatMediaRecorder = new MediaRecorder(stream);
+
+    aiChatMediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+
+    aiChatMediaRecorder.onstop = () => {
+      stream.getTracks().forEach((t) => t.stop());
+      aiChatVoiceBlob = new Blob(chunks, { type: "audio/webm" });
+      renderAiChatAttachments();
+    };
+
+    aiChatIsRecording = true;
+    micBtn.classList.add("ai-chat__icon-btn--active");
+    aiChatMediaRecorder.start();
+  } catch (error) {
+    console.error("AI_CHAT_MIC_ERROR", error);
+    appendAiMessage(
+      "assistant",
+      "Не удалось получить доступ к микрофону. Проверьте разрешения браузера."
+    );
+  }
+}
+
+/* ---------- отправка запроса ---------- */
 
 async function handleAiChatSubmit(event) {
   event.preventDefault();
   if (!aiChatInputEl || aiChatIsSending) return;
 
   const text = (aiChatInputEl.value || "").trim();
-  if (!text) return;
+  if (!text && !aiChatFiles.length && !aiChatVoiceBlob) return;
 
   aiChatIsSending = true;
-  appendAiMessage("user", text);
+
+  let userText = text || "";
+  if (aiChatFiles.length) {
+    userText += (userText ? "\n" : "") + `Прикреплено файлов: ${aiChatFiles.length}`;
+  }
+  if (aiChatVoiceBlob) {
+    userText += (userText ? "\n" : "") + "Прикреплено голосовое сообщение.";
+  }
+
+  appendAiMessage("user", userText || "Файлы/голосовое сообщение без текста");
   aiChatInputEl.value = "";
 
   const typingPlaceholder = appendAiMessage(
     "assistant",
-    "Думаю над идеями для вашего интерьера…"
+    "Думаю над предложениями для вашего интерьера…"
   );
   if (typingPlaceholder) {
     typingPlaceholder.classList.add("ai-chat__message--typing");
   }
 
   try {
+    const formData = new FormData();
+    if (text) formData.append("message", text);
+
+    aiChatFiles.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    if (aiChatVoiceBlob) {
+      formData.append("voice", aiChatVoiceBlob, "voice-message.webm");
+    }
+
     const res = await fetch("/api/ai-designer", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text }),
+      body: formData,
     });
 
     let reply =
       "Извините, сейчас сервис временно недоступен. Попробуйте ещё раз чуть позже.";
+    let audioUrl = null;
+    let designs = [];
 
     if (res.ok) {
       const data = await res.json();
-      if (data && typeof data.reply === "string" && data.reply.trim()) {
-        reply = data.reply.trim();
+      if (data) {
+        if (typeof data.reply === "string" && data.reply.trim()) {
+          reply = data.reply.trim();
+        }
+        if (typeof data.audioUrl === "string") {
+          audioUrl = data.audioUrl;
+        }
+        if (Array.isArray(data.designs)) {
+          designs = data.designs;
+        }
       }
     }
 
     if (typingPlaceholder) {
-      typingPlaceholder.textContent = reply;
       typingPlaceholder.classList.remove("ai-chat__message--typing");
+      const textEl = typingPlaceholder.querySelector(".ai-chat__message-text");
+      if (textEl) textEl.textContent = reply;
+
+      // аудио-ответ
+      if (audioUrl) {
+        const audioWrapper = document.createElement("div");
+        audioWrapper.className = "ai-chat__audio";
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.src = audioUrl;
+        audioWrapper.appendChild(audio);
+        typingPlaceholder.appendChild(audioWrapper);
+      }
+
+      // превью дизайнов
+      if (designs.length) {
+        const gallery = document.createElement("div");
+        gallery.className = "ai-chat__designs";
+
+        designs.forEach((d) => {
+          if (!d || !d.url) return;
+          const card = document.createElement("a");
+          card.href = d.url;
+          card.target = "_blank";
+          card.rel = "noopener noreferrer";
+          card.className = "ai-chat__design-card";
+
+          const img = document.createElement("img");
+          img.src = d.url;
+          img.alt = d.title || "Вариант дизайна";
+          card.appendChild(img);
+
+          if (d.title) {
+            const caption = document.createElement("div");
+            caption.className = "ai-chat__design-caption";
+            caption.textContent = d.title;
+            card.appendChild(caption);
+          }
+
+          gallery.appendChild(card);
+        });
+
+        typingPlaceholder.appendChild(gallery);
+      }
     }
   } catch (error) {
     console.error("AI_CHAT_ERROR", error);
     if (typingPlaceholder) {
-      typingPlaceholder.textContent =
-        "Не удалось получить ответ. Проверьте интернет и попробуйте ещё раз.";
       typingPlaceholder.classList.remove("ai-chat__message--typing");
+      const textEl = typingPlaceholder.querySelector(".ai-chat__message-text");
+      if (textEl) {
+        textEl.textContent =
+          "Не удалось получить ответ. Проверьте интернет и попробуйте ещё раз.";
+      }
     }
   } finally {
     aiChatIsSending = false;
+    aiChatFiles = [];
+    aiChatVoiceBlob = null;
+    renderAiChatAttachments();
+
     if (aiChatMessagesEl) {
       aiChatMessagesEl.scrollTop = aiChatMessagesEl.scrollHeight;
     }
