@@ -1,29 +1,61 @@
 // api/ai-designer.js
-// Простейшая заглушка backend для AI-дизайнера
+// Backend для AI-дизайнера — принимает текст, файлы и голосовые сообщения
+
+const multiparty = require("multiparty");
 
 module.exports = async (req, res) => {
-  // Разрешаем только POST
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   try {
-    // ВАЖНО: пока ничего не парсим, просто возвращаем тестовый ответ
-    // (чтобы проверить связку фронт → бэкенд → фронт)
-    return res.status(200).json({
-      reply:
-        "Спасибо за обращение! Я получил ваш запрос для AI-дизайнера. " +
-        "На следующем шаге мы научим бэкенд читать текст, файлы и голос " +
-        "и генерировать индивидуальные решения.",
-      audioUrl: null,
-      designs: [],
+    const form = new multiparty.Form();
+
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.error("FORM_PARSE_ERROR:", err);
+        return res.status(500).json({
+          reply: "Ошибка при обработке данных. Попробуйте позже.",
+        });
+      }
+
+      // ТЕКСТ
+      const userText = fields?.message?.[0] || null;
+
+      // ФАЙЛЫ (фото, видео, PDF, голосовые — всё)
+      const uploadedFiles = [];
+      Object.values(files).forEach((arr) => {
+        arr.forEach((f) => {
+          uploadedFiles.push({
+            filename: f.originalFilename,
+            type: f.headers["content-type"],
+            size: f.size,
+            path: f.path,
+          });
+        });
+      });
+
+      console.log("TEXT:", userText);
+      console.log("FILES:", uploadedFiles);
+
+      // ТЕСТОВЫЙ ОТВЕТ
+      return res.status(200).json({
+        reply:
+          "Файлы и сообщение успешно получены сервером. " +
+          "Теперь можно переходить к подключению реального ИИ.",
+        received: {
+          text: userText,
+          files: uploadedFiles,
+        },
+        audioUrl: null,
+        designs: [],
+      });
     });
-  } catch (error) {
-    console.error("AI-designer API error:", error);
+  } catch (e) {
+    console.error("AI_DESIGNER_FATAL_ERROR:", e);
     return res.status(500).json({
-      error: "Internal Server Error",
-      details: error.message || String(error),
+      reply: "Ошибка сервера. Попробуйте позже.",
     });
   }
 };
