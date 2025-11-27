@@ -20,10 +20,10 @@ module.exports = async (req, res) => {
         });
       }
 
-      // ТЕКСТ
+      // Текстовое сообщение
       const userText = fields?.message?.[0] || null;
 
-      // ФАЙЛЫ (фото, видео, PDF, голосовые — всё)
+      // Файлы (фото, PDF, видео, голос — всё)
       const uploadedFiles = [];
       Object.values(files).forEach((arr) => {
         arr.forEach((f) => {
@@ -39,11 +39,10 @@ module.exports = async (req, res) => {
       console.log("TEXT:", userText);
       console.log("FILES:", uploadedFiles);
 
-      // ТЕСТОВЫЙ ОТВЕТ
+      // Возвращаем успешный тестовый ответ
       return res.status(200).json({
         reply:
-          "Файлы и сообщение успешно получены сервером. " +
-          "Теперь можно переходить к подключению реального ИИ.",
+          "Файлы и сообщение успешно получены сервером. На следующем шаге подключим настоящий ИИ.",
         received: {
           text: userText,
           files: uploadedFiles,
