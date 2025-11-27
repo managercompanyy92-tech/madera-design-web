@@ -87,7 +87,24 @@ function renderCatalog() {
     const cards = catalogCategories
       .map(
         (cat) => `
-        <div class="catalog-category-card__info">
+        <button
+          class="catalog-category-card"
+          data-category-id="${cat.id}"
+        >
+          <div class="catalog-category-card__image-wrap">
+            <img
+              src="${cat.cover || cat.image || ""}"
+              alt="${cat.name || cat.title || ""}"
+              class="catalog-category-card__img"
+            />
+          </div>
+          <div class="catalog-category-card__bottom">
+            <div class="catalog-category-card__title">
+              ${cat.name || cat.title || ""}
+            </div>
+            <div class="catalog-category-card__arrow">›</div>
+          </div>
+          <div class="catalog-category-card__info">
             ${
               cat.tagline
                 ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
@@ -103,16 +120,8 @@ function renderCatalog() {
                 ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
                 : ""
             }
-            <!-- Блок про скидки и партнёров прямо на карточке -->
-            <div class="catalog-category-card__discount">
-              <div class="catalog-category-card__discount-badge">
-                Скидки и партнёры
-              </div>
-              <div class="catalog-category-card__discount-text">
-                −5% при заказе напрямую • −10% по промокоду партнёра
-              </div>
-            </div>
           </div>
+        </button>
       `
       )
       .join("");
@@ -184,20 +193,7 @@ function renderCatalog() {
             </div>
           </div>
         </div>
-       <!-- Блок про скидки и партнёров -->
-        <div class="catalog-discount-info">
-          <div class="catalog-discount-info__title">
-            Скидки и партнёрская программа
-          </div>
-          <ul class="catalog-discount-info__list">
-            <li>−5% — если вы оформляете заказ напрямую через компанию.</li>
-            <li>−10% — при заказе по промокоду партнёра.</li>
-            <li>Партнёры получают 5% от суммы каждого приведённого заказа.</li>
-          </ul>
-          <div class="catalog-discount-info__note">
-            Мы принимаем заказы от 3 погонных метров и выше.
-          </div>
-        </div>
+
         <div class="catalog-categories-grid">
           ${cards}
         </div>
