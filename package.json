@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "multiparty": "^4.2.3",
+    "openai": "^4.67.2",
     "vite": "^5.0.0"
   }
 }
