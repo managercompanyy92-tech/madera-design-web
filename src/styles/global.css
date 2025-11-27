@@ -1867,3 +1867,263 @@ body .support-bubble {
   padding: 3px 4px 4px;
   color: #fff;
 }
+/* Шапка */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: radial-gradient(circle at top left, #3b2a1a 0%, #090909 50%, #050505 100%);
+  border-bottom: 1px solid rgba(255, 153, 51, 0.25);
+}
+
+.site-header-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-logo-mark {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.site-logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-logo-title {
+  font-size: 16px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #ff9933;
+}
+
+.site-logo-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.header-cta {
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffb347, #ff8c2b);
+  color: #111;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 0 0 1px rgba(255, 153, 51, 0.3),
+    0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.header-cta:hover {
+  filter: brightness(1.05);
+}
+
+/* Hero */
+
+.hero {
+  background: radial-gradient(circle at top, #3b2a1a 0%, #050505 52%, #000 100%);
+  padding: 32px 16px 40px;
+}
+
+.hero-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+}
+
+.hero-text {
+  color: #fff;
+}
+
+.hero-title {
+  font-size: 30px;
+  line-height: 1.2;
+  margin-bottom: 18px;
+}
+
+.hero-subtitle {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 22px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hero-btn-primary {
+  background: linear-gradient(135deg, #ffb347, #ff8c2b);
+  color: #111;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+}
+
+.hero-btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.hero-btn-secondary {
+  border: 1px solid rgba(255, 153, 51, 0.4);
+  color: #ffb347;
+  background: rgba(10, 10, 10, 0.7);
+}
+
+.hero-btn-secondary:hover {
+  background: rgba(255, 153, 51, 0.08);
+}
+
+.hero-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.hero-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #ff9933;
+}
+
+/* Правая колонка с девушкой */
+
+.hero-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hero-face-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #2a211a 0%, #050505 60%);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 153, 51, 0.25);
+}
+
+.hero-face-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hero-face-info {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  right: 16px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(5, 5, 5, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 153, 51, 0.4);
+}
+
+.hero-face-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffb347;
+  margin-bottom: 4px;
+}
+
+.hero-face-role {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Бейдж AI & маркетинг */
+
+.hero-badge {
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: radial-gradient(circle at top left, #3b2a1a 0%, #090909 60%);
+  border: 1px solid rgba(255, 153, 51, 0.25);
+}
+
+.hero-badge-title {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ffb347;
+  margin-bottom: 8px;
+}
+
+.hero-badge-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.hero-badge-list li + li {
+  margin-top: 4px;
+}
+
+/* Адаптив под телефон */
+
+@media (max-width: 768px) {
+  .site-header-inner {
+    padding-inline: 12px;
+  }
+
+  .site-logo-subtitle {
+    display: none;
+  }
+
+  .hero {
+    padding: 20px 12px 28px;
+  }
+
+  .hero-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero-title {
+    font-size: 24px;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
+  }
+
+  .hero-visual {
+    order: -1; /* сначала девушка, потом текст, можно убрать если не нравится */
+  }
+}
