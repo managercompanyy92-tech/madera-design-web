@@ -1,98 +1,84 @@
 // api/ai-designer.js
-// Backend для AI-дизайнера — принимает текст, файлы и голосовые сообщения,
-// вызывает OpenAI и возвращает ответ.
+// Vercel Serverless Function: принимает JSON { message } и возвращает ответ от OpenAI
 
-const multiparty = require("multiparty");
-const OpenAI = require("openai");
+let openaiClientPromise;
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+/**
+ * Ленивое создание клиента OpenAI (ESM-библиотека внутри CommonJS файла)
+ */
+async function getOpenAIClient() {
+  if (!openaiClientPromise) {
+    openaiClientPromise = import("openai").then(({ default: OpenAI }) => {
+      return new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+    });
+  }
+  return openaiClientPromise;
+}
 
 module.exports = async (req, res) => {
-  // Разрешаем только POST
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return res.status(405).json({ error: "Method Not Allowed" });
+    res.status(405).json({ error: "Method not allowed" });
+    return;
   }
 
   try {
-    const form = new multiparty.Form();
+    const { message } = req.body || {};
 
-    form.parse(req, async (err, fields, files) => {
-      if (err) {
-        console.error("FORM_PARSE_ERROR:", err);
-        return res.status(500).json({
-          reply: "Ошибка при обработке данных. Попробуйте позже.",
-        });
-      }
+    if (!message || typeof message !== "string") {
+      res.status(400).json({ error: "Message is required" });
+      return;
+    }
 
-      // Текстовое сообщение пользователя
-      const userText = fields?.message?.[0] || "";
+    const openai = await getOpenAIClient();
 
-      // Собираем информацию о файлах (фото, PDF, видео, голос и т.д.)
-      const uploadedFiles = [];
-      Object.values(files || {}).forEach((arr) => {
-        arr.forEach((f) => {
-          uploadedFiles.push({
-            filename: f.originalFilename,
-            type: f.headers["content-type"],
-            size: f.size,
-          });
-        });
-      });
+    // Настраиваем промпт под твой кейс (AI-дизайнер мебели / интерьера)
+    const systemPrompt =
+      "Ты AI-дизайнер Madera. Ты помогаешь клиентам " +
+      "подбирать материалы, цвета и ориентировочную стоимость " +
+      "корпусной мебели на заказ в Душанбе. Отвечай кратко, по делу, " +
+      "на русском языке, дружелюбно и профессионально. " +
+      "Если не хватает данных (нет размеров, материалов и т.п.), " +
+      "задай уточняющие вопросы.";
 
-      // Вызываем OpenAI — простой промпт под интерьер
-      let aiReply = "";
-      try {
-        const completion = await client.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content:
-                "Ты — AI-дизайнер интерьеров Madera Design. " +
-                "Отвечай кратко, по делу, на понятном русском. " +
-                "Давай конкретные идеи по планировке, цветам и мебели. " +
-                "Если упоминаются вложенные файлы, учитывай их как описание, " +
-                "но не придумывай детали, которых нет в запросе.",
-            },
-            {
-              role: "user",
-              content:
-                userText && userText.trim().length > 0
-                  ? userText
-                  : "Клиент не написал текст, просто отправил файлы. Дай общий совет по дизайну.",
-            },
-          ],
-        });
-
-        aiReply =
-          completion.choices?.[0]?.message?.content ||
-          "Я получил ваш запрос и подготовлю предложения по дизайну.";
-      } catch (openaiError) {
-        console.error("OPENAI_ERROR:", openaiError);
-        return res.status(500).json({
-          reply:
-            "Сервис ИИ временно недоступен. Попробуйте ещё раз чуть позже.",
-        });
-      }
-
-      // Успешный ответ
-      return res.status(200).json({
-        reply: aiReply,
-        received: {
-          text: userText,
-          files: uploadedFiles,
+    const response = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: [
+        {
+          role: "system",
+          content: systemPrompt,
         },
-        audioUrl: null,
-        designs: [],
-      });
+        {
+          role: "user",
+          content: message,
+        },
+      ],
     });
-  } catch (e) {
-    console.error("AI_DESIGNER_FATAL_ERROR:", e);
-    return res.status(500).json({
-      reply: "Ошибка сервера. Попробуйте позже.",
+
+    // Разбор ответа из OpenAI Responses API
+    let reply = "";
+
+    if (response.output && Array.isArray(response.output)) {
+      reply = response.output
+        .flatMap((item) => item.content || [])
+        .map((block) => (block.text && block.text.value) || "")
+        .join("\n")
+        .trim();
+    }
+
+    if (!reply) {
+      reply =
+        "Мне не удалось сформировать ответ. Попробуйте переформулировать запрос или указать размеры и пожелания.";
+    }
+
+    res.status(200).json({ reply });
+  } catch (error) {
+    console.error("AI Designer error:", error);
+    res.status(500).json({
+      error: "AI error",
+      reply:
+        "Извините, сейчас сервис AI-дизайнера временно недоступен. Попробуйте ещё раз чуть позже.",
     });
   }
 };
