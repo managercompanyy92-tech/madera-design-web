@@ -1,7 +1,13 @@
 // api/ai-designer.js
-// Backend для AI-дизайнера — принимает текст, файлы и голосовые сообщения
+// Реальный backend AI-дизайнера: принимает текст, голос, фото, PDF, видео и отправляет в OpenAI
 
 const multiparty = require("multiparty");
+const fs = require("fs");
+const OpenAI = require("openai");
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
@@ -20,39 +26,86 @@ module.exports = async (req, res) => {
         });
       }
 
-      // Текстовое сообщение
-      const userText = fields?.message?.[0] || null;
+      const userText = fields?.message?.[0] || "Клиент не написал текст.";
 
-      // Файлы (фото, PDF, видео, голос — всё)
+      // Собираем файлы
       const uploadedFiles = [];
       Object.values(files).forEach((arr) => {
-        arr.forEach((f) => {
-          uploadedFiles.push({
-            filename: f.originalFilename,
-            type: f.headers["content-type"],
-            size: f.size,
-            path: f.path,
-          });
+        arr.forEach((file) => {
+          uploadedFiles.push(file);
         });
       });
 
-      console.log("TEXT:", userText);
-      console.log("FILES:", uploadedFiles);
+      // Готовим файлы для OpenAI
+      const attachments = [];
+      for (const file of uploadedFiles) {
+        try {
+          const buffer = fs.readFileSync(file.path);
 
-      // Возвращаем успешный тестовый ответ
+          attachments.push({
+            filename: file.originalFilename,
+            buffer,
+            mimeType: file.headers["content-type"],
+          });
+        } catch (e) {
+          console.error("FILE_READ_ERROR:", e);
+        }
+      }
+
+      // Формируем системную роль — стиль и поведение AI-дизайнера
+      const systemPrompt = `
+Ты — AI-дизайнер компании Madera Design.
+Ты — профессиональный дизайнер интерьеров международного уровня.
+
+Правила поведения:
+1. Отвечай красиво, уверенно, профессионально и дипломатично.
+2. Всегда держи уровень элитного дизайнера.
+3. Помогай клиентам, предлагай решения, объясняй, что и почему лучше.
+4. Уважай клиента и веди диалог мягко в сторону сделки.
+5. Представляй интересы компании.
+6. Никогда не говори ничего негативного о Madera Design.
+7. По запросу клиента — анализируй фото, видео, PDF и формируй дизайн-решения.
+8. Генерируй предложения по стилю, цветам, планировке и мебели.
+9. Всегда пиши вежливо, дружелюбно и сдержанно, как топ-дизайнер международного уровня.
+`;
+
+      // Формируем сообщения для OpenAI
+      const messages = [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userText },
+      ];
+
+      // Если есть файлы — отправляем как часть сообщения
+      const openAiFiles = [];
+
+      for (const file of attachments) {
+        const uploaded = await client.files.create({
+          file: file.buffer,
+          purpose: "vision",
+          filename: file.filename,
+        });
+
+        openAiFiles.push(uploaded.id);
+      }
+
+      // Генерируем ответ AI
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages,
+      });
+
+      const aiReply = completion.choices?.[0]?.message?.content || "Ответ не получен.";
+
+      // Возвращаем клиенту
       return res.status(200).json({
-        reply:
-          "Файлы и сообщение успешно получены сервером. На следующем шаге подключим настоящий ИИ.",
-        received: {
-          text: userText,
-          files: uploadedFiles,
-        },
-        audioUrl: null,
+        reply: aiReply,
+        receivedFiles: uploadedFiles.map((f) => f.originalFilename),
         designs: [],
+        audioUrl: null,
       });
     });
   } catch (e) {
-    console.error("AI_DESIGNER_FATAL_ERROR:", e);
+    console.error("AI_DESIGNER_FATAL:", e);
     return res.status(500).json({
       reply: "Ошибка сервера. Попробуйте позже.",
     });
