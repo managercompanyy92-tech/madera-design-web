@@ -82,56 +82,37 @@ function renderHome() {
 /* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
 
 function renderCatalog() {
-  // ПЕРВЫЙ УРОВЕНЬ: список категорий + квиз
+  // Первый уровень: только категории + мини-квиз
   if (!selectedCatalogCategoryId) {
     const cards = catalogCategories
       .map(
         (cat) => `
-        <button
-          class="catalog-category-card"
-          data-category-id="${cat.id}"
-        >
-          <div class="catalog-category-card__image-wrap">
-            <img
-              src="${cat.cover || cat.image || ""}"
-              alt="${cat.name || cat.title || ""}"
-              class="catalog-category-card__img"
-            />
-          </div>
-          <div class="catalog-category-card__bottom">
-            <div class="catalog-category-card__title-row">
-              <div class="catalog-category-card__title">
-                ${cat.name || cat.title || ""}
+        <div class="catalog-category-card__info">
+            ${
+              cat.tagline
+                ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
+                : ""
+            }
+            ${
+              cat.benefit
+                ? `<div class="catalog-category-benefit">${cat.benefit}</div>`
+                : ""
+            }
+            ${
+              cat.statsLabel
+                ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
+                : ""
+            }
+            <!-- Блок про скидки и партнёров прямо на карточке -->
+            <div class="catalog-category-card__discount">
+              <div class="catalog-category-card__discount-badge">
+                Скидки и партнёры
               </div>
-              <div class="catalog-category-card__arrow">›</div>
-            </div>
-            <div class="catalog-category-card__info">
-              ${
-                cat.tagline
-                  ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
-                  : ""
-              }
-              ${
-                cat.benefit
-                  ? `<div class="catalog-category-benefit">${cat.benefit}</div>`
-                  : ""
-              }
-              ${
-                cat.statsLabel
-                  ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
-                  : ""
-              }
-              <div class="catalog-category-card__discount">
-                <div class="catalog-category-card__discount-badge">
-                  СКИДКИ И ПАРТНЁРЫ
-                </div>
-                <div class="catalog-category-card__discount-text">
-                  −5% при заказе напрямую • −10% по промокоду партнёра
-                </div>
+              <div class="catalog-category-card__discount-text">
+                −5% при заказе напрямую • −10% по промокоду партнёра
               </div>
             </div>
           </div>
-        </button>
       `
       )
       .join("");
@@ -203,20 +184,20 @@ function renderCatalog() {
             </div>
           </div>
         </div>
-
-        <!-- Маркетинговый блок про скидки и партнёров -->
+       <!-- Блок про скидки и партнёров -->
         <div class="catalog-discount-info">
-          <div class="catalog-discount-info__title">Скидки и партнёры</div>
+          <div class="catalog-discount-info__title">
+            Скидки и партнёрская программа
+          </div>
           <ul class="catalog-discount-info__list">
-            <li>5% скидка — если оформляете заказ напрямую через компанию.</li>
-            <li>10% скидка — если укажете промокод партнёра.</li>
+            <li>−5% — если вы оформляете заказ напрямую через компанию.</li>
+            <li>−10% — при заказе по промокоду партнёра.</li>
             <li>Партнёры получают 5% от суммы каждого приведённого заказа.</li>
           </ul>
           <div class="catalog-discount-info__note">
             Мы принимаем заказы от 3 погонных метров и выше.
           </div>
         </div>
-
         <div class="catalog-categories-grid">
           ${cards}
         </div>
@@ -224,7 +205,7 @@ function renderCatalog() {
     `;
   }
 
-  // ВТОРОЙ УРОВЕНЬ: идеи внутри выбранной категории
+  // Второй уровень: идеи внутри выбранной категории
   const category = catalogCategories.find(
     (cat) => cat.id === selectedCatalogCategoryId
   );
@@ -264,13 +245,12 @@ function renderCatalog() {
         ← Все категории
       </button>
 
-      <h1 class="page__title">${
-        category ? category.name || category.title : "Категория"
-      }</h1>
+      <h1 class="page__title">
+        ${category ? category.name || category.title : "Категория"}
+      </h1>
       <p class="page__subtitle">
-        Здесь собраны идеи и визуализации для категории «${
-          category ? category.name || category.title : ""
-        }». На следующем шаге адаптируем их под вашу планировку и посчитаем стоимость.
+        Выберите идею, которая ближе к вашему вкусу. На следующих шагах адаптируем дизайн
+        под размеры вашей квартиры и посчитаем стоимость.
       </p>
 
       <div class="catalog-category-bridge">
