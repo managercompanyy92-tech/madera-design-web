@@ -1390,7 +1390,58 @@ body .support-bubble {
   opacity: 0.85;
   flex: 1;
 }
+/* Компактный блок "Скидки и партнёры" под квизом */
+.catalog-discount-info {
+  margin: 16px 16px 10px;            /* небольшие поля слева/справа */
+  padding: 12px 14px;
+  border-radius: 18px;
 
+  background: linear-gradient(135deg, #1d0e07 0%, #0f0b09 60%, #1a120d 100%);
+  border: 1px solid rgba(233, 122, 0, 0.45);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75);
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Заголовок – маленькая «плашка» */
+.catalog-discount-info__title {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+
+  background: radial-gradient(circle at 20% 0%, #ff6f4a 0%, #d12a1d 45%, #8a1515 100%);
+  color: #fff;
+
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+
+  margin-bottom: 8px;
+}
+
+/* Список – плотный, без больших дыр */
+.catalog-discount-info__list {
+  margin: 4px 0 6px;
+  padding-left: 16px;
+}
+
+.catalog-discount-info__list li {
+  margin-bottom: 3px;
+  color: #f7f7f7;
+}
+
+/* Примечание мелким шрифтом */
+.catalog-discount-info__note {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.25);
+
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.78);
+}
 @media (max-width: 768px) {
   .catalog-category-bridge {
     flex-direction: column;
