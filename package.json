@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "start": "vite preview"
+    "start": "vite preview",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "multiparty": "^4.2.3",
