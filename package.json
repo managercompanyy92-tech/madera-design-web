@@ -1,13 +1,7 @@
 {
-  "name": "madera-design",
+  "name": "madera-design-web",
   "version": "1.0.0",
-  "description": "Madera Design Web App",
-  "main": "index.js",
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "start": "vite preview"
-  },
+  "private": true,
   "dependencies": {
     "multiparty": "^4.2.3"
   }
