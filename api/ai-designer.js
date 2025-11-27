@@ -1,8 +1,10 @@
 // api/ai-designer.js
-// Реальный backend AI-дизайнера: принимает текст, голос, фото, PDF, видео и отправляет в OpenAI
+// Backend AI-дизайнера Madera Design.
+// Принимает текст, файлы (фото, видео, PDF, голосовые) и отправляет запрос в OpenAI.
+// Сейчас ИИ работает по тексту + описанию вложений.
+// Анализ самих картинок и PDF подключим на следующем шаге.
 
 const multiparty = require("multiparty");
-const fs = require("fs");
 const OpenAI = require("openai");
 
 const client = new OpenAI({
@@ -22,92 +24,94 @@ module.exports = async (req, res) => {
       if (err) {
         console.error("FORM_PARSE_ERROR:", err);
         return res.status(500).json({
-          reply: "Ошибка при обработке данных. Попробуйте позже.",
+          reply: "Ошибка при обработке данных. Попробуйте ещё раз чуть позже.",
         });
       }
 
+      // Текст от клиента
       const userText = fields?.message?.[0] || "Клиент не написал текст.";
 
-      // Собираем файлы
+      // Собираем информацию о файлах (фото, видео, pdf, голос и т.д.)
       const uploadedFiles = [];
-      Object.values(files).forEach((arr) => {
-        arr.forEach((file) => {
-          uploadedFiles.push(file);
+      Object.entries(files || {}).forEach(([fieldName, arr]) => {
+        arr.forEach((f) => {
+          uploadedFiles.push({
+            field: fieldName,
+            filename: f.originalFilename,
+            type: f.headers["content-type"],
+            size: f.size,
+          });
         });
       });
 
-      // Готовим файлы для OpenAI
-      const attachments = [];
-      for (const file of uploadedFiles) {
-        try {
-          const buffer = fs.readFileSync(file.path);
+      console.log("AI-DESIGNER: TEXT:", userText);
+      console.log("AI-DESIGNER: FILES:", uploadedFiles);
 
-          attachments.push({
-            filename: file.originalFilename,
-            buffer,
-            mimeType: file.headers["content-type"],
-          });
-        } catch (e) {
-          console.error("FILE_READ_ERROR:", e);
-        }
-      }
+      const filesDescription =
+        uploadedFiles.length > 0
+          ? "Клиент также прикрепил файлы (фото/чертежи/голос и др.): " +
+            uploadedFiles
+              .map((f) => `${f.filename} — ${f.type}, ~${Math.round(f.size / 1024)} КБ`)
+              .join("; ") +
+            ". Ты не видишь содержимое файлов, но учитывай, что это материалы по интерьеру."
+          : "Клиент не прикрепил файлов.";
 
-      // Формируем системную роль — стиль и поведение AI-дизайнера
+      // Системная роль: как должен вести себя AI-дизайнер
       const systemPrompt = `
 Ты — AI-дизайнер компании Madera Design.
-Ты — профессиональный дизайнер интерьеров международного уровня.
 
-Правила поведения:
+Твоя роль:
+- Профессиональный интерьерный дизайнер международного уровня.
+- Специалист по корпусной мебели и планировкам.
+- Высококлассный менеджер по продажам.
+
+Правила:
 1. Отвечай красиво, уверенно, профессионально и дипломатично.
-2. Всегда держи уровень элитного дизайнера.
-3. Помогай клиентам, предлагай решения, объясняй, что и почему лучше.
-4. Уважай клиента и веди диалог мягко в сторону сделки.
-5. Представляй интересы компании.
-6. Никогда не говори ничего негативного о Madera Design.
-7. По запросу клиента — анализируй фото, видео, PDF и формируй дизайн-решения.
-8. Генерируй предложения по стилю, цветам, планировке и мебели.
-9. Всегда пиши вежливо, дружелюбно и сдержанно, как топ-дизайнер международного уровня.
+2. Объясняй решения простым языком, но на уровне эксперта.
+3. Помогай клиенту сформулировать задачу, уточняй важные детали.
+4. Предлагай варианты планировки, стилистики, цветовых решений и мебели.
+5. Веди диалог мягко в сторону заключения сделки: предлагай следующие шаги, объясняй, как Madera Design может помочь.
+6. Очень бережно относись к репутации компании Madera Design. Ничего негативного о компании не говори.
+7. На неудобные вопросы отвечай спокойно и уважительно, как дипломат.
+8. Если клиент прикрепил фото, чертежи или PDF, считай, что это материалы по его интерьеру, и учитывай это в рекомендациях.
+9. Пиши по-русски, вежливо, структурировано и достаточно кратко.
 `;
 
-      // Формируем сообщения для OpenAI
-      const messages = [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userText },
-      ];
+      const userMessage = `
+Сообщение клиента:
+${userText}
 
-      // Если есть файлы — отправляем как часть сообщения
-      const openAiFiles = [];
+Информация о вложениях:
+${filesDescription}
+`;
 
-      for (const file of attachments) {
-        const uploaded = await client.files.create({
-          file: file.buffer,
-          purpose: "vision",
-          filename: file.filename,
-        });
-
-        openAiFiles.push(uploaded.id);
-      }
-
-      // Генерируем ответ AI
+      // Запрос к OpenAI
       const completion = await client.chat.completions.create({
         model: "gpt-4o-mini",
-        messages,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage },
+        ],
       });
 
-      const aiReply = completion.choices?.[0]?.message?.content || "Ответ не получен.";
+      const aiReply =
+        completion.choices?.[0]?.message?.content ||
+        "Спасибо за обращение! Я готов помочь с вашим интерьером. Напишите, пожалуйста, подробнее, что вы хотите сделать.";
 
-      // Возвращаем клиенту
       return res.status(200).json({
         reply: aiReply,
-        receivedFiles: uploadedFiles.map((f) => f.originalFilename),
-        designs: [],
+        received: {
+          text: userText,
+          files: uploadedFiles,
+        },
         audioUrl: null,
+        designs: [],
       });
     });
   } catch (e) {
-    console.error("AI_DESIGNER_FATAL:", e);
+    console.error("AI_DESIGNER_FATAL_ERROR:", e);
     return res.status(500).json({
-      reply: "Ошибка сервера. Попробуйте позже.",
+      reply: "Произошла внутренняя ошибка сервера. Попробуйте ещё раз немного позже.",
     });
   }
 };
