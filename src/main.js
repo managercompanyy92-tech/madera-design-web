@@ -105,22 +105,31 @@ function renderCatalog() {
             <div class="catalog-category-card__arrow">›</div>
           </div>
           <div class="catalog-category-card__info">
-            ${
-              cat.tagline
-                ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
-                : ""
-            }
-            ${
-              cat.benefit
-                ? `<div class="catalog-category-benefit">${cat.benefit}</div>`
-                : ""
-            }
-            ${
-              cat.statsLabel
-                ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
-                : ""
-            }
-          </div>
+  ${
+    cat.tagline
+      ? `<div class="catalog-category-tagline">${cat.tagline}</div>`
+      : ""
+  }
+  ${
+    cat.benefit
+      ? `<div class="catalog-category-benefit">${cat.benefit}</div>`
+      : ""
+  }
+  ${
+    cat.statsLabel
+      ? `<div class="catalog-category-stats">${cat.statsLabel}</div>`
+      : ""
+  }
+
+  <div class="catalog-category-card__discount">
+    <div class="catalog-category-card__discount-badge">
+      СКИДКИ И ПАРТНЁРЫ
+    </div>
+    <div class="catalog-category-card__discount-text">
+      −5% при заказе напрямую • −10% по промокоду партнёра
+    </div>
+  </div>
+</div>
         </button>
       `
       )
