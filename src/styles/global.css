@@ -1262,7 +1262,7 @@ body .support-bubble {
 
 .catalog-quiz {
   margin-top: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 6px;
   padding: 14px 14px 12px;
   border-radius: 20px;
   background: radial-gradient(circle at top left, rgba(233, 122, 0, 0.18), rgba(10, 10, 10, 0.95));
