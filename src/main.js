@@ -1236,6 +1236,7 @@ function renderLayout(initialRoute = "home") {
 function initApp() {
   const initialRoute = getInitialRoute();
   renderLayout(initialRoute);
+  initAiDesignerChat(); // <--- добавили
 }
 
 initApp();
