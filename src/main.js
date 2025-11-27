@@ -1,4 +1,4 @@
-import "./src/styles/global.css";
+import "./styles/global.css";
 // src/main.js
 
 import { catalogCategories } from "./utils/catalogCategories.js";
