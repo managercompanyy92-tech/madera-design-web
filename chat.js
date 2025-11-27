@@ -72,6 +72,7 @@
     statusEl.textContent = "Думаю над ответом…";
 
     // Попытка обратиться к backend API
+    const API_URL = "/api/ai-designer";
     try {
       const res = await fetch(API_URL, {
         method: "POST",
