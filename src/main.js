@@ -1159,7 +1159,12 @@ function setupRouter() {
       }
       return;
     }
-
+    // Открыть окно AI-дизайнера
+    const chatTarget = target.closest("[data-action='open-chat']");
+    if (chatTarget) {
+      showAiChat();
+      return;
+    }
     // Калькулятор
     const calcTarget = target.closest("[data-action='calc-price']");
     if (calcTarget) {
