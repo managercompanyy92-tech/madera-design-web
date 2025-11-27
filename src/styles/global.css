@@ -1564,6 +1564,52 @@ body .support-bubble {
   opacity: 0.85;
   color: #ffffff;
 }
+/* Аккуратный блок "Скидки и партнёры" под квизом */
+.catalog-discount-info {
+  max-width: 640px;
+  margin: 16px auto 12px; /* чуть отступить от квиза и от карточек */
+  padding: 12px 16px;
+  border-radius: 18px;
+
+  background: radial-gradient(circle at top left, rgba(233, 122, 0, 0.16), transparent 55%),
+              radial-gradient(circle at bottom right, rgba(233, 122, 0, 0.18), transparent 55%),
+              #1b1b1b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.65);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Заголовок */
+.catalog-discount-info__title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #ffb347;
+  margin-bottom: 8px;
+}
+
+/* Список и пункты */
+.catalog-discount-info__list {
+  margin: 8px 0 10px;
+  padding-left: 18px;
+}
+
+.catalog-discount-info__list li {
+  margin-bottom: 4px;
+  color: #f0f0f0;
+}
+
+/* Примечание внизу мелким шрифтом */
+.catalog-discount-info__note {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
+}
 /* Адаптив для блока скидок */
 @media (max-width: 768px) {
   .catalog-discount-info {
