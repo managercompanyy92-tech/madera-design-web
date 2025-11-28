@@ -42,20 +42,28 @@
     }
 
    openBtn?.addEventListener("click", (event) => {
-  event.preventDefault();
-  event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
 
-  // 1) Создаем AI-дизайнер, если его еще нет
-  if (!aiChatRoot) {
-    initAiDesignerChat();
-  }
+    // 1) Если на странице уже есть AI-дизайнер — просто открыть его
+    if (typeof window.openAiDesignerChat === "function") {
+      window.openAiDesignerChat();
+      return;
+    }
 
-  // 2) Показываем AI-дизайнера
-  aiChatRoot.classList.add("ai-chat--open");
+    // 2) Если окно ещё не создано, но есть init-функция — инициализируем и открываем
+    if (typeof window.initAiDesignerChat === "function") {
+      window.initAiDesignerChat();
 
-  // 3) Фокус в поле ввода
-  aiChatInputEl?.focus();
-});
+      if (typeof window.openAiDesignerChat === "function") {
+        window.openAiDesignerChat();
+      }
+      return;
+    }
+
+    // 3) Если ни один вариант не сработал — пишем в консоль, но ничего не ломаем
+    console.warn("Блок AI-дизайнера не найден на этой странице.");
+  });
 
     /* ----------------------------- РЕНДЕР СООБЩЕНИЙ --------------------------- */
 
