@@ -8,121 +8,754 @@
     />
     <title>Madera Design — Современная корпусная мебель на заказ</title>
 
-    <!-- ОСТАВЬ ЗДЕСЬ СВОИ ПОДКЛЮЧЕНИЯ CSS/JS (link rel="stylesheet", и т.д.) -->
-    <!-- Например:
-    <link rel="stylesheet" href="/src/style.css" />
+    <!--
+      ЕСЛИ У ТЕБЯ ЕСТЬ СВОИ ПОДКЛЮЧЕНИЯ CSS/JS (link, script),
+      МОЖЕШЬ ВСТАВИТЬ ИХ НИЖЕ ЭТОГО КОММЕНТАРИЯ.
+      Если не знаешь, что вставлять — оставь так, всё будет работать.
     -->
+
+    <!-- ===== СТИЛИ ГЛАВНОЙ СТРАНИЦЫ MADERA DESIGN ===== -->
+    <style>
+      :root {
+        --md-bg: #050607;
+        --md-bg-soft: #0d0f11;
+        --md-card: #15181d;
+        --md-border-soft: rgba(255, 255, 255, 0.06);
+        --md-orange: #ff9f2c;
+        --md-orange-soft: #ffba55;
+        --md-text-main: #f7f4ee;
+        --md-text-muted: #b2b6c0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top left, #2d1a07 0, #050607 55%);
+        color: var(--md-text-main);
+      }
+
+      .md-page {
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top left, rgba(255, 159, 44, 0.22), transparent 55%),
+          radial-gradient(circle at bottom right, rgba(255, 159, 44, 0.07), transparent 55%),
+          linear-gradient(180deg, #050607 0, #050607 60%, #050607 100%);
+      }
+
+      .md-shell {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 16px 80px;
+      }
+
+      /* HEADER */
+
+      .md-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+
+      .md-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .md-logo-wrap {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 20%, #ffecce, #ff9f2c 45%, #4c2500 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.08),
+          0 16px 35px rgba(0, 0, 0, 0.7),
+          0 0 40px rgba(255, 159, 44, 0.55);
+      }
+
+      .md-logo-wrap img {
+        width: 26px;
+        height: 26px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
+      }
+
+      .md-brand-text {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .md-logo-title {
+        letter-spacing: 0.3em;
+        font-size: 13px;
+        text-transform: uppercase;
+        color: var(--md-text-main);
+      }
+
+      .md-tagline {
+        font-size: 12px;
+        color: var(--md-text-muted);
+      }
+
+      .md-header-cta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .md-phone {
+        font-size: 13px;
+        color: var(--md-text-muted);
+        text-align: right;
+      }
+
+      .md-phone strong {
+        display: block;
+        font-size: 14px;
+        color: var(--md-text-main);
+      }
+
+      .md-btn-primary {
+        border: none;
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: #111;
+        background: linear-gradient(135deg, #ffbb4c, #ff9f2c);
+        box-shadow:
+          0 10px 25px rgba(0, 0, 0, 0.8),
+          0 0 25px rgba(255, 159, 44, 0.7);
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .md-btn-primary:hover {
+        filter: brightness(1.05);
+      }
+
+      /* HERO */
+
+      .md-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2.4fr);
+        gap: 32px;
+      }
+
+      @media (max-width: 900px) {
+        .md-hero {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .md-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .md-header-cta {
+          align-self: stretch;
+          justify-content: space-between;
+        }
+
+        .md-phone {
+          text-align: left;
+        }
+      }
+
+      .md-hero-main {
+        padding: 28px 24px 26px;
+        border-radius: 26px;
+        background: radial-gradient(circle at top left, #2b190a 0, #111418 40%, #07090b 100%);
+        box-shadow:
+          0 18px 40px rgba(0, 0, 0, 0.9),
+          0 0 0 1px rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .md-hero-main::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at top left, rgba(255, 159, 44, 0.22), transparent 55%),
+          radial-gradient(circle at bottom left, rgba(255, 159, 44, 0.08), transparent 55%);
+        mix-blend-mode: screen;
+        opacity: 0.9;
+        pointer-events: none;
+      }
+
+      .md-hero-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .md-kicker {
+        font-size: 13px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--md-orange-soft);
+        margin-bottom: 10px;
+      }
+
+      .md-hero-title {
+        font-size: clamp(26px, 4.1vw, 34px);
+        line-height: 1.16;
+        letter-spacing: 0.02em;
+        margin: 0 0 14px;
+        color: var(--md-text-main);
+      }
+
+      .md-hero-title span {
+        color: var(--md-orange-soft);
+      }
+
+      .md-hero-lead {
+        font-size: 15px;
+        line-height: 1.6;
+        color: var(--md-text-muted);
+        max-width: 520px;
+        margin-bottom: 18px;
+      }
+
+      .md-hero-ctas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .md-btn-secondary {
+        border-radius: 999px;
+        padding: 10px 18px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(5, 7, 10, 0.6);
+        color: var(--md-text-main);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .md-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .md-badges-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .md-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 11px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(4, 6, 9, 0.72);
+        font-size: 11px;
+        color: var(--md-text-muted);
+      }
+
+      .md-badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 20%, #fff6e3, #ff9f2c);
+        box-shadow: 0 0 8px rgba(255, 159, 44, 0.9);
+      }
+
+      .md-benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      @media (max-width: 900px) {
+        .md-benefits-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .md-benefits-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .md-benefit {
+        border-radius: 18px;
+        padding: 11px 12px 12px;
+        background: rgba(7, 9, 12, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .md-benefit-title {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--md-text-main);
+      }
+
+      .md-benefit-text {
+        font-size: 11px;
+        color: var(--md-text-muted);
+        line-height: 1.5;
+      }
+
+      /* ПРАВАЯ КОЛОНКА: ЛИЦО КОМПАНИИ + AI-БЛОК */
+
+      .md-hero-side {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .md-face-card {
+        display: grid;
+        grid-template-columns: 84px minmax(0, 1fr);
+        gap: 14px;
+        padding: 14px 14px 14px 12px;
+        border-radius: 22px;
+        background: rgba(10, 12, 16, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+          0 14px 28px rgba(0, 0, 0, 0.9),
+          0 0 22px rgba(255, 159, 44, 0.35);
+        align-items: center;
+      }
+
+      .md-face-photo-wrap {
+        position: relative;
+        width: 84px;
+        height: 84px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #1b1e23;
+      }
+
+      .md-face-photo-wrap::before {
+        content: "";
+        position: absolute;
+        inset: -6px;
+        border-radius: inherit;
+        background: conic-gradient(
+          from 140deg,
+          rgba(255, 159, 44, 0.4),
+          transparent 30%,
+          transparent 60%,
+          rgba(255, 159, 44, 0.7)
+        );
+        opacity: 0.9;
+        mix-blend-mode: screen;
+        pointer-events: none;
+      }
+
+      .md-face-photo {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: translateY(2px);
+      }
+
+      .md-face-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .md-face-name {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .md-face-role {
+        font-size: 12px;
+        color: var(--md-text-muted);
+      }
+
+      .md-face-quote {
+        font-size: 12px;
+        color: var(--md-text-main);
+      }
+
+      .md-ai-card {
+        padding: 16px 16px 14px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, #181c22, #101218);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+          0 16px 36px rgba(0, 0, 0, 0.85),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .md-ai-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .md-ai-title {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.17em;
+        color: var(--md-orange-soft);
+      }
+
+      .md-ai-badge {
+        font-size: 10px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: rgba(9, 11, 14, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: var(--md-text-muted);
+      }
+
+      .md-ai-body {
+        display: grid;
+        grid-template-columns: 54px minmax(0, 1fr);
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .md-ai-avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: radial-gradient(circle at top left, #ffbb4c, #ff9f2c 40%, #4b2705);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .md-ai-avatar img {
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+      }
+
+      .md-ai-text {
+        font-size: 12px;
+        color: var(--md-text-muted);
+        line-height: 1.55;
+      }
+
+      .md-ai-bullets {
+        margin-top: 6px;
+        padding-left: 16px;
+      }
+
+      .md-ai-bullets li {
+        font-size: 11px;
+        color: var(--md-text-main);
+        margin-bottom: 4px;
+      }
+
+      .md-ai-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 6px;
+      }
+
+      .md-ai-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--md-text-muted);
+      }
+
+      .md-dot-live {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #13c77b;
+        box-shadow: 0 0 8px rgba(19, 199, 123, 0.9);
+      }
+
+      .md-ai-link {
+        font-size: 11px;
+        color: var(--md-orange-soft);
+        text-decoration: none;
+      }
+
+      .md-ai-link:hover {
+        text-decoration: underline;
+      }
+
+      /* НИЖНИЙ БЛОК: АИ & МАРКЕТИНГ */
+
+      .md-bottom {
+        margin-top: 26px;
+        padding: 18px 20px 18px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, #12151a, #0a0c10);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        box-shadow:
+          0 18px 42px rgba(0, 0, 0, 0.9),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+        display: grid;
+        grid-template-columns: minmax(0, 1.8fr) minmax(0, 2.2fr);
+        gap: 18px;
+        align-items: flex-start;
+      }
+
+      @media (max-width: 900px) {
+        .md-bottom {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .md-bottom-title {
+        font-size: 13px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--md-orange-soft);
+        margin-bottom: 6px;
+      }
+
+      .md-bottom-lead {
+        font-size: 13px;
+        color: var(--md-text-muted);
+        max-width: 340px;
+      }
+
+      .md-bottom-cols {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      @media (max-width: 640px) {
+        .md-bottom-cols {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .md-bottom-col-title {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .md-bottom-list {
+        padding-left: 18px;
+        margin: 0;
+      }
+
+      .md-bottom-list li {
+        font-size: 11px;
+        color: var(--md-text-muted);
+        margin-bottom: 3px;
+      }
+    </style>
+    <!-- ===== КОНЕЦ СТИЛЕЙ ГЛАВНОЙ СТРАНИЦЫ ===== -->
   </head>
 
   <body>
-    <!-- Шапка сайта -->
-    <header class="site-header">
-      <div class="site-header-inner">
-        <div class="site-logo">
-          <img
-            src="/madera-logo.webp"
-            alt="Логотип Madera Design"
-            class="site-logo-mark"
-          />
-          <div class="site-logo-text">
-            <span class="site-logo-title">MADERA DESIGN</span>
-            <span class="site-logo-subtitle">
-              Партнёр в создании современного интерьера
-            </span>
-          </div>
-        </div>
-
-        <a href="#order" class="header-cta">Оформить заказ</a>
-      </div>
-    </header>
-
-    <!-- Hero-экран -->
-    <section class="hero">
-      <div class="hero-inner">
-        <!-- Левая колонка: текст и кнопки -->
-        <div class="hero-text">
-          <h1 class="hero-title">
-            Современная корпусная мебель на заказ в Душанбе
-          </h1>
-
-          <p class="hero-subtitle">
-            Проектируем и производим премиальную мебель под ваши задачи:
-            кухни, гостиные, гардеробные, спальни и детские. Дизайн с
-            поддержкой искусственного интеллекта, прозрачный просчёт и
-            понятный статус заказа на каждом этапе.
-          </p>
-
-          <div class="hero-actions">
-            <a href="#order" class="hero-btn hero-btn-primary">
-              Рассчитать проект и стоимость
-            </a>
-            <a href="#catalog" class="hero-btn hero-btn-secondary">
-              Смотреть каталог идей
-            </a>
-          </div>
-
-          <div class="hero-trust">
-            <span>Премиальная мебель под ваши размеры</span>
-            <span class="hero-dot"></span>
-            <span>Прозрачный онлайн-просчёт</span>
-          </div>
-        </div>
-
-        <!-- Правая колонка: девушка-ассистент + AI & маркетинг -->
-        <aside class="hero-visual">
-          <div class="hero-face-card">
-            <img
-              src="/madera-face.webp"
-              alt="AI-дизайнер Madera Design"
-              class="hero-face-img"
-            />
-            <div class="hero-face-info">
-              <div class="hero-face-name">AI-дизайнер Madera</div>
-              <div class="hero-face-role">
-                Помогу подобрать дизайн и просчитать стоимость мебели
-              </div>
+    <div class="md-page">
+      <div class="md-shell">
+        <!-- ===== HEADER ===== -->
+        <header class="md-header">
+          <div class="md-brand">
+            <div class="md-logo-wrap">
+              <img src="/madera-logo.webp" alt="Логотип Madera Design" />
+            </div>
+            <div class="md-brand-text">
+              <div class="md-logo-title">MADERA DESIGN</div>
+              <div class="md-tagline">Партнёр в создании современного интерьера</div>
             </div>
           </div>
 
-          <div class="hero-badge">
-            <span class="hero-badge-title">AI & маркетинг</span>
-            <ul class="hero-badge-list">
-              <li>Персональные рекомендации дизайна</li>
-              <li>AI-чат 24/7 по мебели и стоимости</li>
-              <li>Визуализация интерьера до заказа</li>
-            </ul>
+          <div class="md-header-cta">
+            <div class="md-phone">
+              <span>Консультация и расчёт</span>
+              <strong>+992 (XX) XXX-XX-XX</strong>
+            </div>
+            <button class="md-btn-primary">
+              Оформить заказ
+            </button>
           </div>
-        </aside>
+        </header>
+
+        <!-- ===== HERO: ЛЕВАЯ ЧАСТЬ ===== -->
+        <main class="md-hero">
+          <section class="md-hero-main">
+            <div class="md-hero-content">
+              <div class="md-kicker">Современная корпусная мебель на заказ в Душанбе</div>
+              <h1 class="md-hero-title">
+                Премиальная мебель с&nbsp;дизайном под&nbsp;ваш интерьер
+                <span>и поддержкой AI-дизайнера</span>
+              </h1>
+
+              <p class="md-hero-lead">
+                Madera Design соединяет авторский дизайн, точный замер, расчёт стоимости
+                и прозрачный статус заказа. От первой идеи до установки — вы знаете,
+                что происходит на каждом шаге.
+              </p>
+
+              <div class="md-hero-ctas">
+                <button class="md-btn-primary">
+                  Рассчитать и оформить заказ
+                </button>
+                <button class="md-btn-secondary">
+                  Смотреть каталог идей
+                </button>
+              </div>
+
+              <div class="md-badges-row">
+                <div class="md-badge">
+                  <span class="md-badge-dot"></span>
+                  Замер, дизайн и монтаж «под ключ»
+                </div>
+                <div class="md-badge">
+                  <span class="md-badge-dot"></span>
+                  AI-подбор компоновки и материалов
+                </div>
+              </div>
+
+              <div class="md-benefits-grid">
+                <div class="md-benefit">
+                  <div class="md-benefit-title">Премиальный внешний вид</div>
+                  <div class="md-benefit-text">
+                    Фасады, фурнитура и подсветка, которые выглядят дорого и служат долго.
+                  </div>
+                </div>
+                <div class="md-benefit">
+                  <div class="md-benefit-title">Честный расчёт стоимости</div>
+                  <div class="md-benefit-text">
+                    Онлайн-калькулятор и прозрачная смета без скрытых доплат.
+                  </div>
+                </div>
+                <div class="md-benefit">
+                  <div class="md-benefit-title">Контроль на каждом этапе</div>
+                  <div class="md-benefit-text">
+                    Статус проекта в приложении, фото-отчёты и поддержка менеджера.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== HERO: ПРАВАЯ ЧАСТЬ (ЛИЦО КОМПАНИИ + AI-КАРТОЧКА) ===== -->
+          <aside class="md-hero-side">
+            <!-- Лицо компании -->
+            <section class="md-face-card">
+              <div class="md-face-photo-wrap">
+                <img
+                  src="/madera-face.webp"
+                  alt="Ваш личный менеджер Madera Design"
+                  class="md-face-photo"
+                />
+              </div>
+              <div class="md-face-info">
+                <div class="md-face-name">Анна, Madera Design</div>
+                <div class="md-face-role">Персональный менеджер и координатор проекта</div>
+                <div class="md-face-quote">
+                  «Мне важно, чтобы вы получили именно тот интерьер, о котором мечтали —
+                  без стресса и с контролем сроков на каждом шаге».
+                </div>
+              </div>
+            </section>
+
+            <!-- AI-ассистент -->
+            <section class="md-ai-card" id="ai-chat">
+              <div class="md-ai-header">
+                <div class="md-ai-title">Ai-дизайнер madera</div>
+                <div class="md-ai-badge">Экономит время и упрощает выбор</div>
+              </div>
+
+              <div class="md-ai-body">
+                <div class="md-ai-avatar">
+                  <img
+                    src="/madera-assistant.webp"
+                    alt="AI-ассистент Madera Design"
+                  />
+                </div>
+                <div class="md-ai-text">
+                  Напишите, какой интерьер вы хотите, или прикрепите план квартиры —
+                  AI-ассистент подскажет компоновку мебели и примерный бюджет.
+                  <ul class="md-ai-bullets">
+                    <li>Подбор планировки кухни, спальни, гостиной и гардеробной</li>
+                    <li>Рекомендации по материалам и цветам под ваш стиль</li>
+                    <li>Оценка стоимости и сроков ещё до встречи в шоуруме</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="md-ai-footer">
+                <div class="md-ai-status">
+                  <span class="md-dot-live"></span>
+                  Ai-чат доступен 24/7
+                </div>
+                <a href="#ai-chat" class="md-ai-link">Открыть AI-помощника</a>
+              </div>
+            </section>
+          </aside>
+        </main>
+
+        <!-- ===== НИЖНИЙ БЛОК: AI & МАРКЕТИНГ ===== -->
+        <section class="md-bottom">
+          <div>
+            <div class="md-bottom-title">Ai &amp; маркетинг</div>
+            <div class="md-bottom-lead">
+              Мы используем аналитику и AI, чтобы ваш интерьер работал на вас:
+              выглядел эффектно, оставался функциональным и увеличивал ценность квартиры.
+            </div>
+          </div>
+
+          <div class="md-bottom-cols">
+            <div>
+              <div class="md-bottom-col-title">До проекта</div>
+              <ul class="md-bottom-list">
+                <li>Помощь с формулировкой задачи и бюджета</li>
+                <li>AI-подбор референсов под ваш стиль</li>
+                <li>Предварительный расчёт стоимости комплекта мебели</li>
+              </ul>
+            </div>
+            <div>
+              <div class="md-bottom-col-title">После установки</div>
+              <ul class="md-bottom-list">
+                <li>Рекомендации по уходу за фасадами и фурнитурой</li>
+                <li>Подбор дополнительных модулей, если меняется сценарий жизни</li>
+                <li>Сервисное сопровождение и гарантия на изделия</li>
+              </ul>
+            </div>
+          </div>
+        </section>
       </div>
-    </section>
+    </div>
 
-    <!-- ДАЛЬШЕ: ОСТАВЬ СВОЙ СУЩЕСТВУЮЩИЙ КОНТЕНТ БЕЗ ИЗМЕНЕНИЙ -->
     <!--
-      Здесь должны идти остальные блоки, которые у тебя уже есть:
-      - блоки преимуществ,
-      - каталог,
-      - заказ,
-      - профиль,
-      - футер,
-      - виджет AI-ассистента и т.д.
-
-      Просто перенеси их из текущего index.html ниже этого комментария
-      в том же порядке.
-    -->
-
-    <!-- Пример-якорь для блока каталога (если его ещё нет, можно добавить позже) -->
-    <section id="catalog">
-      <!-- Здесь твой существующий контент каталога -->
-    </section>
-
-    <!-- Пример-якорь для блока заказа (под него у тебя уже есть отдельный блок) -->
-    <section id="order">
-      <!-- Здесь твой существующий блок оформления/заявки -->
-    </section>
-
-    <!-- НИЖЕ СОХРАНИ СВОИ СКРИПТЫ КАК ЕСТЬ -->
-    <!-- Например:
-    <script src="/chat.js"></script>
+      ЕСЛИ У ТЕБЯ В СТАРОМ ФАЙЛЕ БЫЛИ <script ...> ПЕРЕД </body>,
+      ИХ МОЖНО ВСТАВИТЬ СЮДА НИЖЕ ЭТОГО КОММЕНТАРИЯ.
+      Если не будешь вставлять — просто оставь как есть.
     -->
   </body>
 </html>
