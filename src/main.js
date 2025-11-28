@@ -18,86 +18,135 @@ function renderHome() {
   return `
     <section class="page page--home">
 
-      <!-- Узкий верхний блок с брендом и логотипом -->
-      <header class="home-top">
-        <div class="home-top__left">
-          <div class="home-top__brand">
-            <div class="home-top__name">MADERA DESIGN</div>
-            <div class="home-top__tagline">
+      <!-- ВЕРХНИЙ БЛОК С БРЕНДОМ -->
+      <div class="home-brand">
+        <div class="home-brand__left">
+          <div class="brand-text">
+            <div class="brand-name">MADERA DESIGN</div>
+            <div class="brand-tagline">
               Партнёр в создании современного интерьера
             </div>
           </div>
         </div>
-        <div class="home-top__right">
+
+        <div class="home-brand__right">
           <img
             src="/logo.jpg"
             alt="Логотип Madera Design"
-            class="home-top__logo"
+            class="home-brand__logo"
           />
-          <button
-            class="btn btn--primary home-top__cta"
-            data-nav="order"
-          >
+          <button class="btn btn--primary" data-nav="order">
             Оформить заказ
           </button>
         </div>
-      </header>
+      </div>
 
-      <!-- Главный герой-блок: текст слева, фото справа -->
-      <div class="hero hero--split">
+      <!-- ГЛАВНЫЙ БЛОК (ХЕРО) -->
+      <div class="hero">
         <div class="hero__content">
           <h1 class="hero__title">
-            Современная корпусная мебель на заказ в Душанбе
+            Современная корпусная мебель<br />на заказ в Душанбе
           </h1>
 
           <p class="hero__subtitle">
             Премиальная мебель под ваш интерьер с авторским дизайном
-            и поддержкой AI-дизайнера. Вы сразу видите концепцию, бюджет
-            и сроки — без неприятных сюрпризов.
+            и поддержкой AI-дизайнера. Вы заранее видите концепцию,
+            budget и сроки — без неприятных сюрпризов.
           </p>
 
           <div class="hero__actions">
-            <button
-              class="btn btn--primary"
-              data-nav="order"
-            >
+            <button class="btn btn--primary" data-nav="order">
               Рассчитать и оформить заказ
             </button>
 
-            <button
-              class="btn btn--ghost"
-              data-nav="catalog"
-            >
+            <button class="btn btn--ghost" data-nav="catalog">
               Смотреть каталог идей
             </button>
           </div>
 
           <p class="hero__note">
-            Мы создаём интерьеры, которые впечатляют с первого взгляда
-            и каждый день дарят ощущение «вау-эффекта».
+            Сделаем интерьер, который впечатляет с первого взгляда
+            и приносит «вау-эффект» каждый день.
           </p>
         </div>
 
-        <div class="hero__side hero__side--photo">
-          <img
-            src="/face.jpg"
-            alt="Специалист Madera Design"
-            class="hero__photo"
-          />
+        <div class="hero__side">
+          <div class="hero__photo-wrapper">
+            <img
+              src="/face.jpg"
+              alt="Специалист Madera Design"
+              class="hero__photo"
+            />
+          </div>
+
+          <div class="hero-card">
+            <div class="hero-card__label">AI & маркетинг</div>
+            <ul class="hero-card__list">
+              <li>Персональные рекомендации дизайна</li>
+              <li>AI-чат 24/7 по мебели и стоимости</li>
+              <li>Визуализация интерьера до монтажа</li>
+              <li>Прозрачный статус заказа в приложении</li>
+            </ul>
+          </div>
         </div>
       </div>
 
-      <!-- Блок AI & маркетинг под главным экраном -->
-      <section class="hero-card hero-card--ai">
-        <div class="hero-card__label">
-          AI &amp; маркетинг
+      <!-- БЛОК «ПОД КЛЮЧ» -->
+      <section class="home-section home-section--service">
+        <div class="pill pill--primary">
+          <span class="pill__dot pill__dot--green"></span>
+          Замер, дизайн и монтаж «под ключ»
         </div>
-        <ul class="hero-card__list">
-          <li>Персональные рекомендации дизайна и наполнения мебели.</li>
-          <li>AI-чат 24/7 по мебели, планировке и стоимости.</li>
-          <li>Визуализация интерьера до заказа и монтажа.</li>
-          <li>Прозрачный статус заказа в приложении и аккуратный сервис.</li>
+
+        <ul class="home-list">
+          <li>AI-рекомендации по планировке, стилю и наполнению мебели</li>
+          <li>Точный расчёт стоимости до заказа и контроль бюджета</li>
+          <li>Визуализация интерьера до монтажа — вы видите итог заранее</li>
+          <li>Прозрачный статус заказа в приложении и отлаженный сервис</li>
         </ul>
+      </section>
+
+      <!-- КАРТОЧКА СПЕЦИАЛИСТА -->
+      <section class="home-section home-section--expert">
+        <div class="expert-card">
+          <div class="expert-card__header">
+            <div class="expert-card__title">Специалист Madera Design</div>
+            <div class="expert-card__status">
+              <span class="expert-card__status-dot"></span>
+              Онлайн сегодня
+            </div>
+          </div>
+
+          <div class="expert-card__body">
+            <div class="expert-card__photo">
+              <img
+                src="/face.jpg"
+                alt="Лицо компании Madera Design — специалист по интерьеру"
+              />
+            </div>
+
+            <div class="expert-card__text">
+              <p>
+                Лицо компании Madera Design — это специалист, который
+                заботится о вашем интерьере так же, как о своём. Он помогает
+                сформулировать задачу, подобрать материалы и конфигурации,
+                чтобы интерьер впечатлял каждый день.
+              </p>
+              <p>
+                Вместе вы уточните задачу, бюджет и сроки, а AI-дизайнер
+                подскажет оптимальные решения. В итоге вы получаете
+                продуманный проект и мебель, которая идеально «садится»
+                в пространство.
+              </p>
+            </div>
+          </div>
+
+          <div class="expert-card__tags">
+            <span class="tag">Премиальный сервис</span>
+            <span class="tag">Дизайн + AI-поддержка</span>
+            <span class="tag">Интерьер «под ключ»</span>
+          </div>
+        </div>
       </section>
 
     </section>
