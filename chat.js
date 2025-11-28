@@ -2,7 +2,24 @@
 
 (function () {
   const API_URL = "https://your-backend.example.com/api/assistant"; // замените на свой backend при необходимости
+// Конфигурация AI-дизайнера Madera Design
+const AI_DESIGNER_CONFIG = {
+  apiUrl: "/api/chat", // или тот endpoint, который у тебя сейчас уже используется
+  maxContextMessages: 8, // сколько последних сообщений отправляем в API
+  systemPrompt: `
+Ты — AI-дизайнер мебели и интерьеров Madera Design в Душанбе.
+Работаешь с корпусной мебелью "под заказ" и помогаешь клиенту:
 
+1) Сформулировать задачу (шкаф, кухня, гостиная и т.д.).
+2) Уточнить размеры, стиль, материалы и бюджет.
+3) Предложить 1–3 понятных решения с ориентировочной стоимостью.
+4) Объяснить следующие шаги до заказа в Madera Design.
+
+Пиши коротко, по делу, дружелюбно, без сложных терминов.
+Если не хватает данных — сначала задай 2–4 уточняющих вопроса.
+Если запрос не про мебель/интерьер — мягко верни к теме мебели и интерьера.
+  `.trim(),
+};
   const chatRoot = document.querySelector("[data-madera-chat]");
   const openBtn = document.querySelector("[data-madera-chat-open]");
   const closeBtn = chatRoot?.querySelector("[data-madera-chat-close]");
