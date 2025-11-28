@@ -54,9 +54,8 @@
 - Не критикуй конкурентов, говори только о преимуществах Madera Design.
 
 ВАЖНО ПРО ДИАЛОГ:
-- Поздоровайся красиво ТОЛЬКО в самом первом своём ответе в рамках одной переписки.
-- Если в истории диалога уже есть твои ответы — НЕ начинай снова с "Здравствуйте" или длинного приветствия.
-- В следующих сообщениях отвечай сразу по сути вопроса, без повторных приветствий.
+- Можно поздороваться красиво только в самом первом ответе.
+- Но мы дополнительно удаляем из ответов формальные приветствия вроде "Здравствуйте" / "Добрый день" / "Меня зовут..." и т.п., чтобы в интерфейсе клиент сразу видел суть ответа.
 `.trim(),
   };
 
@@ -106,23 +105,15 @@
   }
 
   // ---------------------------------------------------------------------------
-  // АГРЕССИВНО УБИРАЕМ ПОВТОРНЫЕ ПРИВЕТСТВИЯ
+  // ЖЁСТКАЯ ОЧИСТКА ПОВТОРНЫХ ПРИВЕТСТВИЙ
   // ---------------------------------------------------------------------------
   function normalizeAssistantReply(text) {
     if (!text) return text;
     const trimmed = text.trim();
+    if (!trimmed) return trimmed;
 
-    // Есть ли уже ответы ассистента в истории?
-    const isFirstAssistant =
-      !chatState.messages.some((m) => m.role === "assistant");
-
-    // Для самого первого ответа — оставляем как есть (может быть красивое приветствие)
-    if (isFirstAssistant) {
-      return trimmed;
-    }
-
-    // Разбиваем на «предложения» по . ! ? и переносам
-    const parts = trimmed
+    // Разбиваем на "предложения"
+    let parts = trimmed
       .split(/(?<=[.!?])\s+|\n+/)
       .map((p) => p.trim())
       .filter((p) => p.length > 0);
@@ -131,35 +122,39 @@
       return trimmed;
     }
 
-    // Функция: является ли предложение приветствием / вступительным блоком
     function isGreetingSentence(sentence) {
       const s = sentence.toLowerCase();
 
-      // Базовые приветствия
+      // базовые приветствия
       if (
-        s.startsWith("здравствуйте") ||
-        s.startsWith("добрый день") ||
-        s.startsWith("добрый вечер") ||
-        s.startsWith("доброе утро") ||
-        s.startsWith("привет")
+        s.includes("здравствуйте") ||
+        s.includes("здравствуй") ||
+        s.includes("добрый день") ||
+        s.includes("добрый вечер") ||
+        s.includes("доброе утро") ||
+        s.startsWith("привет") ||
+        s.includes("приветствую")
       ) {
         return true;
       }
 
-      // Расширенные фразы
+      // представления и "рада/рад"
       if (
-        s.includes("рада приветствовать") ||
-        s.includes("рад приветствовать") ||
-        s.includes("я рада приветствовать") ||
-        s.includes("я рад приветствовать") ||
         s.includes("меня зовут") ||
         s.includes("я ваш ai") ||
-        s.includes("я вашa ai") ||
+        s.includes("я ваша ai") ||
         s.includes("я ваш дизайнер") ||
+        s.includes("я вашa дизайнер") ||
         s.includes("я виртуальный дизайнер") ||
         s.includes("я виртуальный ассистент") ||
-        s.startsWith("я — ai") ||
-        s.startsWith("я – ai")
+        s.includes("я – ai") ||
+        s.includes("я — ai") ||
+        s.includes("рада приветствовать") ||
+        s.includes("рад приветствовать") ||
+        s.includes("рад знакомству") ||
+        s.includes("рада знакомству") ||
+        s.includes("спасибо, что обратились") ||
+        s.includes("спасибо что обратились")
       ) {
         return true;
       }
@@ -167,25 +162,25 @@
       return false;
     }
 
-    // Срезаем все начальные предложения, которые считаем приветствием/вступлением
-    let cutIndex = 0;
-    while (cutIndex < parts.length && isGreetingSentence(parts[cutIndex])) {
-      cutIndex += 1;
-    }
-
-    // Если мы ничего не обрезали — вернём исходный текст
-    if (cutIndex === 0) {
+    // Если одно предложение и оно не похоже на приветствие — не трогаем
+    if (parts.length === 1) {
+      if (isGreetingSentence(parts[0])) {
+        // если единственное предложение — приветствие, оставим как есть,
+        // чтобы клиент не увидел пустой ответ
+        return trimmed;
+      }
       return trimmed;
     }
 
-    const rest = parts.slice(cutIndex).join(" ").trim();
+    // Удаляем ВСЕ предложения-приветствия в ответе (не только в начале)
+    const filtered = parts.filter((p) => !isGreetingSentence(p));
 
-    // Если после обрезки всё исчезло — вернём исходный текст
-    if (!rest) {
+    // Если всё вырезали — возвращаем исходный текст
+    if (filtered.length === 0) {
       return trimmed;
     }
 
-    return rest;
+    return filtered.join(" ").trim();
   }
 
   function setStatus(text) {
@@ -274,7 +269,7 @@
     const sendBtn = form?.querySelector(".madera-chat__send");
     const voiceBtn = form?.querySelector(".madera-chat__voice");
 
-    if (input) input.disabled = true;
+    input.disabled = true;
     if (sendBtn) sendBtn.disabled = true;
     if (voiceBtn) voiceBtn.disabled = true;
 
@@ -293,7 +288,7 @@
       );
       setStatus("Возникла временная ошибка. Можно попробовать ещё раз.");
     } finally {
-      if (input) input.disabled = false;
+      input.disabled = false;
       if (sendBtn) sendBtn.disabled = false;
       if (voiceBtn) voiceBtn.disabled = false;
       input.focus();
