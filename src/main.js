@@ -1,17 +1,3 @@
-// src/main.js
-
-import { catalogCategories } from "./utils/catalogCategories.js";
-import { catalogItems } from "./utils/catalogItems.js";
-
-// Тарифы за погонный метр (сомони)
-const BASE_RATES = {
-  standard: 4000,
-  premium: 5000,
-};
-
-const appRoot = document.getElementById("app");
-let selectedCatalogCategoryId = null;
-
 /* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
 
 function renderHome() {
