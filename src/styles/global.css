@@ -1867,3 +1867,115 @@ body .support-bubble {
   padding: 3px 4px 4px;
   color: #fff;
 }
+/* Верхний узкий блок бренда на главной */
+.home-top {
+  max-width: 1040px;
+  margin: 0 auto 24px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 0% 0%, rgba(255, 184, 77, 0.3), transparent) #1b120b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.home-top__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.home-top__name {
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 13px;
+  color: #f4e8d8;
+}
+
+.home-top__tagline {
+  font-size: 13px;
+  color: rgba(244, 232, 216, 0.7);
+}
+
+.home-top__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-top__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+}
+
+.home-top__cta {
+  white-space: nowrap;
+  padding-inline: 20px;
+}
+
+/* Главный блок: текст + фото */
+.hero--split {
+  max-width: 1040px;
+  margin: 0 auto 32px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 24px;
+  align-items: center;
+}
+
+/* Фото девушки справа */
+.hero__side--photo {
+  display: flex;
+  justify-content: center;
+}
+
+.hero__photo {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 32px;
+  object-fit: cover;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 191, 94, 0.25);
+}
+
+/* Адаптация под мобильные устройства */
+@media (max-width: 768px) {
+  .home-top {
+    flex-direction: row;
+    align-items: flex-start;
+    border-radius: 24px;
+  }
+
+  .home-top__name {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+  }
+
+  .home-top__tagline {
+    font-size: 12px;
+  }
+
+  .hero--split {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__side--photo {
+    order: -1; /* На мобильных можно поднять фото выше, если захочешь, можно убрать */
+  }
+
+  .hero__photo {
+    max-width: 100%;
+  }
+}
+
+/* Карточка AI под главным блоком */
+.hero-card--ai {
+  max-width: 1040px;
+  margin: 0 auto 40px;
+}
