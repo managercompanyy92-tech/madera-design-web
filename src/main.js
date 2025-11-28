@@ -45,7 +45,7 @@ function renderHome() {
           <div class="hero-photo">
             <div class="hero-photo__inner">
               <img
-                src="/face.jpg"
+                src="/public/face/face.jpg"
                 alt="Специалист Madera Design — ваш личный AI-дизайнер по интерьеру"
                 loading="lazy"
                 class="hero-photo__img"
