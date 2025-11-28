@@ -1,198 +1,210 @@
 // chat.js
+// Логика AI-дизайнера Madera Design
 
 (function () {
-  const API_URL = "https://your-backend.example.com/api/assistant"; // замените на свой backend при необходимости
+  // Безопасная инициализация: если браузер очень старый или DOM не готов, просто выходим
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+
+  // --- Поиск элементов в DOM ---
 
   const chatRoot = document.querySelector("[data-madera-chat]");
   const openBtn = document.querySelector("[data-madera-chat-open]");
   const closeBtn = chatRoot?.querySelector("[data-madera-chat-close]");
+  const form = chatRoot?.querySelector("[data-madera-chat-form]");
+  const input = chatRoot?.querySelector("[data-madera-chat-input]");
   const messagesEl = chatRoot?.querySelector("[data-madera-chat-messages]");
   const statusEl = chatRoot?.querySelector("[data-madera-chat-status]");
-  const formEl = chatRoot?.querySelector("[data-madera-chat-form]");
-  const inputEl = chatRoot?.querySelector("[data-madera-chat-input]");
   const voiceBtn = chatRoot?.querySelector("[data-madera-chat-voice]");
 
-  if (!chatRoot || !openBtn || !formEl || !messagesEl || !inputEl) {
-    console.warn("Madera chat: DOM elements not found");
+  if (!chatRoot || !openBtn || !closeBtn || !form || !input || !messagesEl || !statusEl) {
+    // Если что-то не нашли, тихо выходим, чтобы не ломать страницу
     return;
   }
 
-  /* ------------------------ ОТКРЫТИЕ / ЗАКРЫТИЕ ЧАТА ------------------------ */
+  // --- Вспомогательные функции UI ---
 
   function openChat() {
     chatRoot.classList.add("madera-chat--open");
-    if (inputEl) inputEl.focus();
+    // Автофокус в поле ввода с небольшой задержкой
+    setTimeout(() => input.focus(), 150);
   }
 
   function closeChat() {
     chatRoot.classList.remove("madera-chat--open");
-    stopRecognition();
   }
 
-  openBtn.addEventListener("click", openChat);
-  closeBtn?.addEventListener("click", closeChat);
+  function scrollMessagesToBottom() {
+    requestAnimationFrame(() => {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+  }
 
-  /* ------------------------------ РЕНДЕР СООБЩЕНИЙ ------------------------------ */
+  function setStatus(text) {
+    statusEl.textContent = text;
+  }
 
-  function appendMessage(text, role = "bot") {
+  function createMessageElement(role, text) {
     const wrapper = document.createElement("div");
-    wrapper.className =
-      "madera-chat__message " +
-      (role === "user"
-        ? "madera-chat__message--user"
-        : "madera-chat__message--bot");
+    wrapper.className = "madera-chat__message madera-chat__message--" + role;
 
     const bubble = document.createElement("div");
     bubble.className = "madera-chat__bubble";
     bubble.textContent = text;
 
     wrapper.appendChild(bubble);
-    messagesEl.appendChild(wrapper);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return wrapper;
   }
 
-  /* -------------------------- ГОЛОСОВОЙ ОТВЕТ (TTS) -------------------------- */
+  function addMessage(role, text) {
+    const msgEl = createMessageElement(role, text);
+    messagesEl.appendChild(msgEl);
+    scrollMessagesToBottom();
+  }
 
-  function speak(text) {
-    if (!("speechSynthesis" in window)) return;
-    try {
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = "ru-RU";
-      utter.rate = 1;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utter);
-    } catch (e) {
-      console.warn("TTS error:", e);
+  // --- Голосовой ввод ---
+
+  let recognition = null;
+  let isRecognizing = false;
+
+  function initSpeechRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+
+    const recog = new SR();
+    recog.lang = "ru-RU";
+    recog.interimResults = false;
+    recog.maxAlternatives = 1;
+
+    recog.addEventListener("start", () => {
+      isRecognizing = true;
+      if (voiceBtn) {
+        voiceBtn.classList.add("madera-chat__voice--active");
+      }
+      setStatus("Слушаю вас…");
+    });
+
+    recog.addEventListener("end", () => {
+      isRecognizing = false;
+      if (voiceBtn) {
+        voiceBtn.classList.remove("madera-chat__voice--active");
+      }
+      setStatus("Готова помочь. Голосовые и текстовые сообщения работают.");
+    });
+
+    recog.addEventListener("result", (event) => {
+      const transcript = Array.from(event.results)
+        .map((res) => res[0].transcript)
+        .join(" ");
+
+      if (transcript) {
+        input.value = transcript.trim();
+        input.focus();
+      }
+    });
+
+    recog.addEventListener("error", () => {
+      isRecognizing = false;
+      if (voiceBtn) {
+        voiceBtn.classList.remove("madera-chat__voice--active");
+      }
+      setStatus("Не удалось распознать голос. Попробуйте ещё раз или напишите текст.");
+    });
+
+    return recog;
+  }
+
+  if (voiceBtn) {
+    recognition = initSpeechRecognition();
+
+    if (recognition) {
+      voiceBtn.addEventListener("click", () => {
+        if (isRecognizing) {
+          recognition.stop();
+        } else {
+          try {
+            recognition.start();
+          } catch (e) {
+            // Иногда браузер бросает ошибку при повторном запуске — игнорируем
+          }
+        }
+      });
+    } else {
+      // Если распознавание речи недоступно — прячем кнопку, чтобы не путать пользователя
+      voiceBtn.style.display = "none";
     }
   }
 
-  /* ------------------------- ОТПРАВКА НА BACKEND / ФОЛБЭК ------------------------- */
+  // --- Взаимодействие с бэкендом ---
 
-  async function sendToAssistant(message) {
-    statusEl.textContent = "Думаю над ответом…";
+  async function sendToAssistant(messageText) {
+    // Здесь используем универсальный текст статуса — ты можешь изменить его по вкусу
+    setStatus("AI-дизайнер Madera думает над решением…");
 
-    // Попытка обратиться к backend API
     try {
-      const res = await fetch(API_URL, {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({
+          message: messageText,
+        }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const reply = data.reply || data.text || "";
-        if (reply) {
-          return reply;
-        }
+      if (!response.ok) {
+        throw new Error("Ошибка сети");
       }
-    } catch (e) {
-      console.warn("API error, fallback to локальная логика:", e);
+
+      const data = await response.json();
+      const reply =
+        (data && (data.reply || data.answer || data.message)) ||
+        "У меня сейчас не получилось получить ответ от сервера. Давайте попробуем ещё раз чуть позже.";
+
+      addMessage("assistant", reply);
+      setStatus("Готова помочь. Задайте новый вопрос про вашу мебель или интерьер.");
+    } catch (error) {
+      addMessage(
+        "assistant",
+        "Похоже, связь с сервером временно недоступна. " +
+          "Проверьте интернет и попробуйте ещё раз. Я никуда не исчезну."
+      );
+      setStatus("Не удалось связаться с сервером. Попробуйте отправить вопрос ещё раз.");
     }
-
-    // Локальный фолбэк, если API нет или отвечает с ошибкой
-    const lower = message.toLowerCase();
-
-    if (lower.includes("цена") || lower.includes("стоим")) {
-      return "Базовые тарифы: около 4000 сомони за погонный метр для ЛДСП (Стандарт) и 5000 сомони для МДФ фасадов (Премиум). Минимальный объём — 3 погонных метра.";
-    }
-
-    if (lower.includes("минимал")) {
-      return "Минимальный объём заказа — 3 погонных метра. Это помогает сохранять качество сервиса и оптимальную загрузку производства.";
-    }
-
-    if (lower.includes("кредит") || lower.includes("рассроч")) {
-      return "Оплата возможна частями и в кредит через партнёрские банки. Конкретные условия можно обсудить с менеджером после расчёта проекта.";
-    }
-
-    if (lower.includes("адрес") || lower.includes("где находитесь")) {
-      return "Шоурум и производство Madera Design находятся в Душанбе. Точный адрес и схему проезда вам уточнит менеджер при согласовании замера.";
-    }
-
-    return "Я зафиксировала ваш вопрос. Ориентировочные тарифы: 4000 / 5000 сом за погонный метр, минимальный объём — 3 пог. метра. За точными цифрами лучше заполнить заявку в разделе «Заказ» — менеджер всё посчитает.";
   }
 
-  /* ------------------------------ ОТПРАВКА ФОРМЫ ------------------------------ */
+  // --- Обработчики событий ---
 
-  formEl.addEventListener("submit", async (event) => {
+  openBtn.addEventListener("click", () => {
+    openChat();
+  });
+
+  closeBtn.addEventListener("click", () => {
+    closeChat();
+  });
+
+  form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const text = (inputEl.value || "").trim();
+
+    const text = input.value.trim();
     if (!text) return;
 
-    appendMessage(text, "user");
-    inputEl.value = "";
+    // Сообщение пользователя
+    addMessage("user", text);
+    input.value = "";
 
-    const reply = await sendToAssistant(text);
-    appendMessage(reply, "bot");
-    statusEl.textContent =
-      "Готова к следующему вопросу. Голосовой и текстовый ввод доступны.";
-    speak(reply);
+    // Отправляем запрос к AI-дизайнеру
+    sendToAssistant(text);
   });
 
-  inputEl.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+  // Дополнительно: открытие чата по клавише "Enter" при фокусе на кнопке-аватаре
+  openBtn.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      formEl.dispatchEvent(new Event("submit", { cancelable: true }));
+      openChat();
     }
   });
 
-  /* --------------------------- ГОЛОСОВОЙ ВВОД (STT) --------------------------- */
+  // Стартовый статус
+  setStatus("Готова помочь. Задайте вопрос о мебели или интерьере.");
 
-  let recognition = null;
-  let recognizing = false;
-
-  if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.lang = "ru-RU";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.addEventListener("start", () => {
-      recognizing = true;
-      voiceBtn.classList.add("madera-chat__voice--active");
-      statusEl.textContent = "Слушаю… говорите ваш вопрос.";
-    });
-
-    recognition.addEventListener("end", () => {
-      recognizing = false;
-      voiceBtn.classList.remove("madera-chat__voice--active");
-      statusEl.textContent =
-        "Готова к следующему вопросу. Голосовой и текстовый ввод доступны.";
-    });
-
-    recognition.addEventListener("result", (event) => {
-      const transcript = event.results[0][0].transcript;
-      inputEl.value = transcript;
-      formEl.dispatchEvent(new Event("submit", { cancelable: true }));
-    });
-  } else {
-    console.warn("SpeechRecognition API not supported");
-  }
-
-  function startRecognition() {
-    if (!recognition || recognizing) return;
-    recognition.start();
-  }
-
-  function stopRecognition() {
-    if (!recognition || !recognizing) return;
-    recognition.stop();
-  }
-
-  voiceBtn.addEventListener("click", () => {
-    if (!recognition) {
-      statusEl.textContent =
-        "Голосовой ввод не поддерживается в этом браузере. Попробуйте последний Chrome.";
-      return;
-    }
-    if (recognizing) {
-      stopRecognition();
-    } else {
-      startRecognition();
-    }
-  });
 })();
