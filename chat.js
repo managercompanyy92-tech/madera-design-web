@@ -118,33 +118,31 @@
     const isFirstAssistant =
       !chatState.messages.some((m) => m.role === "assistant");
 
+    // Для самого первого ответа — оставляем приветствие как есть
     if (isFirstAssistant) {
-      // Первый ответ — допускаем красивое приветствие
       return trimmed;
     }
 
-    // Для последующих ответов:
-    // 1) пробуем убрать первый абзац, если он начинается с приветствия
-    const paragraphs = trimmed.split(/\n{2,}/); // делим по пустым строкам
+    let t = trimmed;
 
-    if (
-      paragraphs.length > 1 &&
-      /^[—\-•\s]*?(здравствуй|здравствуйте|привет)/i.test(paragraphs[0])
-    ) {
-      return paragraphs.slice(1).join("\n\n").trim();
+    // 1) Удаляем первое приветственное предложение в начале текста
+    //    Здравствуйте..., Привет..., Добрый день..., Доброе утро/вечер...
+    const greetingSentenceRegex = new RegExp(
+      String.raw`^(\s*(здравствуй(те)?|привет|добрый\s+(день|вечер|утро)|доброе\s+(утро|день|вечер))[^.!?]*[.!?])`,
+      "i"
+    );
+    t = t.replace(greetingSentenceRegex, "").trimStart();
+
+    // 2) Убираем фразы типа "Я рада/рад приветствовать вас..." в начале
+    const welcomeSentenceRegex = /^(\s*(я\s+рад[а]?|рад[а]?\s+приветствовать)[^.!?]*[.!?])/i;
+    t = t.replace(welcomeSentenceRegex, "").trimStart();
+
+    // Если после обрезки всё исчезло, чтобы не показывать пустой ответ — вернём оригинальный текст
+    if (!t) {
+      return trimmed;
     }
 
-    // 2) fallback — убираем приветствие в начале всей реплики
-    const withoutGreeting = trimmed
-      .replace(
-        /^(здравствуй(те)?|привет)[^А-ЯЁA-Z0-9]*?/i,
-        ""
-      )
-      .trim();
-
-    // Если после обрезки текст совсем пропал — вернём исходный,
-    // чтобы не показывать пустой ответ
-    return withoutGreeting || trimmed;
+    return t;
   }
 
   function setStatus(text) {
