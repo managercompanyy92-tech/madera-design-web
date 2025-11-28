@@ -30,7 +30,7 @@ function renderHome() {
         </div>
         <div class="home-top__right">
           <img
-            src="/madera-logo.jpg"
+            src="/logo.jpg"
             alt="Логотип Madera Design"
             class="home-top__logo"
           />
@@ -80,7 +80,7 @@ function renderHome() {
 
         <div class="hero__side hero__side--photo">
           <img
-            src="/madera-face.jpg"
+            src="/face.jpg"
             alt="Специалист Madera Design"
             class="hero__photo"
           />
