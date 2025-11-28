@@ -63,8 +63,6 @@
   // СОСТОЯНИЕ ЧАТА
   // ---------------------------------------------------------------------------
   const chatState = {
-    isOpen: false,
-    isRecording: false,
     messages: [], // { role: "user" | "assistant", text: string }
   };
 
@@ -73,6 +71,12 @@
   // ---------------------------------------------------------------------------
   function qs(selector) {
     return document.querySelector(selector);
+  }
+
+  function setStatus(text) {
+    const statusEl = qs("[data-madera-chat-status]");
+    if (!statusEl) return;
+    statusEl.textContent = text;
   }
 
   // ---------------------------------------------------------------------------
@@ -84,11 +88,11 @@
 
     const wrapper = document.createElement("div");
     wrapper.classList.add("madera-chat__message");
-    if (role === "user") {
-      wrapper.classList.add("madera-chat__message--user");
-    } else {
-      wrapper.classList.add("madera-chat__message--bot");
-    }
+    wrapper.classList.add(
+      role === "user"
+        ? "madera-chat__message--user"
+        : "madera-chat__message--bot"
+    );
 
     const bubble = document.createElement("div");
     bubble.classList.add("madera-chat__bubble");
@@ -117,9 +121,7 @@
       .map((p) => p.trim())
       .filter((p) => p.length > 0);
 
-    if (parts.length === 0) {
-      return trimmed;
-    }
+    if (parts.length === 0) return trimmed;
 
     function isGreetingSentence(sentence) {
       const s = sentence.toLowerCase();
@@ -175,78 +177,6 @@
     return filtered.join(" ").trim();
   }
 
-  function setStatus(text) {
-    const statusEl = qs("[data-madera-chat-status]");
-    if (!statusEl) return;
-    statusEl.textContent = text;
-  }
-
-  // ---------------------------------------------------------------------------
-  // ОТКРЫТИЕ / ЗАКРЫТИЕ ВСПЛЫВАЮЩЕГО ЧАТА (запасной вариант)
-  // ---------------------------------------------------------------------------
-  function openChat() {
-    const panel = qs("[data-madera-chat]");
-    if (!panel) return;
-    panel.classList.add("madera-chat--open");
-    chatState.isOpen = true;
-  }
-
-  function closeChat() {
-    const panel = qs("[data-madera-chat]");
-    if (!panel) return;
-    panel.classList.remove("madera-chat--open");
-    chatState.isOpen = false;
-  }
-
-  // ---------------------------------------------------------------------------
-  // ПРОКРУТКА К БЛОКУ AI-ДИЗАЙНЕРА (ИЗ ЛЮБОЙ СТРАНИЦЫ)
-  // ---------------------------------------------------------------------------
-  function scrollToAiDesignerOrFallback() {
-    let scrolled = false;
-
-    function attemptScroll() {
-      if (scrolled) return;
-
-      // Ищем блок AI-дизайнера
-      const section = qs("[data-ai-designer]");
-      if (!section) return;
-
-      scrolled = true;
-      section.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-
-      // Пытаемся сфокусировать поле ввода внутри блока
-      const inputInside = section.querySelector("[data-ai-designer-input]");
-      const globalInput = qs("[data-ai-designer-input]");
-      const targetInput = inputInside || globalInput;
-
-      if (targetInput) {
-        setTimeout(() => {
-          targetInput.focus();
-        }, 400);
-      }
-    }
-
-    // Делаем несколько попыток — чтобы успел отрисоваться роутер SPA
-    attemptScroll();
-    setTimeout(attemptScroll, 150);
-    setTimeout(attemptScroll, 400);
-    setTimeout(attemptScroll, 800);
-
-    // Если через 1 сек. так и не нашли блок — открываем всплывающий чат как резерв
-    setTimeout(() => {
-      if (!scrolled) {
-        openChat();
-        const input = qs("[data-madera-chat-input]");
-        if (input) {
-          setTimeout(() => input.focus(), 50);
-        }
-      }
-    }, 1000);
-  }
-
   // ---------------------------------------------------------------------------
   // ОТПРАВКА СООБЩЕНИЯ НА БЭКЕНД
   // ---------------------------------------------------------------------------
@@ -286,7 +216,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // ОБРАБОТЧИК ОТПРАВКИ ФОРМЫ ВСПЛЫВАЮЩЕГО ЧАТА
+  // ОБРАБОТЧИК ОТПРАВКИ ФОРМЫ МАЛЕНЬКОГО ЧАТА (ЕСЛИ ИСПОЛЬЗУЕТСЯ)
   // ---------------------------------------------------------------------------
   async function handleFormSubmit(event) {
     event.preventDefault();
@@ -302,7 +232,7 @@
     addToHistory("user", messageText);
     input.value = "";
 
-    setStatus("Думаю над вашим запросом…");
+    setStatus("Думаем над вашим запросом…");
 
     const form = qs("[data-madera-chat-form]");
     const sendBtn = form?.querySelector(".madera-chat__send");
@@ -335,7 +265,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // ГОЛОСОВОЙ ВВОД (ПОКА ПРОСТО ЗАГЛУШКА)
+  // ГОЛОСОВОЙ ВВОД (ПОКА ЗАГЛУШКА)
   // ---------------------------------------------------------------------------
   function setupVoicePlaceholder() {
     const voiceBtn = qs("[data-madera-chat-voice]");
@@ -349,42 +279,60 @@
   }
 
   // ---------------------------------------------------------------------------
-  // ИНИЦИАЛИЗАЦИЯ ЧАТА И КНОПКИ AI-ASSISTANT
+  // ИНИЦИАЛИЗАЦИЯ
   // ---------------------------------------------------------------------------
   function initChat() {
     const openBtn = qs("[data-madera-chat-open]");
     const closeBtn = qs("[data-madera-chat-close]");
     const form = qs("[data-madera-chat-form]");
+    const chatPanel = qs("[data-madera-chat]");
 
-    // Клик по круглой кнопке "AI-assistant Madera"
+    // БЛОК AI-ДИЗАЙНЕРА, КУДА НАДО СКРОЛЛИТЬ
+    const aiDesignerSection = qs("[data-ai-designer]");
+    const aiDesignerInput = aiDesignerSection
+      ? aiDesignerSection.querySelector("[data-ai-designer-input]")
+      : null;
+
+    // 1) КНОПКА-КРУЖОК AI-ASSISTANT MADERA
     if (openBtn) {
       openBtn.addEventListener("click", (event) => {
         event.preventDefault();
+        event.stopPropagation();
 
-        // 1. Переключаемся на страницу с AI-дизайнером (например, "order")
-        if (typeof window !== "undefined") {
-          window.location.hash = "#order";
+        // Всегда только скроллим к блоку AI-дизайнера
+        if (aiDesignerSection) {
+          aiDesignerSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+
+          if (aiDesignerInput) {
+            setTimeout(() => {
+              aiDesignerInput.focus();
+            }, 400);
+          }
         }
-
-        // 2. Пытаемся несколько раз найти блок [data-ai-designer] и прокрутиться к нему
-        scrollToAiDesignerOrFallback();
       });
     }
 
-    if (closeBtn) {
+    // 2) КНОПКА ЗАКРЫТИЯ МАЛЕНЬКОГО ЧАТА (если он вообще используется)
+    if (closeBtn && chatPanel) {
       closeBtn.addEventListener("click", (event) => {
         event.preventDefault();
-        closeChat();
+        chatPanel.classList.remove("madera-chat--open");
       });
     }
 
+    // 3) ОТПРАВКА СООБЩЕНИЙ В МАЛЕНЬКОМ ЧАТЕ
     if (form) {
       form.addEventListener("submit", handleFormSubmit);
     }
 
     setupVoicePlaceholder();
 
-    setStatus("Готова помочь. Можно написать или задать вопрос голосом.");
+    setStatus(
+      "Готова помочь. Можно написать вопрос или воспользоваться AI-дизайнером на странице."
+    );
   }
 
   document.addEventListener("DOMContentLoaded", initChat);
