@@ -859,6 +859,30 @@ function initAiDesignerChat() {
     micBtn.addEventListener("click", () => toggleAiChatRecording(micBtn));
   }
 }
+// Открыть окно AI-дизайнера (если нужно — создать)
+function openAiDesignerChat() {
+  // если окно ещё не создано — создаём
+  if (!aiChatRoot) {
+    if (typeof initAiDesignerChat === "function") {
+      initAiDesignerChat();
+    }
+  }
+
+  if (!aiChatRoot) return;
+
+  // показываем окно
+  aiChatRoot.classList.add("ai-chat--open");
+
+  // фокус в поле ввода
+  try {
+    const input = aiChatRoot.querySelector("[data-ai-chat-input]");
+    if (input) {
+      input.focus();
+    }
+  } catch (e) {
+    console.warn("AI designer: не удалось установить фокус", e);
+  }
+}
 
 function showAiChat(initialQuestion = "") {
   if (!aiChatRoot) return;
