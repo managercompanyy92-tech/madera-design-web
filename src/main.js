@@ -17,67 +17,93 @@ let selectedCatalogCategoryId = null;
 function renderHome() {
   return `
     <section class="page page--home">
-      <div class="hero">
+
+      <!-- Узкий верхний блок с брендом и логотипом -->
+      <header class="home-top">
+        <div class="home-top__left">
+          <div class="home-top__brand">
+            <div class="home-top__name">MADERA DESIGN</div>
+            <div class="home-top__tagline">
+              Партнёр в создании современного интерьера
+            </div>
+          </div>
+        </div>
+        <div class="home-top__right">
+          <img
+            src="/madera-logo.jpg"
+            alt="Логотип Madera Design"
+            class="home-top__logo"
+          />
+          <button
+            class="btn btn--primary home-top__cta"
+            data-nav="order"
+          >
+            Оформить заказ
+          </button>
+        </div>
+      </header>
+
+      <!-- Главный герой-блок: текст слева, фото справа -->
+      <div class="hero hero--split">
         <div class="hero__content">
           <h1 class="hero__title">
             Современная корпусная мебель на заказ в Душанбе
           </h1>
+
           <p class="hero__subtitle">
-            Премиальный сервис, дизайн с поддержкой искусственного интеллекта, онлайн-калькулятор стоимости
-            и прозрачный статус заказа на каждом этапе.
+            Премиальная мебель под ваш интерьер с авторским дизайном
+            и поддержкой AI-дизайнера. Вы сразу видите концепцию, бюджет
+            и сроки — без неприятных сюрпризов.
           </p>
+
           <div class="hero__actions">
-            <button class="btn btn--primary" data-route="order">
+            <button
+              class="btn btn--primary"
+              data-nav="order"
+            >
               Рассчитать и оформить заказ
             </button>
-            <button class="btn btn--ghost" data-route="catalog">
+
+            <button
+              class="btn btn--ghost"
+              data-nav="catalog"
+            >
               Смотреть каталог идей
             </button>
           </div>
+
           <p class="hero__note">
-            Сделаем интерьер, который впечатляет с первого взгляда
-            — и приносит «вау-эффект» каждый день.
+            Мы создаём интерьеры, которые впечатляют с первого взгляда
+            и каждый день дарят ощущение «вау-эффекта».
           </p>
         </div>
-        <div class="hero__side">
-          <div class="hero-card">
-            <div class="hero-card__label">AI &amp; маркетинг</div>
-            <ul class="hero-card__list">
-              <li>Персональные рекомендации дизайна</li>
-              <li>AI-чат 24/7 по мебели и стоимости</li>
-              <li>Визуализация интерьера до заказа</li>
-              <li>Прозрачный статус заказа в приложении</li>
-            </ul>
-          </div>
+
+        <div class="hero__side hero__side--photo">
+          <img
+            src="/madera-face.jpg"
+            alt="Специалист Madera Design"
+            class="hero__photo"
+          />
         </div>
       </div>
 
-      <section class="highlights">
-        <div class="highlights__item">
-          <div class="highlights__title">Премиальный тёмный дизайн</div>
-          <p class="highlights__text">
-            Фирменная палитра: глубокий графит и благородный оранжевый (#E97A00).
-            Интерфейс, который сразу транслирует уровень бренда.
-          </p>
+      <!-- Блок AI & маркетинг под главным экраном -->
+      <section class="hero-card hero-card--ai">
+        <div class="hero-card__label">
+          AI &amp; маркетинг
         </div>
-        <div class="highlights__item">
-          <div class="highlights__title">Цифровая воронка продаж</div>
-          <p class="highlights__text">
-            От вдохновения до оплаты: каталог, калькулятор, онлайн-заказ, кредиты,
-            партнёрская программа — всё в одном веб-приложении.
-          </p>
-        </div>
-        <div class="highlights__item">
-          <div class="highlights__title">Сделано для Душанбе</div>
-          <p class="highlights__text">
-            Локальный бренд, локальное производство, адаптация под реальные квартиры
-            и запросы клиентов Душанбе.
-          </p>
-        </div>
+        <ul class="hero-card__list">
+          <li>Персональные рекомендации дизайна и наполнения мебели.</li>
+          <li>AI-чат 24/7 по мебели, планировке и стоимости.</li>
+          <li>Визуализация интерьера до заказа и монтажа.</li>
+          <li>Прозрачный статус заказа в приложении и аккуратный сервис.</li>
+        </ul>
       </section>
+
     </section>
   `;
 }
+          
 
 /* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
 
