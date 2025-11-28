@@ -319,17 +319,32 @@
     const closeBtn = document.querySelector("[data-madera-chat-close]");
     const form = document.querySelector("[data-madera-chat-form]");
 
-    if (openBtn) {
-      openBtn.addEventListener("click", () => {
-        openChat();
+    // Клик по круглой кнопке "AI-assistant Madera"
+  openBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    // 1) Если на странице есть блок AI-дизайнера — ведём туда
+    if (aiDesignerSection) {
+      aiDesignerSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
       });
+
+      if (aiDesignerInput) {
+        setTimeout(() => {
+          aiDesignerInput.focus();
+        }, 500); // чуть подождать пока докрутится
+      }
+
+      return;
     }
 
-    if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        closeChat();
-      });
+    // 2) Если блока AI-дизайнера нет — ведём себя по-старому (открываем чат)
+    if (chatRoot) {
+      chatRoot.classList.add("madera-chat--open");
+      inputEl?.focus();
     }
+  });
 
     if (form) {
       form.addEventListener("submit", handleFormSubmit);
