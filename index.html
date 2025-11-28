@@ -4,39 +4,29 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0"
     />
-    <title>Madera Design — Премиальная корпусная мебель на заказ в Душанбе</title>
+    <title>Madera Design — Премиальная корпусная мебель на заказ</title>
     <meta
       name="description"
-      content="Премиальная корпусная мебель на заказ в Душанбе. Авторский дизайн, AI-поддержка, точный замер, онлайн-расчёт стоимости и прозрачный статус заказа."
+      content="Madera Design — премиальная корпусная мебель на заказ в Душанбе. Авторский дизайн, точный замер, AI-поддержка и прозрачный статус заказа на каждом этапе."
     />
-
-    <!-- Favicon / логотип -->
-    <link rel="icon" type="image/webp" href="madera-logo.jpg" />
-
-    <!-- ВСТАВЬ СЮДА ДОПОЛНИТЕЛЬНЫЕ <link> ИЗ БЭКАПА (ЕСЛИ БЫЛИ)
-         например, подключения внешних шрифтов или CSS-файлов -->
 
     <style>
       :root {
-        --bg-main: #050608;
-        --bg-card: radial-gradient(circle at top left, #3b2510 0, #0a0706 55%);
-        --bg-card-soft: radial-gradient(circle at top left, #2b1a0d 0, #070506 55%);
-        --accent: #f7a52f;
-        --accent-soft: #f7a52f22;
-        --accent-strong: #ffb63b;
-        --accent-dark: #c47e16;
-        --text-main: #f9fafb;
-        --text-muted: #c7c9d1;
-        --text-soft: #9b9daf;
-        --error: #ff5252;
+        --bg-main: #060506;
+        --bg-card: #15100f;
+        --bg-card-soft: #1d1511;
+        --accent: #f9a825;
+        --accent-soft: #f6c063;
+        --text-main: #fef7ec;
+        --text-muted: #cbbfb2;
+        --stroke-soft: rgba(255, 255, 255, 0.06);
         --radius-xl: 32px;
         --radius-lg: 24px;
-        --radius-pill: 999px;
-        --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.65);
-        --shadow-strong: 0 26px 60px rgba(0, 0, 0, 0.9);
-        --border-glow: 1px solid rgba(255, 255, 255, 0.04);
+        --radius-md: 16px;
+        --shadow-soft: 0 28px 120px rgba(0, 0, 0, 0.6);
+        --shadow-gold: 0 0 40px rgba(249, 168, 37, 0.5);
       }
 
       * {
@@ -47,11 +37,11 @@
       body {
         margin: 0;
         padding: 0;
-        background: radial-gradient(circle at top, #26140b 0, #050608 40%, #020203 100%);
-        color: var(--text-main);
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
           "Segoe UI", sans-serif;
-        -webkit-font-smoothing: antialiased;
+        background: radial-gradient(circle at top left, #422112 0, #060506 55%)
+          fixed;
+        color: var(--text-main);
       }
 
       body {
@@ -60,59 +50,54 @@
         flex-direction: column;
       }
 
-      .page-shell {
+      .page-wrapper {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 18px 16px 80px;
+        padding: 20px 16px 40px;
       }
 
-      @media (min-width: 960px) {
-        .page-shell {
-          padding: 28px 24px 96px;
-        }
-      }
+      /* HEADER */
 
-      /* ===== HEADER ===== */
-
-      .top-bar {
+      .site-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        padding: 14px 18px;
+        padding: 12px 18px;
         border-radius: var(--radius-xl);
-        background: linear-gradient(
-          120deg,
-          rgba(255, 187, 92, 0.16),
-          rgba(15, 8, 3, 0.96) 36%,
-          rgba(7, 6, 9, 0.98) 100%
-        );
+        background: radial-gradient(circle at 0 0, #5a2e12 0, #1a120f 40%, #060506 100%);
         box-shadow: var(--shadow-soft);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        position: sticky;
-        top: 10px;
-        z-index: 20;
-        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        margin-bottom: 22px;
       }
 
-      .top-bar-left {
+      .brand-block {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         min-width: 0;
       }
 
-      .site-logo {
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 14px 28px rgba(0, 0, 0, 0.75);
-        background: radial-gradient(circle at 20% 0, #ffe399 0, #f0932b 45%, #732a0b 100%);
+      .brand-logo-circle {
+        width: 54px;
+        height: 54px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 20%, #ffe1a8 0, #f6b13d 35%, #c77210 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow: var(--shadow-gold);
+        flex-shrink: 0;
       }
 
-      .brand-text-block {
+      .brand-logo-circle img {
+        width: 130%;
+        height: 130%;
+        object-fit: cover;
+      }
+
+      .brand-text {
         display: flex;
         flex-direction: column;
         gap: 2px;
@@ -120,418 +105,391 @@
       }
 
       .brand-name {
-        font-size: 16px;
-        letter-spacing: 0.3em;
+        letter-spacing: 0.38em;
+        font-size: 13px;
         text-transform: uppercase;
-        color: #fef3c7;
-        font-weight: 500;
+        color: #ffe8b8;
         white-space: nowrap;
       }
 
       .brand-tagline {
-        font-size: 13px;
-        color: var(--text-soft);
+        font-size: 12px;
+        color: var(--text-muted);
+        opacity: 0.9;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
-      .top-bar-right {
-        display: flex;
-        align-items: center;
-        gap: 14px;
+      .header-cta {
         flex-shrink: 0;
       }
 
-      .top-phone {
-        display: none;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 2px;
-      }
-
-      .top-phone-label {
-        font-size: 11px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--text-soft);
-      }
-
-      .top-phone-number {
-        font-size: 13px;
-        font-weight: 600;
-        color: #e5e7eb;
-      }
-
       .btn-primary {
-        border-radius: var(--radius-pill);
-        padding: 10px 20px;
         border: none;
+        outline: none;
         cursor: pointer;
+        padding: 12px 22px;
+        border-radius: 999px;
         font-size: 13px;
         font-weight: 600;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
-        background: linear-gradient(135deg, var(--accent-strong), var(--accent-dark));
-        color: #111827;
-        box-shadow: 0 16px 35px rgba(0, 0, 0, 0.8);
-        transition: transform 0.13s ease-out, box-shadow 0.13s ease-out,
-          background 0.13s ease-out;
+        color: #1b110a;
+        background: linear-gradient(135deg, #f9a825 0, #f6c063 50%, #ffdf9a 100%);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+        transition: transform 0.14s ease-out, box-shadow 0.14s ease-out,
+          filter 0.14s ease-out;
         white-space: nowrap;
       }
 
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.7);
+        filter: brightness(1.03);
+      }
+
       .btn-primary:active {
-        transform: translateY(1px) scale(0.99);
-        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.9);
+        transform: translateY(1px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        filter: brightness(0.98);
       }
 
-      @media (min-width: 720px) {
-        .site-logo {
-          width: 52px;
-          height: 52px;
-        }
+      /* HERO */
 
-        .brand-name {
-          font-size: 18px;
-        }
-
-        .brand-tagline {
-          font-size: 14px;
-        }
-
-        .top-phone {
-          display: flex;
-        }
-
-        .btn-primary {
-          padding: 12px 26px;
-          font-size: 13px;
-        }
+      .hero-card {
+        background: radial-gradient(circle at top, #3a2214 0, #1a120f 45%, #050506 100%);
+        border-radius: 40px;
+        padding: 24px 22px 24px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 26px;
       }
 
-      /* ===== HERO LAYOUT ===== */
-
-      .hero {
-        margin-top: 22px;
-        border-radius: var(--radius-xl);
-        background: var(--bg-card);
-        box-shadow: var(--shadow-strong);
-        padding: 22px 18px 22px;
-        border: var(--border-glow);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .hero-inner {
-        display: grid;
-        grid-template-columns: minmax(0, 1.25fr);
-        gap: 22px;
-      }
-
-      @media (min-width: 880px) {
-        .hero {
-          padding: 30px 28px 30px;
-        }
-
-        .hero-inner {
-          grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
-          align-items: center;
-          gap: 28px;
-        }
-      }
-
-      .hero-kicker {
+      .hero-eyebrow {
         font-size: 12px;
-        letter-spacing: 0.25em;
+        letter-spacing: 0.26em;
         text-transform: uppercase;
-        color: #fed7aa;
-        margin-bottom: 12px;
+        color: #f2d6a6;
+        margin-bottom: 8px;
       }
 
       .hero-title {
-        font-size: 26px;
+        font-size: clamp(24px, 4.4vw, 34px);
         line-height: 1.2;
-        font-weight: 700;
+        font-weight: 800;
         margin: 0 0 14px;
       }
 
-      .hero-title span.accent {
-        color: var(--accent-strong);
-      }
-
-      @media (min-width: 720px) {
-        .hero-title {
-          font-size: 32px;
-        }
+      .hero-title span.highlight {
+        color: var(--accent-soft);
       }
 
       .hero-subtitle {
         font-size: 14px;
         line-height: 1.6;
         color: var(--text-muted);
+        max-width: 670px;
         margin-bottom: 18px;
-        max-width: 540px;
       }
 
       .hero-actions {
         display: flex;
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 12px;
         margin-bottom: 18px;
       }
 
-      @media (min-width: 540px) {
-        .hero-actions {
-          flex-direction: row;
-        }
-      }
-
-      .btn-ghost {
-        border-radius: var(--radius-pill);
-        padding: 10px 18px;
+      .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 20px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(11, 9, 8, 0.9);
+        color: #f7ede0;
         font-size: 13px;
         font-weight: 500;
-        border: 1px solid rgba(249, 250, 251, 0.22);
-        background: radial-gradient(circle at top left, #24130b 0, #030304 70%);
-        color: #f9fafb;
         cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: border-color 0.13s ease-out, background 0.13s ease-out,
-          transform 0.13s ease-out;
+        outline: none;
+        transition: background 0.14s ease-out, border-color 0.14s ease-out;
       }
 
-      .btn-ghost:active {
-        transform: translateY(1px);
+      .btn-secondary-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 20%, #ffe6a6 0, #f6b13d 40%, #b96a0f 100%);
+        box-shadow: 0 0 12px rgba(246, 177, 61, 0.8);
       }
 
-      .btn-ghost-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--accent-strong);
-        box-shadow: 0 0 0 4px rgba(247, 165, 47, 0.3);
+      .btn-secondary:hover {
+        background: rgba(18, 13, 11, 0.95);
+        border-color: rgba(255, 255, 255, 0.28);
       }
 
-      .hero-note {
+      .hero-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 12px;
-        border-radius: var(--radius-pill);
-        background: rgba(17, 24, 39, 0.75);
-        border: 1px solid rgba(249, 250, 251, 0.06);
-        font-size: 11px;
-        color: var(--text-soft);
-      }
-
-      .hero-note-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 40% 0, #bbf7d0 0, #22c55e 55%, #14532d 100%);
-        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.24);
-      }
-
-      .hero-bullets {
-        margin-top: 18px;
-        padding-top: 14px;
-        border-top: 1px solid rgba(249, 250, 251, 0.06);
-        display: grid;
-        gap: 6px;
-      }
-
-      .hero-bullet {
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 0 0, #0e5b2a 0, #071910 55%);
+        border: 1px solid rgba(144, 238, 144, 0.38);
+        color: #e9ffe9;
         font-size: 12px;
-        color: var(--text-soft);
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        margin-bottom: 18px;
       }
 
-      .hero-bullet span {
-        color: var(--accent-strong);
+      .hero-badge-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 20%, #c3ffba 0, #2fd65a 40%, #0f7c33 100%);
+        box-shadow: 0 0 12px rgba(46, 204, 113, 0.7);
       }
 
-      .hero-bullet-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--accent-soft);
-        border: 1px solid rgba(248, 181, 82, 0.7);
+      .hero-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.1fr);
+        gap: 6px 18px;
+        font-size: 13px;
+        color: #f5e3ca;
       }
 
-      @media (min-width: 720px) {
-        .hero-bullets {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
+      .hero-list li {
+        position: relative;
+        padding-left: 16px;
       }
 
-      /* ===== FACE BLOCK (ФОТО ДЕВУШКИ) ===== */
-
-      .hero-face {
-        display: flex;
-        justify-content: center;
+      .hero-list li::before {
+        content: "•";
+        position: absolute;
+        left: 4px;
+        top: 1px;
+        color: var(--accent-soft);
+        font-size: 14px;
       }
 
-      .hero-face-card {
+      /* SPECIALIST SECTION */
+
+      .specialist-section {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
+        gap: 20px;
+        margin-bottom: 32px;
+      }
+
+      .specialist-card {
         position: relative;
         border-radius: var(--radius-xl);
-        background: radial-gradient(circle at 20% 0, #fbbf77 0, #4a2a13 38%, #050509 100%);
-        padding: 10px;
-        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.95);
-        max-width: 360px;
-        width: 100%;
-        border: 1px solid rgba(248, 201, 120, 0.55);
+        padding: 18px 18px 16px;
+        background: radial-gradient(circle at 0 0, #5a3216 0, #231511 40%, #060506 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: var(--shadow-soft);
         overflow: hidden;
       }
 
-      .hero-face-photo-wrapper {
-        position: relative;
-        border-radius: 22px;
-        overflow: hidden;
-        background: #020203;
-      }
-
-      .hero-face-photo {
-        display: block;
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-        transform: translateY(0);
-      }
-
-      .hero-face-badge {
-        position: absolute;
-        bottom: 14px;
-        left: 14px;
-        padding: 8px 11px;
-        border-radius: var(--radius-pill);
-        background: rgba(15, 23, 42, 0.86);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(248, 250, 252, 0.22);
+      .specialist-header {
         display: flex;
         align-items: center;
-        gap: 8px;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
       }
 
-      .hero-face-badge-avatar {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 20% 0, #ffe6b7 0, #f59e0b 50%, #7c2d12 100%);
+      .specialist-title {
+        font-size: 15px;
+        font-weight: 700;
       }
 
-      .hero-face-badge-text {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-
-      .hero-face-badge-title {
-        font-size: 11px;
-        font-weight: 600;
-        color: #e5e7eb;
-      }
-
-      .hero-face-badge-subtitle {
-        font-size: 10px;
-        color: #d1d5db;
-      }
-
-      .hero-face-tag {
-        margin-top: 10px;
-        font-size: 11px;
-        color: #111827;
-        padding: 6px 10px;
-        border-radius: var(--radius-pill);
-        background: rgba(248, 250, 252, 0.9);
+      .specialist-status {
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(8, 22, 10, 0.9);
+        border: 1px solid rgba(130, 214, 130, 0.7);
+        font-size: 11px;
+        color: #c9ffcf;
       }
 
-      .hero-face-tag-dot {
+      .specialist-status-dot {
         width: 8px;
         height: 8px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #22c55e, #059669);
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 20%, #cfffd0 0, #35d674 40%, #0f7c33 100%);
+        box-shadow: 0 0 10px rgba(46, 204, 113, 0.6);
       }
 
-      @media (max-width: 879px) {
-        .hero-face {
-          order: 2;
+      .specialist-body {
+        display: grid;
+        grid-template-columns: 0.95fr 1.35fr;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .specialist-photo-wrapper {
+        position: relative;
+        border-radius: 26px;
+        overflow: hidden;
+        background: #201513;
+        box-shadow: var(--shadow-gold);
+        min-height: 180px;
+      }
+
+      .specialist-photo-wrapper::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.12) 0, transparent 45%);
+        pointer-events: none;
+        mix-blend-mode: soft-light;
+      }
+
+      .specialist-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .specialist-text {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+
+      .specialist-text p {
+        margin: 0 0 8px;
+      }
+
+      .specialist-text p:last-child {
+        margin-bottom: 0;
+      }
+
+      .specialist-name {
+        font-weight: 600;
+        color: var(--accent-soft);
+      }
+
+      .specialist-footer {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 12px;
+        color: #f1e0c5;
+      }
+
+      .specialist-tag {
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      /* FOOTER NAV */
+
+      .bottom-nav-placeholder {
+        margin-top: auto;
+        padding-top: 12px;
+        font-size: 11px;
+        color: rgba(200, 190, 175, 0.45);
+        text-align: center;
+      }
+
+      /* RESPONSIVE */
+
+      @media (max-width: 900px) {
+        .site-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
         }
 
-        .hero-inner {
+        .header-cta {
+          align-self: stretch;
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        .hero-card {
+          border-radius: 28px;
+          padding: 20px 18px 20px;
+        }
+
+        .specialist-section {
           grid-template-columns: minmax(0, 1fr);
         }
 
-        .hero-face-card {
-          max-width: 300px;
-          margin: 0 auto;
+        .specialist-body {
+          grid-template-columns: minmax(0, 1fr);
         }
       }
 
-      /* ===== BOTTOM NAV PLACEHOLDER (если у тебя был свой – можешь заменить) ===== */
+      @media (max-width: 640px) {
+        .page-wrapper {
+          padding-inline: 12px;
+        }
 
-      .bottom-nav {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 10px 14px 14px;
-        z-index: 30;
-        pointer-events: none;
-      }
+        .site-header {
+          padding: 10px 12px;
+        }
 
-      .bottom-nav-inner {
-        max-width: 520px;
-        margin: 0 auto;
-        background: rgba(12, 10, 11, 0.96);
-        border-radius: 999px;
-        padding: 8px 16px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.95);
-        border: 1px solid rgba(249, 250, 251, 0.06);
-        pointer-events: all;
-      }
+        .hero-list {
+          grid-template-columns: minmax(0, 1fr);
+        }
 
-      .bottom-nav-link {
-        flex: 1;
-        text-align: center;
-        font-size: 11px;
-        color: var(--text-soft);
-        text-decoration: none;
-      }
+        .hero-card {
+          margin-bottom: 20px;
+        }
 
-      .bottom-nav-link--active {
-        color: #fef3c7;
-        font-weight: 600;
-      }
+        .specialist-card {
+          padding: 16px 14px 14px;
+        }
 
-      @media (min-width: 880px) {
-        .bottom-nav {
-          display: none;
+        .brand-name {
+          letter-spacing: 0.26em;
+          font-size: 12px;
+        }
+
+        .brand-tagline {
+          font-size: 11px;
+        }
+
+        .btn-primary {
+          width: 100%;
+          text-align: center;
+          justify-content: center;
+        }
+
+        .header-cta {
+          width: 100%;
         }
       }
     </style>
   </head>
 
   <body>
-    <div class="page-shell">
-      <!-- ===== HEADER ===== -->
-      <header class="top-bar">
-        <div class="top-bar-left">
-          <img
-            src="madera-logo.jpg"
-            alt="Логотип Madera Design"
-            class="site-logo"
-          />
-          <div class="brand-text-block">
+    <div class="page-wrapper">
+      <!-- HEADER -->
+      <header class="site-header">
+        <div class="brand-block">
+          <div class="brand-logo-circle">
+            <img
+              src="/madera-logo.jpg"
+              alt="Логотип Madera Design"
+              loading="lazy"
+            />
+          </div>
+          <div class="brand-text">
             <div class="brand-name">MADERA DESIGN</div>
             <div class="brand-tagline">
               Партнёр в создании современного интерьера
@@ -539,118 +497,110 @@
           </div>
         </div>
 
-        <div class="top-bar-right">
-          <div class="top-phone">
-            <div class="top-phone-label">Консультация и расчёт</div>
-            <div class="top-phone-number">+992 (XX) XXX-XX-XX</div>
-          </div>
+        <div class="header-cta">
           <button class="btn-primary" type="button">
             Оформить заказ
           </button>
         </div>
       </header>
 
-      <!-- ===== HERO ===== -->
-      <main class="hero">
-        <div class="hero-inner">
-          <!-- Левая колонка: текст и CTA -->
-          <section aria-labelledby="hero-title">
-            <div class="hero-kicker">
-              СОВРЕМЕННАЯ КОРПУСНАЯ МЕБЕЛЬ НА ЗАКАЗ В ДУШАНБЕ
-            </div>
-            <h1 id="hero-title" class="hero-title">
-              Премиальная мебель с дизайном под ваш интерьер
-              <span class="accent">и поддержкой AI-дизайнера</span>
-            </h1>
-            <p class="hero-subtitle">
-              Madera Design соединяет авторский дизайн, точный замер,
-              расчёт стоимости и прозрачный статус заказа. От первой идеи
-              до установки — вы знаете, что происходит на каждом шаге.
-            </p>
+      <!-- HERO -->
+      <main>
+        <section class="hero-card">
+          <div class="hero-eyebrow">
+            СОВРЕМЕННАЯ КОРПУСНАЯ МЕБЕЛЬ НА ЗАКАЗ В ДУШАНБЕ
+          </div>
 
-            <div class="hero-actions">
-              <button class="btn-primary" type="button">
-                Рассчитать и оформить заказ
-              </button>
-              <button class="btn-ghost" type="button">
-                <span class="btn-ghost-dot"></span>
-                Смотреть каталог идей
-              </button>
+          <h1 class="hero-title">
+            Премиальная мебель с дизайном под ваш интерьер
+            <span class="highlight">и поддержкой AI-дизайнера</span>
+          </h1>
+
+          <p class="hero-subtitle">
+            Madera Design соединяет авторский дизайн, точный замер, расчёт
+            стоимости и прозрачный статус заказа. От первой идеи до установки
+            — вы знаете, что происходит на каждом шаге.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn-primary" type="button">
+              Рассчитать и оформить заказ
+            </button>
+
+            <button class="btn-secondary" type="button">
+              <span class="btn-secondary-dot"></span>
+              Смотреть каталог идей
+            </button>
+          </div>
+
+          <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            Замер, дизайн и монтаж «под ключ»
+          </div>
+
+          <ul class="hero-list">
+            <li>AI-рекомендации по планировке, стилю и наполнению мебели.</li>
+            <li>Точный расчёт стоимости до заказа и контроль бюджета.</li>
+            <li>Визуализация интерьера до монтажа — вы видите итог заранее.</li>
+            <li>Прозрачный статус заказа в приложении и отлаженный сервис.</li>
+          </ul>
+        </section>
+
+        <!-- SPECIALIST CARD -->
+        <section class="specialist-section">
+          <article class="specialist-card">
+            <div class="specialist-header">
+              <div class="specialist-title">
+                Специалист Madera Design
+              </div>
+              <div class="specialist-status">
+                <span class="specialist-status-dot"></span>
+                Онлайн сегодня
+              </div>
             </div>
 
-            <div class="hero-note">
-              <span class="hero-note-dot"></span>
-              <span>Замер, дизайн и монтаж «под ключ»</span>
-            </div>
-
-            <div class="hero-bullets">
-              <div class="hero-bullet">
-                <span class="hero-bullet-dot"></span>
-                <span>AI-рекомендации по планировке и стилю</span>
-              </div>
-              <div class="hero-bullet">
-                <span class="hero-bullet-dot"></span>
-                <span>Точный расчёт стоимости до заказа</span>
-              </div>
-              <div class="hero-bullet">
-                <span class="hero-bullet-dot"></span>
-                <span>Визуализация интерьера до монтажа</span>
-              </div>
-              <div class="hero-bullet">
-                <span class="hero-bullet-dot"></span>
-                <span>Прозрачный статус заказа в приложении</span>
-              </div>
-            </div>
-          </section>
-
-          <!-- Правая колонка: лицо бренда -->
-          <aside class="hero-face" aria-label="Представитель Madera Design">
-            <div class="hero-face-card">
-              <div class="hero-face-photo-wrapper">
+            <div class="specialist-body">
+              <div class="specialist-photo-wrapper">
                 <img
-                  src="madera-face.jpg"
-                  alt="Специалист Madera Design"
-                  class="hero-face-photo"
+                  src="/madera-face.jpg"
+                  alt="Лицо компании Madera Design — специалист по интерьеру"
+                  class="specialist-photo"
                   loading="lazy"
                 />
-                <div class="hero-face-badge">
-                  <div class="hero-face-badge-avatar"></div>
-                  <div class="hero-face-badge-text">
-                    <div class="hero-face-badge-title">
-                      Ваш персональный эксперт
-                    </div>
-                    <div class="hero-face-badge-subtitle">
-                      Поможет выбрать решения под ваш интерьер
-                    </div>
-                  </div>
-                </div>
               </div>
-              <div class="hero-face-tag">
-                <span class="hero-face-tag-dot"></span>
-                Лицо компании Madera Design — забота о вашем интерьере
+
+              <div class="specialist-text">
+                <p>
+                  <span class="specialist-name">Лицо компании Madera Design</span> —
+                  это специалист, который заботится о вашем интерьере так же,
+                  как о своём. Она помогает сформулировать задачу, подобрать
+                  материалы и конфигурации, чтобы интерьер впечатлял каждый
+                  день.
+                </p>
+                <p>
+                  Вместе вы уточните задачу, бюджет и сроки, а AI-дизайнер
+                  подскажет оптимальные решения. В итоге вы получаете
+                  продуманный проект и мебель, которая идеально «садится» в
+                  пространство.
+                </p>
               </div>
             </div>
-          </aside>
-        </div>
+
+            <div class="specialist-footer">
+              <span class="specialist-tag">Премиальный сервис</span>
+              <span class="specialist-tag">Дизайн + AI-поддержка</span>
+              <span class="specialist-tag">Интерьер «под ключ»</span>
+            </div>
+          </article>
+        </section>
       </main>
+
+      <div class="bottom-nav-placeholder">
+        Нижняя навигация сайта и другие разделы остаются без изменений.
+      </div>
     </div>
 
-    <!-- Нижняя навигация (при необходимости можешь заменить своей реализацией) -->
-    <nav class="bottom-nav" aria-label="Основная навигация">
-      <div class="bottom-nav-inner">
-        <a href="#" class="bottom-nav-link bottom-nav-link--active">Главная</a>
-        <a href="#catalog" class="bottom-nav-link">Каталог</a>
-        <a href="#order" class="bottom-nav-link">Заказ</a>
-        <a href="#profile" class="bottom-nav-link">Профиль</a>
-        <a href="#more" class="bottom-nav-link">Ещё</a>
-      </div>
-    </nav>
-
-    <!-- ВСТАВЬ СЮДА СВОИ <script> ИЗ БЭКАПА (ЕСЛИ БЫЛИ)
-         Например:
-         <script type="module" src="/src/main.js"></script>
-         <script src="/chat.js" defer></script>
-    -->
-
+    <!-- Скрипт AI-ассистента (как и раньше) -->
+    <script src="/chat.js" defer></script>
   </body>
 </html>
