@@ -103,7 +103,9 @@
   function addToHistory(role, text) {
     chatState.messages.push({ role, text });
   }
-
+  // Блок AI-дизайнера на странице (если он есть)
+  const aiDesignerSection = document.querySelector("[data-ai-designer]");
+  const aiDesignerInput = document.querySelector("[data-ai-designer-input]");
   // ---------------------------------------------------------------------------
   // ЖЁСТКАЯ ОЧИСТКА ПОВТОРНЫХ ПРИВЕТСТВИЙ
   // ---------------------------------------------------------------------------
