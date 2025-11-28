@@ -2127,3 +2127,18 @@ body .support-bubble {
     order: -1; /* сначала девушка, потом текст, можно убрать если не нравится */
   }
 }
+/* Плавное появление окна AI-дизайнера */
+.ai-chat {
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition:
+    opacity 0.25s ease-out,
+    transform 0.25s ease-out;
+}
+
+.ai-chat--open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
