@@ -42,29 +42,7 @@ function renderHome() {
       </div>
 
       <!-- ГЛАВНЫЙ БЛОК (ХЕРО) -->
-      <div class="hero">
-        <div class="hero__content">
-          <h1 class="hero__title">
-            Современная корпусная мебель<br />на заказ в Душанбе
-          </h1>
-
-          <p class="hero__subtitle">
-            Премиальная мебель под ваш интерьер с авторским дизайном
-            и поддержкой AI-дизайнера. Вы заранее видите концепцию,
-            budget и сроки — без неприятных сюрпризов.
-          </p>
-
-          <div class="hero__actions">
-            <button class="btn btn--primary" data-nav="order">
-              Рассчитать и оформить заказ
-            </button>
-
-            <button class="btn btn--ghost" data-nav="catalog">
-              Смотреть каталог идей
-            </button>
-          </div>
-
-          <p class="hero__note">
+        <p class="hero__note">
             Сделаем интерьер, который впечатляет с первого взгляда
             и приносит «вау-эффект» каждый день.
           </p>
