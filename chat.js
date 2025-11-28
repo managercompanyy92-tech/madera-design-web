@@ -41,15 +41,21 @@
       chatRoot.classList.remove("madera-chat--open");
     }
 
-    openBtn.addEventListener("click", openChat);
-    closeBtn.addEventListener("click", closeChat);
+   openBtn?.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
 
-    // Закрытие по Esc
-    document.addEventListener("keydown", (evt) => {
-      if (evt.key === "Escape") {
-        closeChat();
-      }
-    });
+  // 1) Создаем AI-дизайнер, если его еще нет
+  if (!aiChatRoot) {
+    initAiDesignerChat();
+  }
+
+  // 2) Показываем AI-дизайнера
+  aiChatRoot.classList.add("ai-chat--open");
+
+  // 3) Фокус в поле ввода
+  aiChatInputEl?.focus();
+});
 
     /* ----------------------------- РЕНДЕР СООБЩЕНИЙ --------------------------- */
 
