@@ -187,8 +187,9 @@ function normalizeAssistantReply(text) {
 
     try {
       const replyText = await sendMessageToServer(messageText);
-      appendMessage("assistant", replyText);
-      addToHistory("assistant", replyText);
+const normalized = normalizeAssistantReply(replyText);
+appendMessage("assistant", normalized);
+addToHistory("assistant", normalized);
       setStatus("Готова помочь. Задайте вопрос о мебели или интерьере.");
     } catch (error) {
       const fallback =
