@@ -18,14 +18,29 @@ function renderHome() {
   return `
     <section class="page page--home">
       <div class="hero">
+        <!-- Фото специалиста — теперь в самом верху блока -->
+        <div class="hero-photo">
+          <div class="hero-photo__inner">
+            <img
+              src="/public/face/face.jpg"
+              alt="Специалист Madera Design — ваш личный AI-дизайнер по интерьеру"
+              loading="lazy"
+              class="hero-photo__img"
+            />
+          </div>
+        </div>
+
+        <!-- Основной текст под фото -->
         <div class="hero__content">
           <h1 class="hero__title">
             Современная корпусная мебель на заказ в Душанбе
           </h1>
+
           <p class="hero__subtitle">
             Премиальный сервис, дизайн с поддержкой искусственного интеллекта,
             онлайн-калькулятор стоимости и прозрачный статус заказа на каждом этапе.
           </p>
+
           <div class="hero__actions">
             <button class="btn btn--primary" data-nav="order">
               Рассчитать и оформить заказ
@@ -34,26 +49,15 @@ function renderHome() {
               Смотреть каталог идей
             </button>
           </div>
+
           <p class="hero__note">
             Сделаем интерьер, который впечатляет с первого взгляда —
             и приносит «вау-эффект» каждый день.
           </p>
         </div>
 
+        <!-- Карточка AI & маркетинг аккуратно под текстом -->
         <div class="hero__side">
-          <!-- Новый блок с фото специалиста -->
-          <div class="hero-photo">
-            <div class="hero-photo__inner">
-              <img
-                src="/public/face/face.jpg"
-                alt="Специалист Madera Design — ваш личный AI-дизайнер по интерьеру"
-                loading="lazy"
-                class="hero-photo__img"
-              />
-            </div>
-          </div>
-
-          <!-- Старая карточка AI & МАРКЕТИНГ — оставляем как есть -->
           <div class="hero-card">
             <div class="hero-card__label">AI &amp; МАРКЕТИНГ</div>
             <ul class="hero-card__list">
@@ -91,7 +95,7 @@ function renderHome() {
       </section>
     </section>
   `;
-}
+}  
 
 /* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
 
