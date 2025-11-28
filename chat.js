@@ -57,7 +57,26 @@
       chatState.messages.splice(0, extra);
     }
   }
+// Убираем повторяющееся приветствие ассистента,
+// если это уже не первое сообщение в диалоге
+function normalizeAssistantReply(text) {
+  if (!text) return text;
+  const trimmed = text.trim();
 
+  // Проверяем, есть ли уже ответы ассистента в истории
+  const isFirstAssistant =
+    !chatState.messages.some(m => m.role === "assistant");
+
+  // Если это не первый ответ ассистента и он начинается с "Здравствуйте" —
+  // обрезаем приветствие
+  if (!isFirstAssistant) {
+    return trimmed
+      .replace(/^здравствуй(те)?[,! ]*/i, "")
+      .trim();
+  }
+
+  return trimmed;
+}
   // ---------------- Вспомогательные функции ----------------
 
   function openChat() {
