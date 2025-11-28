@@ -76,10 +76,6 @@
     return document.querySelector(selector);
   }
 
-  function qsa(selector) {
-    return Array.from(document.querySelectorAll(selector));
-  }
-
   // ---------------------------------------------------------------------------
   // РАБОТА С СООБЩЕНИЯМИ В ИНТЕРФЕЙСЕ
   // ---------------------------------------------------------------------------
@@ -109,7 +105,9 @@
     chatState.messages.push({ role, text });
   }
 
-  // Убираем повторяющиеся приветствия ассистента
+  // ---------------------------------------------------------------------------
+  // АГРЕССИВНО УБИРАЕМ ПОВТОРНЫЕ ПРИВЕТСТВИЯ
+  // ---------------------------------------------------------------------------
   function normalizeAssistantReply(text) {
     if (!text) return text;
     const trimmed = text.trim();
@@ -118,31 +116,76 @@
     const isFirstAssistant =
       !chatState.messages.some((m) => m.role === "assistant");
 
-    // Для самого первого ответа — оставляем приветствие как есть
+    // Для самого первого ответа — оставляем как есть (может быть красивое приветствие)
     if (isFirstAssistant) {
       return trimmed;
     }
 
-    let t = trimmed;
+    // Разбиваем на «предложения» по . ! ? и переносам
+    const parts = trimmed
+      .split(/(?<=[.!?])\s+|\n+/)
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
 
-    // 1) Удаляем первое приветственное предложение в начале текста
-    //    Здравствуйте..., Привет..., Добрый день..., Доброе утро/вечер...
-    const greetingSentenceRegex = new RegExp(
-      String.raw`^(\s*(здравствуй(те)?|привет|добрый\s+(день|вечер|утро)|доброе\s+(утро|день|вечер))[^.!?]*[.!?])`,
-      "i"
-    );
-    t = t.replace(greetingSentenceRegex, "").trimStart();
-
-    // 2) Убираем фразы типа "Я рада/рад приветствовать вас..." в начале
-    const welcomeSentenceRegex = /^(\s*(я\s+рад[а]?|рад[а]?\s+приветствовать)[^.!?]*[.!?])/i;
-    t = t.replace(welcomeSentenceRegex, "").trimStart();
-
-    // Если после обрезки всё исчезло, чтобы не показывать пустой ответ — вернём оригинальный текст
-    if (!t) {
+    if (parts.length === 0) {
       return trimmed;
     }
 
-    return t;
+    // Функция: является ли предложение приветствием / вступительным блоком
+    function isGreetingSentence(sentence) {
+      const s = sentence.toLowerCase();
+
+      // Базовые приветствия
+      if (
+        s.startsWith("здравствуйте") ||
+        s.startsWith("добрый день") ||
+        s.startsWith("добрый вечер") ||
+        s.startsWith("доброе утро") ||
+        s.startsWith("привет")
+      ) {
+        return true;
+      }
+
+      // Расширенные фразы
+      if (
+        s.includes("рада приветствовать") ||
+        s.includes("рад приветствовать") ||
+        s.includes("я рада приветствовать") ||
+        s.includes("я рад приветствовать") ||
+        s.includes("меня зовут") ||
+        s.includes("я ваш ai") ||
+        s.includes("я вашa ai") ||
+        s.includes("я ваш дизайнер") ||
+        s.includes("я виртуальный дизайнер") ||
+        s.includes("я виртуальный ассистент") ||
+        s.startsWith("я — ai") ||
+        s.startsWith("я – ai")
+      ) {
+        return true;
+      }
+
+      return false;
+    }
+
+    // Срезаем все начальные предложения, которые считаем приветствием/вступлением
+    let cutIndex = 0;
+    while (cutIndex < parts.length && isGreetingSentence(parts[cutIndex])) {
+      cutIndex += 1;
+    }
+
+    // Если мы ничего не обрезали — вернём исходный текст
+    if (cutIndex === 0) {
+      return trimmed;
+    }
+
+    const rest = parts.slice(cutIndex).join(" ").trim();
+
+    // Если после обрезки всё исчезло — вернём исходный текст
+    if (!rest) {
+      return trimmed;
+    }
+
+    return rest;
   }
 
   function setStatus(text) {
@@ -258,14 +301,13 @@
   }
 
   // ---------------------------------------------------------------------------
-  // ГОЛОСОВОЙ ВВОД (ПОКА ПРОСТО ЗАГЛУШКА, БЕЗ ЛОМА)
+  // ГОЛОСОВОЙ ВВОД (ПОКА ПРОСТО ЗАГЛУШКА)
   // ---------------------------------------------------------------------------
   function setupVoicePlaceholder() {
     const voiceBtn = document.querySelector("[data-madera-chat-voice]");
     if (!voiceBtn) return;
 
     voiceBtn.addEventListener("click", () => {
-      // Здесь позже можно подключить Web Speech API или свой бэкенд для распознавания речи.
       alert(
         "Голосовой ввод пока в демо-режиме. Позже здесь появится полноценная запись и распознавание речи."
       );
