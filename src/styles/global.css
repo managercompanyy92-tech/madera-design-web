@@ -2510,3 +2510,35 @@ body .support-bubble {
 .hero-face-info {
   transform: translate(10px, -18px); /* правее ≈5 мм и выше ≈4 мм */
 }
+  /* ==== ПРИНУДИТЕЛЬНОЕ ПЕРЕМЕЩЕНИЕ БЛОКА НА ФОТО ==== */
+.hero-face-info {
+  position: absolute !important;
+
+  /* смещения (0.4 см вверх = ~15px, 0.5 см вправо = ~18px) */
+  bottom: 30px !important; /* было 14px — подняли выше */
+  left: 34px !important;   /* было 16px — сдвинули правее */
+
+  right: 16px !important;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+}
+
+/* ==== ЧТОБЫ БЛОК НЕ ПЕРЕКРЫВАЛСЯ ДРУГИМИ ЭЛЕМЕНТАМИ ==== */
+.hero-photo,
+.hero-photo-inner,
+.hero-face-card {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ==== ЧТОБЫ КНОПКИ СНОВА БЫЛИ КЛИКАБЕЛЬНЫМИ ==== */
+.hero-face-info button,
+.hero-face-info a {
+  pointer-events: auto !important;
+  z-index: 999 !important;
+}
+
+/* Иногда перекрывает слой ассистента — отключаем */
+.hero-assistant-widget {
+  z-index: 1 !important;
+}
