@@ -2226,25 +2226,99 @@ body .support-bubble {
 /* Мобильная адаптация */
 @media (max-width: 768px) {
   .hero-overlay {
-    top: auto;
-    bottom: 7%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 86%;
-    padding: 18px 18px;
+  position: absolute;
+  z-index: 2;
+
+  bottom: 7%;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 86%;
+  max-width: 420px;
+
+  background: radial-gradient(circle at top left,
+    rgba(255, 196, 120, 0.98) 0,
+    #e99627 32%,
+    rgba(24, 18, 10, 0.96) 100%);
+  padding: 16px 18px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 204, 140, 0.7);
+
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(0, 0, 0, 0.7);
+
+  backdrop-filter: blur(9px);
+  }
+  .hero-overlay__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 8px;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.45);
+}
+
+.hero-overlay__subtitle {
+  font-size: 0.9rem;
+  color: #fdf5eb;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.hero-overlay__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-overlay .btn-primary,
+.hero-overlay .btn-outline {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  transition: all 0.25s ease;
+}
+
+/* основная кнопка */
+.hero-overlay .btn-primary {
+  background: linear-gradient(90deg, #f6b546, #ffd77f);
+  color: #1b1206;
+  box-shadow: 0 0 14px rgba(246, 181, 70, 0.55);
+}
+
+/* вторичная кнопка */
+.hero-overlay .btn-outline {
+  background: rgba(12, 10, 8, 0.78);
+  border: 1px solid rgba(255, 210, 140, 0.7);
+  color: #ffd89c;
+}
+  @media (max-width: 768px) {
+  .hero-overlay {
+    bottom: 4%;
+    width: 90%;
+    padding: 14px 14px;
+    border-radius: 22px;
   }
 
   .hero-overlay__title {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
 
   .hero-overlay__subtitle {
-    font-size: 0.85rem;
+    font-size: 0.84rem;
+    margin-bottom: 12px;
   }
 
   .hero-overlay .btn-primary,
   .hero-overlay .btn-outline {
-    font-size: 0.9rem;
-    padding: 10px 14px;
+    font-size: 0.85rem;
+    padding: 9px 12px;
   }
-}
+  }
