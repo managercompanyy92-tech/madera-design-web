@@ -2526,5 +2526,5 @@ section.page--home .hero__actions {
 }
 .hero-city {
     display: inline-block;
-    margin-left: 5px; /* сдвигает только слово Душанбе */
+    margin-left: 12px; /* сдвигает только слово Душанбе */
 }
