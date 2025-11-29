@@ -2517,3 +2517,10 @@ section.page--home .hero__actions {
     height: 0 !important;
     overflow: hidden !important;
 }
+/* Тюнинг фразы "Мебель на заказ" */
+.hero-face-info h3,
+.hero-face-info .hero-face-info__title {
+    margin-left: -20px !important;     /* сдвиг влево */
+    font-size: 30px !important;         /* размер текста */
+    line-height: 1.2 !important;        /* аккуратный межстрочный */
+}
