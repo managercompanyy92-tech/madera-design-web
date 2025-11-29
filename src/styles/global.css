@@ -2506,3 +2506,28 @@ body .support-bubble {
   color: #ffb347;
   border: 1px solid rgba(255, 153, 51, 0.6);
 }
+/* --- HERO CARD FINAL POSITION TUNING --- */
+.hero-face-card {
+    position: absolute !important;
+
+    /* Подняли ещё на +16px вверх */
+    bottom: 126px !important;
+
+    /* Сдвинули ещё на +16px вправо */
+    left: 50% !important;
+    transform: translateX(-42%) !important;
+
+    z-index: 5 !important;
+    pointer-events: auto !important;
+}
+
+/* Чтобы кнопки были кликабельными */
+.hero-face-card *,
+.hero-face-card button {
+    pointer-events: auto !important;
+}
+
+/* Чтобы карточка НЕ перекрывала нижнее меню */
+.page--home {
+    padding-bottom: 160px !important;
+}
