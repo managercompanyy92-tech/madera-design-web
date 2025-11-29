@@ -2506,3 +2506,18 @@ body .support-bubble {
   color: #ffb347;
   border: 1px solid rgba(255, 153, 51, 0.6);
 }
+  /* --- Управление положением блока на фото --- */
+/* Сюда ты можешь менять только bottom и left и двигать блок как хочешь */
+
+.hero-face-info {
+  position: absolute !important;
+  bottom: 140px !important;   /* двигай ВВЕРХ/ВНИЗ — увеличивай или уменьчай число */
+  left: 50% !important;        /* всегда по центру */
+  transform: translateX(-50%);
+  z-index: 50 !important;
+}
+
+/* Чтобы нижнее меню не закрывалось */
+.hero-face-card {
+  padding-bottom: 160px !important; /* можешь увеличивать, если блок снова будет закрывать меню */
+}
