@@ -2322,3 +2322,27 @@ body .support-bubble {
     padding: 9px 12px;
   }
   }
+/* ПЕРЕОПРЕДЕЛЕНИЕ КАРТОЧКИ НА ФОТО — НОВЫЙ ВАРИАНТ */
+.hero-face-info {
+  position: absolute;
+
+  /* Расположение — компактная карточка слева внизу */
+  left: 16px;
+  bottom: 18px;
+  width: 60%;
+  max-width: 300px;
+
+  padding: 14px 16px;
+  border-radius: 18px;
+
+  /* Красивый полупрозрачный фон с блюром */
+  background: rgba(10, 10, 10, 0.82);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 153, 51, 0.5);
+
+  /* Глубина и стиль Madera */
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+
+  /* Цвет текста */
+  color: #ffffff;
+}
