@@ -2507,3 +2507,13 @@ body .support-bubble {
   color: #ffb347;
   border: 1px solid rgba(255, 153, 51, 0.6);
 }
+/* Убираем заголовок, текст и две кнопки под карточкой */
+section.page--home h2,
+section.page--home p,
+section.page--home .hero__actions {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
