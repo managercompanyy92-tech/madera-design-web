@@ -2520,7 +2520,7 @@ section.page--home .hero__actions {
 /* Тюнинг фразы "Мебель на заказ" */
 .hero-face-info h3,
 .hero-face-info .hero-face-info__title {
-    margin-left: -25px !important;     /* сдвиг влево */
+    margin-left: -30px !important;     /* сдвиг влево */
     font-size: 22px !important;         /* размер текста */
     line-height: 1.2 !important;        /* аккуратный межстрочный */
 }
