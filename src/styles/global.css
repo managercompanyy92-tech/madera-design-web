@@ -2511,8 +2511,8 @@ body .support-bubble {
 
 .hero-face-info {
   position: absolute !important;
-  bottom: 10px !important;   /* двигай ВВЕРХ/ВНИЗ — увеличивай или уменьчай число */
-  left: 50% !important;        /* всегда по центру */
+  bottom: 140px !important;   /* двигай ВВЕРХ/ВНИЗ — увеличивай или уменьчай число */
+  left: 10% !important;        /* всегда по центру */
   transform: translateX(-50%);
   z-index: 50 !important;
 }
