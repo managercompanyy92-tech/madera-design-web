@@ -2431,7 +2431,6 @@ body .support-bubble {
 }
 /* === MADERA: карточка с девушкой и текстом на фото ======================= */
 
-/* Оболочка с фото */
 .hero-face-card {
   position: relative;
   border-radius: 18px;
@@ -2441,19 +2440,18 @@ body .support-bubble {
   border: 1px solid rgba(255, 153, 51, 0.45);
 }
 
-/* Фото девушки */
 .hero-face-img {
   width: 100%;
   height: auto;
   display: block;
 }
 
-/* Блок с текстом и кнопками поверх фото */
+/* Плашка с текстом и кнопками поверх фото */
 .hero-face-info {
   position: absolute;
   left: 16px;
   bottom: 18px;
-  max-width: 68%;                /* компактный блок слева, не закрывает всё фото */
+  max-width: 68%;
   padding: 14px 16px 16px;
   border-radius: 16px;
   background: rgba(5, 5, 5, 0.82);
@@ -2461,7 +2459,6 @@ body .support-bubble {
   border: 1px solid rgba(255, 153, 51, 0.55);
 }
 
-/* Заголовок на фото */
 .hero-face-title {
   font-size: 15px;
   line-height: 1.35;
@@ -2470,7 +2467,6 @@ body .support-bubble {
   margin: 0 0 6px;
 }
 
-/* Описание на фото */
 .hero-face-text {
   font-size: 13px;
   line-height: 1.45;
@@ -2478,14 +2474,13 @@ body .support-bubble {
   margin: 0 0 10px;
 }
 
-/* Контейнер для кнопок */
 .hero-face-actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* Базовый стиль кнопок на фото */
+/* Кнопки поверх фото */
 .hero-face-btn {
   display: inline-flex;
   align-items: center;
@@ -2499,7 +2494,6 @@ body .support-bubble {
   padding: 9px 14px;
 }
 
-/* Основная кнопка: "Рассчитать и оформить заказ" */
 .hero-face-btn--primary {
   background: linear-gradient(135deg, #ffb347, #ff9933);
   color: #111;
@@ -2507,7 +2501,6 @@ body .support-bubble {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
-/* Вторичная кнопка: "Смотреть каталог идей" */
 .hero-face-btn--secondary {
   background: rgba(10, 10, 10, 0.85);
   color: #ffb347;
