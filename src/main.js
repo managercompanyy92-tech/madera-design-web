@@ -17,44 +17,40 @@ let selectedCatalogCategoryId = null;
 function renderHome() {
   return `
     <section class="page page--home">
-      <div class="hero">
-        <!-- Фото специалиста — теперь в самом верху блока -->
-        <div class="hero-photo">
-       <div class="hero-photo__inner">
-  <img
-    src="/public/face/face.jpg"
-    alt="Специалист Madera Design — AI-дизайнер"
-    class="hero-photo__img"
-  />
-<div class="face-text-card">
-    <h2 class="face-title">AI-дизайн, созданный с точностью и стилем</h2>
-    <p class="face-subtitle">Мы проектируем мебель, анализируя пространство и ваш стиль жизни.</p>
+ <div class="hero-photo">
+  <div class="hero-photo__inner hero-face-card">
+    <img
+      class="hero-face-img"
+      src="/public/face/face.jpg"
+      alt="Специалист Madera Design"
+    />
 
-    <div class="face-actions">
-        <button class="face-btn face-btn-primary" onclick="navigateTo('order')">
-            Рассчитать и оформить заказ
+    <!-- Полупрозрачная плашка с текстом и кнопками прямо НА фото -->
+    <div class="hero-face-info">
+      <h3 class="hero-face-title">
+        AI-дизайн, созданный с точностью и стилем
+      </h3>
+      <p class="hero-face-text">
+        Мы проектируем мебель, анализируя пространство и ваш стиль жизни.
+      </p>
+
+      <div class="hero-face-actions">
+        <button
+          class="hero-face-btn hero-face-btn--primary"
+          type="button"
+          data-nav="order"
+        >
+          Рассчитать и оформить заказ
         </button>
 
-        <button class="face-btn face-btn-secondary" onclick="navigateTo('catalog')">
-            Смотреть каталог идей
+        <button
+          class="hero-face-btn hero-face-btn--secondary"
+          type="button"
+          data-nav="catalog"
+        >
+          Смотреть каталог идей
         </button>
-    </div>
-</div>
-  <div class="hero-overlay">
-    <h2 class="hero-overlay__title">
-      AI-дизайн, созданный с точностью и стилем
-    </h2>
-    <p class="hero-overlay__subtitle">
-      Мы проектируем мебель, анализируя пространство и ваш стиль жизни.
-    </p>
-
-    <div class="hero-overlay__buttons">
-      <a href="#order" class="btn-primary">
-        Рассчитать и оформить заказ
-      </a>
-      <a href="#catalog" class="btn-outline">
-        Смотреть каталог идей
-      </a>
+      </div>
     </div>
   </div>
 </div>
