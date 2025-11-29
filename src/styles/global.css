@@ -2537,7 +2537,7 @@ section.page--home .hero__actions {
 }
 .hero-ai-avatar {
     position: fixed !important;
-    bottom: 40px !important;
+    bottom: 10px !important;
     right: 15px !important;
     z-index: 99999 !important;
 }
