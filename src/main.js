@@ -28,7 +28,7 @@ function renderHome() {
     <!-- Полупрозрачная плашка с текстом и кнопками прямо НА фото -->
     <div class="hero-face-info">
       <h3 class="hero-face-title">
-        Мебель на заказ в ДУШАНБЕ!
+        Мебель на заказ в <span class="hero-city">ДУШАНБЕ!</span>
       </h3>
       <p class="hero-face-text">
         Мы проектируем мебель, анализируя пространство и ваш стиль жизни.
