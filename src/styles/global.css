@@ -2029,6 +2029,7 @@ body .support-bubble {
 
 .hero-face-card {
   position: relative;
+  bottom: 14px;
   border-radius: 18px;
   overflow: hidden;
   background: radial-gradient(circle at top, #2a211a 0%, #050505 60%);
