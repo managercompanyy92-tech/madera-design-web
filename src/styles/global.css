@@ -2143,3 +2143,108 @@ body .support-bubble {
     padding: 10px 14px;
   }
 }
+.hero-photo__inner {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-photo__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Карточка поверх фото */
+.hero-overlay {
+  position: absolute;
+  z-index: 2;
+
+  top: 12%;
+  left: 6%;
+  width: 46%;
+  max-width: 380px;
+
+  background: radial-gradient(circle at top left, #f5b04a 0, #e48a1f 35%, rgba(20, 20, 20, 0.9) 100%);
+  padding: 20px 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 196, 120, 0.55);
+
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(0, 0, 0, 0.7);
+
+  backdrop-filter: blur(10px);
+}
+
+.hero-overlay__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.hero-overlay__subtitle {
+  font-size: 0.95rem;
+  color: #f5f5f5;
+  line-height: 1.45;
+  margin-bottom: 16px;
+}
+
+.hero-overlay__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hero-overlay .btn-primary,
+.hero-overlay .btn-outline {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 999px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  transition: all 0.25s ease;
+}
+
+.hero-overlay .btn-primary {
+  background: linear-gradient(90deg, #f6b546, #ffd77f);
+  color: #1b1206;
+  box-shadow: 0 0 16px rgba(246, 181, 70, 0.55);
+}
+
+.hero-overlay .btn-outline {
+  background: rgba(12, 10, 8, 0.75);
+  border: 1px solid rgba(255, 210, 140, 0.6);
+  color: #ffd89c;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .hero-overlay {
+    top: auto;
+    bottom: 7%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 86%;
+    padding: 18px 18px;
+  }
+
+  .hero-overlay__title {
+    font-size: 1.05rem;
+  }
+
+  .hero-overlay__subtitle {
+    font-size: 0.85rem;
+  }
+
+  .hero-overlay .btn-primary,
+  .hero-overlay .btn-outline {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+  }
+}
