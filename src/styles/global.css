@@ -2190,7 +2190,7 @@ body .support-bubble {
   line-height: 1.45;
   margin-bottom: 16px;
 }
-
+8
 .hero-overlay__buttons {
   display: flex;
   flex-direction: column;
@@ -2455,8 +2455,8 @@ body .support-bubble {
   max-width: 68%;
   padding: 14px 16px 16px;
   border-radius: 16px;
-  background: rgba(5, 5, 5, 20.0k);
-  backdrop-filter: blur(10px);
+  background: rgba(5, 5, 5, 0.82k);
+  backdrop-filter: blur(60px);
   border: 1px solid rgba(255, 153, 51, 0.55);
 }
 
