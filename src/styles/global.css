@@ -2535,3 +2535,9 @@ section.page--home .hero__actions {
 #chat-mini {
     bottom: -290px !important;
 }
+.hero-ai-avatar {
+    position: fixed !important;
+    bottom: -20px !important;
+    right: 15px !important;
+    z-index: 99999 !important;
+}
