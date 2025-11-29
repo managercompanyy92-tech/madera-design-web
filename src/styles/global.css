@@ -2557,3 +2557,15 @@ body .support-bubble {
 .hero-face-info {
   bottom: 50px !important; /* можно потом подрегулировать на вкус */
 }
+/* Кнопки внутри карточки на фото: вертикальная колонка, на всю ширину */
+.hero-face-info .hero__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.hero-face-info .btn {
+  width: 100%;
+  justify-content: center;
+}
