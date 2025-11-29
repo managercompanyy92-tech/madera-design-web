@@ -2581,7 +2581,7 @@ body .support-bubble {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 210px;              /* поднимаем карточку выше нижнего меню */
+  bottom: 500px;              /* поднимаем карточку выше нижнего меню */
   pointer-events: auto;       /* внутри карточки клики работают */
 }
 
