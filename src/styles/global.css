@@ -2569,3 +2569,22 @@ body .support-bubble {
   width: 100%;
   justify-content: center;
 }
+  /* --- Карточка на фото: не закрывать нижнее меню --- */
+
+.hero-face-card {
+  position: relative;
+  padding-bottom: 110px;      /* запас снизу, чтобы фото не упиралось в меню */
+  pointer-events: none;       /* сам контейнер клики не перехватывает */
+}
+
+.hero-face-info {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 105px;              /* поднимаем карточку выше нижнего меню */
+  pointer-events: auto;       /* внутри карточки клики работают */
+}
+
+.hero-face-info * {
+  pointer-events: auto;
+}
