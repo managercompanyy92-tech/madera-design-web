@@ -2429,3 +2429,87 @@ body .support-bubble {
 .face-btn-secondary:hover {
     background: rgba(255, 153, 51, 0.15);
 }
+/* === MADERA: карточка с девушкой и текстом на фото ======================= */
+
+/* Оболочка с фото */
+.hero-face-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #2a190c 0%, #050509 70%);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 153, 51, 0.45);
+}
+
+/* Фото девушки */
+.hero-face-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Блок с текстом и кнопками поверх фото */
+.hero-face-info {
+  position: absolute;
+  left: 16px;
+  bottom: 18px;
+  max-width: 68%;                /* компактный блок слева, не закрывает всё фото */
+  padding: 14px 16px 16px;
+  border-radius: 16px;
+  background: rgba(5, 5, 5, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 153, 51, 0.55);
+}
+
+/* Заголовок на фото */
+.hero-face-title {
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #ffb347;
+  margin: 0 0 6px;
+}
+
+/* Описание на фото */
+.hero-face-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 10px;
+}
+
+/* Контейнер для кнопок */
+.hero-face-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Базовый стиль кнопок на фото */
+.hero-face-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  padding: 9px 14px;
+}
+
+/* Основная кнопка: "Рассчитать и оформить заказ" */
+.hero-face-btn--primary {
+  background: linear-gradient(135deg, #ffb347, #ff9933);
+  color: #111;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Вторичная кнопка: "Смотреть каталог идей" */
+.hero-face-btn--secondary {
+  background: rgba(10, 10, 10, 0.85);
+  color: #ffb347;
+  border: 1px solid rgba(255, 153, 51, 0.6);
+}
