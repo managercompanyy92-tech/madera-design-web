@@ -2524,3 +2524,7 @@ section.page--home .hero__actions {
     font-size: 21px !important;         /* размер текста */
     line-height: 1.2 !important;        /* аккуратный межстрочный */
 }
+.hero-city {
+    display: inline-block;
+    margin-left: -20px; /* сдвигает только слово Душанбе */
+}
