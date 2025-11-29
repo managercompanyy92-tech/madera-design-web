@@ -2521,6 +2521,6 @@ section.page--home .hero__actions {
 .hero-face-info h3,
 .hero-face-info .hero-face-info__title {
     margin-left: -20px !important;     /* сдвиг влево */
-    font-size: 30px !important;         /* размер текста */
+    font-size: 22px !important;         /* размер текста */
     line-height: 1.2 !important;        /* аккуратный межстрочный */
 }
