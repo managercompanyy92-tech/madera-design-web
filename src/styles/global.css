@@ -2542,3 +2542,18 @@ body .support-bubble {
 .hero-assistant-widget {
   z-index: 1 !important;
 }
+/* Карточка на фото не должна блокировать клики вне себя */
+.hero-face-card {
+  pointer-events: none !important;
+}
+
+/* Но внутри карточки клики должны работать */
+.hero-face-info,
+.hero-face-info * {
+  pointer-events: auto !important;
+}
+
+/* Чуть сильнее поднимаем карточку, чтобы она точно не залезала на нижнее меню */
+.hero-face-info {
+  bottom: 80px !important; /* можно потом подрегулировать на вкус */
+}
