@@ -2455,8 +2455,8 @@ body .support-bubble {
   max-width: 68%;
   padding: 14px 16px 16px;
   border-radius: 16px;
-  background: rgba(5, 5, 5, 0.82k);
-  backdrop-filter: blur(2px);
+  background: rgba(5, 5, 5, 0.10k);
+  backdrop-filter: blur(0.5px);
   border: 1px solid rgba(255, 153, 51, 0.55);
 }
 
