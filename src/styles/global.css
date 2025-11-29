@@ -2506,3 +2506,7 @@ body .support-bubble {
   color: #ffb347;
   border: 1px solid rgba(255, 153, 51, 0.6);
 }
+/* Точная подстройка карточки на фото */
+.hero-face-info {
+  transform: translate(10px, -18px); /* правее ≈5 мм и выше ≈4 мм */
+}
