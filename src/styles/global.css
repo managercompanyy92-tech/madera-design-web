@@ -2531,3 +2531,27 @@ body .support-bubble {
 .page--home {
     padding-bottom: 160px !important;
 }
+/* --- HERO CARD NEW POSITION (10mm DOWN + 10mm LEFT) --- */
+.hero-face-card {
+    position: absolute !important;
+
+    /* Было 126px — опускаем вниз на 32px → 126 - 32 = 94 */
+    bottom: 94px !important;
+
+    /* Было translateX(-42%) — двигаем на 32px влево */
+    left: calc(50% - 32px) !important;
+
+    z-index: 5 !important;
+    pointer-events: auto !important;
+}
+
+/* Кнопки кликабельные */
+.hero-face-card *,
+.hero-face-card button {
+    pointer-events: auto !important;
+}
+
+/* Чтобы не перекрывал нижнее меню */
+.page--home {
+    padding-bottom: 160px !important;
+}
