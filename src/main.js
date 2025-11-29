@@ -21,6 +21,16 @@ function renderHome() {
         <!-- Фото специалиста — теперь в самом верху блока -->
         <div class="hero-photo">
           <div class="hero-photo__inner">
+          <div class="madera-hero-overlay">
+  <div class="madera-hero-text">
+    <h2>AI-дизайн, созданный с точностью и стилем</h2>
+    <p>Мы проектируем мебель, анализируя пространство и ваш стиль жизни.</p>
+    <div class="madera-hero-buttons">
+      <a href="#order" class="btn-primary">Рассчитать и оформить заказ</a>
+      <a href="#catalog" class="btn-outline">Смотреть каталог идей</a>
+    </div>
+  </div>
+</div>
             <img
               src="/public/face/face.jpg"
               alt="Специалист Madera Design — ваш личный AI-дизайнер по интерьеру"
