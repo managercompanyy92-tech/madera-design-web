@@ -2450,8 +2450,8 @@ body .support-bubble {
 /* Плашка с текстом и кнопками поверх фото */
 .hero-face-info {
   position: absolute;
-  left: 26px;
-  bottom: 8px;
+  left: 56px;
+  bottom: 6px;
   max-width: 68%;
   padding: 14px 16px 16px;
   border-radius: 16px;
