@@ -2528,3 +2528,10 @@ section.page--home .hero__actions {
     display: inline-block;
     margin-left: 32px; /* сдвигает только слово Душанбе */
 }
+  .hero-ai-avatar,
+.ai-assistant,
+.ai-widget,
+#chat-btn,
+#chat-mini {
+    bottom: -32px !important;
+}
