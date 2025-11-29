@@ -2452,11 +2452,11 @@ body .support-bubble {
   position: absolute;
   left: 71px;
   bottom: 6px;
-  max-width: 68%;
+  max-width: 48%;
   padding: 14px 16px 16px;
   border-radius: 16px;
-  background: rgba(5, 5, 5, 0.10k);
-  backdrop-filter: blur(0.5px);
+  background: rgba(5, 5, 5, 0.3k);
+  backdrop-filter: blur(0.1px);
   border: 1px solid rgba(255, 153, 51, 0.55);
 }
 
