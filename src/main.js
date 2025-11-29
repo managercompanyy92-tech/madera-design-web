@@ -26,7 +26,20 @@ function renderHome() {
     alt="Специалист Madera Design — AI-дизайнер"
     class="hero-photo__img"
   />
+<div class="face-text-card">
+    <h2 class="face-title">AI-дизайн, созданный с точностью и стилем</h2>
+    <p class="face-subtitle">Мы проектируем мебель, анализируя пространство и ваш стиль жизни.</p>
 
+    <div class="face-actions">
+        <button class="face-btn face-btn-primary" onclick="navigateTo('order')">
+            Рассчитать и оформить заказ
+        </button>
+
+        <button class="face-btn face-btn-secondary" onclick="navigateTo('catalog')">
+            Смотреть каталог идей
+        </button>
+    </div>
+</div>
   <div class="hero-overlay">
     <h2 class="hero-overlay__title">
       AI-дизайн, созданный с точностью и стилем
