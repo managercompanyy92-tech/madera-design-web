@@ -2044,14 +2044,21 @@ body .support-bubble {
 
 .hero-face-info {
   position: absolute;
+
+  /* Карточка внизу слева, а не на всю ширину */
   left: 16px;
-  bottom: 14px;
-  right: 16px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(5, 5, 5, 0.82);
+  bottom: 18px;
+  width: 58%;
+  max-width: 280px;
+
+  padding: 14px 16px;
+  border-radius: 18px;
+
+  background: rgba(10, 10, 10, 0.78);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 153, 51, 0.4);
+  border: 1px solid rgba(255, 153, 51, 0.45);
+
+  color: #ffffff;
 }
 
 .hero-face-name {
