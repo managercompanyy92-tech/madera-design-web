@@ -2432,13 +2432,28 @@ body .support-bubble {
 /* === MADERA: карточка с девушкой и текстом на фото ======================= */
 
 .hero-face-card {
-  position: relative;
+  /* Позиционируем карту поверх фото */
+  position: absolute;
+  z-index: 5;
+
+  /* 10 мм ≈ 32 px. Опускаем на ~10 мм ниже и сдвигаем на ~10 мм левее
+     относительно предыдущего “идеального” положения */
+  left: calc(50% - 32px);
+  bottom: 88px; /* если будет низко/высоко — меняем это число */
+
+  /* Дальше — твой стиль карточки */
   border-radius: 18px;
   overflow: hidden;
-  background: radial-gradient(circle at top, #2a190c 0%, #050509 70%);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(255, 153, 51, 0.45);
+  background: radial-gradient(circle at top left, rgba(255, 179, 71, 0.95), rgba(5, 5, 5, 0.96));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 153, 51, 0.7);
+  padding: 22px 20px 24px;
 }
+  .page--home .hero-face-card {
+  left: calc(50% - 32px) !important;
+  bottom: 88px !important;
+  position: absolute !important;
+  }
 
 .hero-face-img {
   width: 100%;
