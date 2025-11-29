@@ -1527,3 +1527,28 @@ function initApp() {
 }
 
 initApp();
+// ---------------------------------------------
+// Кнопки на карточке девушки -> действующие CTA
+// ---------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  const overlayOrderBtn = document.querySelector(".hero-face-btn--primary");
+  const overlayCatalogBtn = document.querySelector(".hero-face-btn--secondary");
+
+  // Кнопки из основного hero-блока, которые уже работают
+  const mainOrderBtn = document.querySelector(".hero__actions .btn--primary");
+  const mainCatalogBtn = document.querySelector(".hero__actions .btn--ghost");
+
+  if (overlayOrderBtn && mainOrderBtn) {
+    overlayOrderBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      mainOrderBtn.click(); // ведём туда же, куда ведет основная кнопка
+    });
+  }
+
+  if (overlayCatalogBtn && mainCatalogBtn) {
+    overlayCatalogBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      mainCatalogBtn.click(); // ведём туда же, куда ведет основная кнопка
+    });
+  }
+});
