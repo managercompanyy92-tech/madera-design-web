@@ -2521,3 +2521,21 @@ body .support-bubble {
 .hero-face-card {
   padding-bottom: 160px !important; /* можешь увеличивать, если блок снова будет закрывать меню */
 }
+/* --- FIX HERO CARD POSITION AND CLICKABILITY --- */
+.hero-face-card {
+    position: absolute !important;
+    bottom: 110px !important; /* поднимаем на 12px + безопасная зона */
+    left: 50% !important;
+    transform: translateX(-46%) !important; /* сдвигаем вправо на ~6px */
+    z-index: 5 !important; /* ниже меню, выше фона */
+    pointer-events: auto !important;
+}
+
+.hero-face-card * {
+    pointer-events: auto !important;
+}
+
+/* Чтобы карточка НЕ перекрывала нижнее меню */
+.page--home {
+    padding-bottom: 160px !important;
+}
