@@ -2589,16 +2589,3 @@ section,
 div {
   background-color: transparent !important;
 }
-.lower-card {
-  margin: 20px auto;
-  width: 90%;
-  padding: 20px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 153, 51, 0.5);
-  background: rgba(40, 20, 0, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #fff;
-  font-size: 16px;
-  line-height: 1.4;
-}
