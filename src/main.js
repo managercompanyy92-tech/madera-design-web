@@ -93,7 +93,8 @@ function renderHome() {
 
       <section class="highlights">
         <div class="highlights__item">
-          <div class="highlights__title">Премиальный тёмный дизайн</div>
+          <div class="highlights__title">Премиальный сервис, дизайн с поддержкой искусственного интеллекта,
+            онлайн-калькулятор стоимости и прозрачный статус заказа на каждом этапе.</div>
           <p class="highlights__text">
             Фирменная палитра: глубокий графит и благородный оранжевый.
             Интерфейс, который сразу транслирует уровень бренда.
