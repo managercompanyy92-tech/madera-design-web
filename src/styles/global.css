@@ -2555,7 +2555,7 @@ section.page--home .hero__actions {
     transform-origin: top left !important; /* куда "растёт" блок при увеличении */
 
     /* РАСШИРЕНИЕ БЛОКА */
-    width: 115% !important;     /* увеличить ширину блока */
+    width: 125% !important;     /* увеличить ширину блока */
 }
   /* Выровнять блок AI & МАРКЕТИНГ по центру и сделать как верхний */
 .ai-section {
