@@ -2577,7 +2577,7 @@ section.page--home .hero__actions {
 }
   /* Настройка блока AI & МАРКЕТИНГ */
 .hero-card {
-    width: 115% !important;          /* делает шире/уже */
+    width: 108% !important;          /* делает шире/уже */
     margin-left: auto !important;   /* центрирует */
     margin-right: auto !important;
 
