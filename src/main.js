@@ -92,16 +92,10 @@ function renderHome() {
       </div>
 
       <section class="highlights">
-        <div class="highlights__item">
-          <div class="highlights__title">Премиальный тёмный дизайн</div>
           <p class="highlights__text">
             Фирменная палитра: глубокий графит и благородный оранжевый.
             Интерфейс, который сразу транслирует уровень бренда.
           </p>
-        </div>
-        <div class="highlights__item">
-          <div class="highlights__title">Цифровая воронка продаж</div>
-          <p class="highlights__text">
             От вдохновения до оплаты: каталог, калькулятор, онлайн-заказ,
             кредиты, партнёрская программа — всё в одном веб-приложении.
           </p>
