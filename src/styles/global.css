@@ -1940,7 +1940,7 @@ body .support-bubble {
 .hero-overlay {
   position: absolute;
   top: 50%;
-  left: 5%;
+  left: 25%;
   transform: translateY(-50%);
   z-index: 5;
   width: 40%;
