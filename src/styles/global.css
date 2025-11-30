@@ -2547,7 +2547,7 @@ section.page--home .hero__actions {
 
     /* ДВИЖЕНИЕ */
     top: -10px !important;     /* выше на 10px */
-    left: -20px !important;     /* левее на 8px */
+    left: 1px !important;     /* левее на 8px */
 
     /* УВЕЛИЧЕНИЕ */
     transform: scale(1.05) !important;  /* на 5% шире/крупнее */
