@@ -2589,3 +2589,6 @@ section,
 div {
   background-color: transparent !important;
 }
+.lower-card {
+  @extend .hero-card;
+}
