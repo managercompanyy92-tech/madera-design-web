@@ -15,11 +15,13 @@ body {
   height: 100%;
 }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top, #2b2b2b 0, #050505 55%, #000 100%);
-  color: #f5f5f5;
-  -webkit-font-smoothing: antialiased;
+html, body {
+  height: 100%;
+  min-height: 100vh;
+  background: #0d0d0d; /* твой тёмный фон */
+  background: linear-gradient(180deg, #111 0%, #000 100%); /* вариант с градиентом */
+  margin: 0;
+  padding: 0;
 }
 
 /* ========================================================================== */
