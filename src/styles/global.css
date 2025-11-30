@@ -2533,7 +2533,7 @@ section.page--home .hero__actions {
 .ai-widget,
 #chat-btn,
 #chat-mini {
-    bottom: -290px !important;
+    bottom: -50px !important;
 }
 .hero-ai-avatar {
     position: fixed !important;
