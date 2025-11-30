@@ -2575,3 +2575,23 @@ section.page--home .hero__actions {
     transform: scale(1) !important;
     transform-origin: center !important;
 }
+  /* Настройка блока AI & МАРКЕТИНГ */
+.hero-card {
+    width: 92% !important;          /* делает шире/уже */
+    margin-left: auto !important;   /* центрирует */
+    margin-right: auto !important;
+
+    margin-top: -20px !important;   /* поднимает вверх, нужно ближе к блоку сверху */
+    /* Увеличить/уменьшить:  
+       -30px = ещё выше  
+       -10px = чуть выше  
+       0px = стандарт  
+       +20px = опустить */
+}
+
+/* Меняем размер самого контейнера */
+.hero__side {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
