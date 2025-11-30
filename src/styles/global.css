@@ -2541,3 +2541,21 @@ section.page--home .hero__actions {
     right: 15px !important;
     z-index: 99999 !important;
 }
+/* Выровнять блок AI & МАРКЕТИНГ по центру и сделать как верхний */
+.ai-section {
+    position: relative !important;
+
+    /* 1. Центрирование */
+    width: 92% !important;                /* ширина как у верхнего блока */
+    margin: 0 auto !important;            /* по центру */
+
+    /* 2. Приблизить вверх */
+    margin-top: -12px !important;         /* подними выше (-), опусти ниже (+) */
+
+    /* 3. Красивые отступы */
+    padding: 18px 20px !important;
+
+    /* 4. Фиксируем аккуратный масштаб */
+    transform: scale(1) !important;
+    transform-origin: center !important;
+}
