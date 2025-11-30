@@ -2567,27 +2567,4 @@ section.page--home .hero__actions {
     transform: scale(1) !important;
     transform-origin: center !important;
 }
-html, body {
-  min-height: 100%;
-  margin: 0;
-  padding: 0;
-}
 
-body {
-  background: radial-gradient(circle at top, #2b2b2b 0%, #050505 55%, #000 100%) !important;
-  background-attachment: fixed;
-}
-  #app,
-.app,
-.page,
-.page__content,
-.page--home,
-.highlights,
-section,
-div {
-  background-color: transparent !important;
-}
-.hero-card--info {
-  margin-top: 16px;       /* расстояние между карточками */
-  max-width: 100%;        /* чтобы по ширине было как у AI & маркетинг */
-}
