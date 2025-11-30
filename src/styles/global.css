@@ -2569,3 +2569,11 @@ section.page--home .hero__actions {
     transform: scale(1) !important;
     transform-origin: center !important;
 }
+  body {
+  display: flex;
+  flex-direction: column;
+}
+
+#app {
+  flex: 1 0 auto;
+}
