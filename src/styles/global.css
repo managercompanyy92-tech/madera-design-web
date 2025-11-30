@@ -2577,3 +2577,36 @@ section.page--home .hero__actions {
 #app {
   flex: 1 0 auto;
 }
+/* Усиливаем читаемость слогана и блока "AI & МАРКЕТИНГ" */
+
+/* Общая подложка для карточек поверх фото/фона */
+.hero-face-info,
+.hero-card {
+  background: radial-gradient(
+    circle at top,
+    rgba(10, 10, 10, 0.96) 0%,
+    rgba(0, 0, 0, 0.98) 60%,
+    #000000 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
+}
+
+/* Слоган в большой карточке */
+.hero-face-info p:first-child {
+  color: #ffe2a8;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.95);
+}
+
+/* Заголовок "AI & МАРКЕТИНГ" */
+.hero-card__label {
+  color: #ffb14a;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.95);
+}
+
+/* Пункты списка в "AI & МАРКЕТИНГ" */
+.hero-card__list li {
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
