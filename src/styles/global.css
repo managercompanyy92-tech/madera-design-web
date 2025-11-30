@@ -279,7 +279,7 @@ body .support-bubble {
 }
 /* Настройка блока AI & МАРКЕТИНГ */
 .hero__side .hero-card {
-  width: 105%;               /* как у верхнего блока */
+  width: 100%;               /* как у верхнего блока */
   max-width: 420px;         /* чтобы красиво держала размер */
   margin-left: auto;        /* центр */
   margin-right: auto;       /* центр */
