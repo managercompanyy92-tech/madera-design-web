@@ -109,7 +109,8 @@ function renderHome() {
           </p>
         </div>
         <div class="highlights__item">
-          <div class="highlights__title">Сделано для Душанбе</div>
+          <div class="highlights__title">Локальный бренд, локальное производство, адаптация под реальные
+            квартиры и запросы клиентов Душанбе.</div>
           <p class="highlights__text">
             Локальный бренд, локальное производство, адаптация под реальные
             квартиры и запросы клиентов Душанбе.
