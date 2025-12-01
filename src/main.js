@@ -1549,47 +1549,68 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 
 initApp();
-// Кнопка "Рассчитать и оформить заказ"
-document.addEventListener('click', function (event) {
-  const orderBtn = event.target.closest('.hero-face-btn[data-nav="order"]');
-  if (!orderBtn) return; // кликнули не по этой кнопке
+// ГЛОБАЛЬНЫЙ обработчик только для верхних кнопок на фото
+// Работает в режиме capture, поэтому срабатывает раньше всего остального
+document.addEventListener(
+  'click',
+  function (event) {
+    const btn = event.target.closest('.hero-face-btn[data-nav]');
+    if (!btn) return; // кликнули не по нужной кнопке
 
-  event.preventDefault();
+    const nav = btn.dataset.nav;
 
-  // Ищем любой подходящий блок "заказ"
-  const target =
-    document.querySelector('#order') ||
-    document.querySelector('#order-start') ||
-    document.querySelector('#calculator') ||
-    document.querySelector('#quiz') ||
-    document.querySelector('#form') ||
-    document.querySelector('#ai-design');
+    // Нас интересуют только две кнопки на фото
+    if (nav !== 'order' && nav !== 'catalog') {
+      return;
+    }
 
-  if (target) {
-    target.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  } else {
-    console.warn('Не найден блок заказа для кнопки "Рассчитать и оформить заказ"');
-  }
-});
+    // Полностью перехватываем событие
+    event.preventDefault();
+    event.stopPropagation();
 
-// Кнопка "Смотреть каталог идей"
-document.addEventListener('click', function (event) {
-  const catalogBtn = event.target.closest('.hero-face-btn[data-nav="catalog"]');
-  if (!catalogBtn) return; // кликнули не по этой кнопке
+    let target = null;
 
-  event.preventDefault();
+    if (nav === 'order') {
+      // Список возможных ID блока заказа
+      const selectors = [
+        '#order',
+        '#order-start',
+        '#calculator',
+        '#quiz',
+        '#form',
+        '#ai-design',
+      ];
 
-  const target = document.getElementById('catalog');
+      for (const sel of selectors) {
+        const el = document.querySelector(sel);
+        if (el) {
+          target = el;
+          break;
+        }
+      }
+    }
 
-  if (target) {
-    target.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  } else {
-    console.warn('Не найден блок каталога для кнопки "Смотреть каталог идей"');
-  }
-});
+    if (nav === 'catalog') {
+      // Основной блок каталога
+      target =
+        document.querySelector('#catalog') ||
+        document.querySelector('#ideas') ||
+        document.querySelector('#portfolio');
+    }
+
+    if (target) {
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    } else {
+      // Жёсткий запасной вариант — меняем hash, если вообще ничего не нашли
+      if (nav === 'order') {
+        window.location.hash = '#order';
+      } else if (nav === 'catalog') {
+        window.location.hash = '#catalog';
+      }
+    }
+  },
+  true // <-- режим capture, чтобы наш код выстреливал всегда
+);
