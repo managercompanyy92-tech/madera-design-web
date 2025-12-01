@@ -2569,3 +2569,54 @@ section.page--home .hero__actions {
     transform: scale(1) !important;
     transform-origin: center !important;
 }
+/* Анимация и "живость" для главной кнопки */
+.hero-face-btn--accent {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    opacity 0.2s ease-out;
+}
+
+/* Эффект блика */
+.hero-face-btn--accent::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 0 50%, rgba(255, 255, 255, 0.35), transparent 60%);
+  transform: translateX(-120%);
+  pointer-events: none;
+  transition: transform 0.6s ease-out;
+}
+
+/* Лёгкое нажатие кнопки */
+.hero-face-btn--accent:active {
+  transform: scale(0.97) translateY(1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Блик при наведении (для мыши и клавиатуры) */
+@media (hover: hover) {
+  .hero-face-btn--accent:hover::after,
+  .hero-face-btn--accent:focus-visible::after {
+    transform: translateX(120%);
+  }
+}
+
+/* Очень мягкое пульсирующее свечение */
+@keyframes heroFacePulse {
+  0% {
+    box-shadow: 0 12px 30px rgba(255, 179, 71, 0.30);
+  }
+  50% {
+    box-shadow: 0 18px 46px rgba(255, 179, 71, 0.55);
+  }
+  100% {
+    box-shadow: 0 12px 30px rgba(255, 179, 71, 0.30);
+  }
+}
+
+.hero-face-btn--accent {
+  animation: heroFacePulse 2.8s ease-in-out infinite;
+}
