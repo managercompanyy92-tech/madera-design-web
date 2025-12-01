@@ -1449,11 +1449,22 @@ function setupRouter() {
       }
       return;
     }
-    // Открыть окно AI-дизайнера
-    const chatTarget = target.closest("[data-action='open-chat']");
+   // Открыть AI-дизайнер через аватарку
+    const chatTarget = target.closest("[data-madera-chat-open]");
     if (chatTarget) {
-      showAiChat();
+      // помечаем, что после отрисовки каталога нужно проскроллить к AI-дизайнеру
+      scrollToAiDesignerOnRender = true;
+
+      if (typeof window !== "undefined") {
+        // переключаемся на раздел "Каталог"
+        window.location.hash = "catalog";
+      } else {
+        // запасной вариант
+        renderRoute("catalog");
+      }
+
       return;
+    }
     }
     // Калькулятор
     const calcTarget = target.closest("[data-action='calc-price']");
