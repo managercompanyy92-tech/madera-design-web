@@ -1526,6 +1526,26 @@ function initApp() {
   const initialRoute = getInitialRoute();
   renderLayout(initialRoute);
   initAiDesignerChat(); // <--- добавили
+  // === Аккуратное восстановление навигации кнопок ===
+document.addEventListener('DOMContentLoaded', function () {
+  // Ищем все кнопки с атрибутом data-nav
+  const navButtons = document.querySelectorAll('[data-nav]');
+
+  navButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = btn.getAttribute('data-nav');
+
+      // Безопасный переход по разделам
+      if (target === 'order') {
+        // Кнопка "Рассчитать и оформить заказ"
+        window.location.href = '/#ai-designer';
+      } else if (target === 'catalog') {
+        // Кнопка "Смотреть каталог идей"
+        window.location.href = '/#catalog';
+      }
+    });
+  });
+});
 }
 
 initApp();
