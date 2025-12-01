@@ -2515,6 +2515,31 @@ body .support-bubble {
     box-shadow 0.15s ease-out,
     border-color 0.15s ease-out;
 /* Пульсирующее свечение */
+  .hero-face-btn[data-nav="order"] {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    border-color 0.15s ease-out,
+    background 0.15s ease-out;
+  /* если уже есть animation: orderBtnPulse ... — оставь её */
+  }
+  /* Наведение (desktop / ноутбук) */
+@media (hover: hover) {
+  .hero-face-btn[data-nav="order"]:hover {
+    transform: translateY(-1px) scale(1.03);
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* Нажатие (в т.ч. на телефоне) */
+.hero-face-btn[data-nav="order"]:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
 @keyframes orderBtnPulse {
   0% {
     box-shadow: 0 8px 22px rgba(255, 179, 71, 0.25);
