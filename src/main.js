@@ -11,6 +11,7 @@ const BASE_RATES = {
 
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
+let scrollToAiDesignerOnRender = false;
 
 /* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
 
