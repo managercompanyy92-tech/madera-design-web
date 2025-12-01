@@ -1194,16 +1194,55 @@ const VIEWS = {
   profile: renderProfile,
   more: renderMore,
 };
-
 function renderRoute(route) {
-  const viewFn = VIEWS[route] || VIEWS.home;
-  const main = document.getElementById("app-main");
+  const viewFn = VIEWS[route] || VIEWS["home"];
+  const main = document.getElementById("main");
   if (!main) return;
 
+  // отрисовываем контент страницы
   main.innerHTML = viewFn();
 
+  // если нужно после перехода в каталог проскроллить к AI-дизайнеру
+  if (route === "catalog" && scrollToAiDesignerOnRender) {
+    scrollToAiDesignerOnRender = false; // сбрасываем флаг
+
+    setTimeout(() => {
+      // ищем блок AI-дизайнера
+      const aiSection =
+        document.querySelector("[data-madera-chat]") ||
+        document.querySelector(".madera-chat");
+
+      if (!aiSection) return;
+
+      // плавный скролл к блоку
+      aiSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      // пробуем открыть окно AI-чата
+      try {
+        if (typeof showAiChat === "function") {
+          showAiChat();
+        }
+      } catch (e) {
+        console.warn("AI designer: не удалось автоматически открыть чат", e);
+      }
+
+      // ставим фокус в поле ввода
+      const inputEl =
+        aiSection.querySelector(".ai-chat__input") ||
+        aiSection.querySelector("textarea") ||
+        aiSection.querySelector("input");
+
+      if (inputEl && typeof inputEl.focus === "function") {
+        inputEl.focus();
+      }
+    }, 80); // чуть ждём, чтобы DOM успел построиться
+  }
+
   // Подсветка активной кнопки в нижнем меню
-  const navButtons = appRoot.querySelectorAll(".app-nav__item");
+  const navButtons = appRoot.querySelectorAll("[data-route]");
   navButtons.forEach((btn) => {
     const r = btn.getAttribute("data-route");
     btn.classList.toggle("app-nav__item--active", r === route);
