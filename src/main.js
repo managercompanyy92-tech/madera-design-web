@@ -1615,31 +1615,31 @@ document.addEventListener(
   true // <-- режим capture, чтобы наш код выстреливал всегда
 );
 document.addEventListener('DOMContentLoaded', () => {
-  // Кнопка-аватарка в правом нижнем углу
+// Кнопка-аватарка AI-дизайнера
   const avatarBtn = document.querySelector('.madera-chat-avatar-btn');
 
-  if (!avatarBtn) return;
+  if (avatarBtn) {
+    avatarBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-  avatarBtn.addEventListener('click', (event) => {
-    // Отключаем старое поведение (если было)
-    event.preventDefault();
-    event.stopPropagation();
+      // Если функция открытия AI-дизайнера доступна — вызываем её
+      if (typeof openAiDesignerChat === 'function') {
+        openAiDesignerChat();
+        return;
+      }
 
-    // Пытаемся найти блок AI-дизайнера разными способами
-    const target =
-      document.querySelector('#ai-design') ||
-      document.querySelector('#ai-designer') ||
-      document.querySelector('[data-section="ai-design"]');
+      // На всякий случай: если по какой-то причине функции нет,
+      // пробуем просто открыть якорь AI-дизайнера
+      const section =
+        document.querySelector('#ai-design') ||
+        document.querySelector('#ai-designer') ||
+        document.querySelector('[data-section="ai-design"]');
 
-    if (target) {
-      // Плавный скролл к нужному блоку
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    } else {
-      // На всякий случай: открыть страницу с якорем
-      window.location.href = '/#ai-design';
-    }
-  });
-});
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.location.href = '/#ai-design';
+      }
+    });
+  }
