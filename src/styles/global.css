@@ -302,6 +302,7 @@ body .support-bubble {
   border-radius: 16px;
   background: radial-gradient(circle at top left, rgba(233, 122, 0, 0.22), rgba(0, 0, 0, 0.94));
   border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.85);
 }
 
 .highlights__title {
