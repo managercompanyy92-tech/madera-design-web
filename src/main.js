@@ -1644,3 +1644,43 @@ document.addEventListener("click", function (event) {
     window.location.href = "/#ai-designer";
   }
 });
+// === АВАТАРКА -> ОТКРЫТЬ AI-ДИЗАЙНЕРА ===
+document.addEventListener("DOMContentLoaded", function () {
+  // Ищем кнопку-аватарку
+  const avatarBtn = document.querySelector(
+    ".madera-chat-avatar-btn[data-madera-chat-open]"
+  );
+
+  if (!avatarBtn) {
+    console.warn("Avatar button .madera-chat-avatar-btn не найден");
+    return;
+  }
+
+  avatarBtn.addEventListener("click", function (event) {
+    event.preventDefault();
+
+    // 1) Если есть функция открытия AI-дизайнера — используем её
+    if (typeof openAiDesignerChat === "function") {
+      openAiDesignerChat();
+      return;
+    }
+
+    // 2) Если есть общая функция открытия AI-чата — используем её
+    if (typeof showAiChat === "function") {
+      showAiChat();
+      return;
+    }
+
+    // 3) Резервный вариант: просто открыть панель чата по data-атрибуту
+    const chatPanel =
+      document.querySelector("[data-madera-chat]") ||
+      document.querySelector(".ai-chat");
+
+    if (chatPanel) {
+      chatPanel.classList.add("ai-chat--open", "madera-chat--open");
+    } else {
+      // Совсем запасной вариант — перейти на якорь AI-дизайнера
+      window.location.hash = "#ai-designer";
+    }
+  });
+});
