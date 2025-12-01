@@ -92,7 +92,8 @@ function renderHome() {
       </div>
 
       <section class="highlights">
-        <div class="highlights__item">
+        <div class="highlights__item
+        highlights__item--accent">
           <div class="highlights__title">Премиальный сервис, дизайн с поддержкой искусственного интеллекта,
             онлайн-калькулятор стоимости и прозрачный статус заказа на каждом этапе.</div>
           <p class="highlights__text">
@@ -100,7 +101,8 @@ function renderHome() {
             Интерфейс, который сразу транслирует уровень бренда.
           </p>
         </div>
-        <div class="highlights__item">
+        <div class="highlights__item
+        highlights__item--accent">
           <div class="highlights__title">От вдохновения до оплаты: каталог, калькулятор, онлайн-заказ,
             кредиты, партнёрская программа — всё в одном веб-приложении.</div>
           <p class="highlights__text">
@@ -108,7 +110,8 @@ function renderHome() {
             кредиты, партнёрская программа — всё в одном веб-приложении.
           </p>
         </div>
-        <div class="highlights__item">
+        <div class="highlights__item
+        highlights__item--accent">
           <div class="highlights__title">Локальный бренд, локальное производство, адаптация под реальные
             квартиры и запросы клиентов Душанбе.</div>
           <p class="highlights__text">
