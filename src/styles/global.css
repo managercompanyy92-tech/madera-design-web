@@ -2503,6 +2503,49 @@ body .support-bubble {
   cursor: pointer;
   border: none;
   padding: 9px 14px;
+  /* Живой эффект только для кнопки "Рассчитать и оформить заказ" */
+.hero-face-btn[data-nav="order"] {
+  position: relative;
+  overflow: hidden;
+  /* Чёткая рамка, чтобы сразу видеть, что стиль применился */
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    border-color 0.15s ease-out;
+}
+
+/* Пульсирующее свечение */
+@keyframes orderBtnPulse {
+  0% {
+    box-shadow: 0 8px 22px rgba(255, 179, 71, 0.25);
+  }
+  50% {
+    box-shadow: 0 14px 36px rgba(255, 179, 71, 0.55);
+  }
+  100% {
+    box-shadow: 0 8px 22px rgba(255, 179, 71, 0.25);
+  }
+}
+
+.hero-face-btn[data-nav="order"] {
+  animation: orderBtnPulse 2.8s ease-in-out infinite;
+}
+
+/* Реакция на наведение/фокус (мышь, клавиатура) */
+@media (hover: hover) {
+  .hero-face-btn[data-nav="order"]:hover,
+  .hero-face-btn[data-nav="order"]:focus-visible {
+    transform: translateY(-1px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* Лёгкое "нажатие" при тапе/клике */
+.hero-face-btn[data-nav="order"]:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
 }
 
 .hero-face-btn--primary {
