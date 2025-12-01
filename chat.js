@@ -662,3 +662,69 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+// ==========================================================================
+// ГЛОБАЛЬНЫЙ ПЕРЕХОД К БЛОКУ AI-ДИЗАЙНЕРА В РАЗДЕЛЕ "КАТАЛОГ"
+// ==========================================================================
+
+function goToAIDesignerHard() {
+  // 1. Переключаем SPA на каталог
+  window.location.hash = "catalog";
+
+  // 2. Периодически проверяем, отрисовался ли блок AI-дизайнера
+  let attempts = 0;
+  const maxAttempts = 30; // ~4.5 секунды при интервале 150 мс
+
+  const intervalId = setInterval(() => {
+    attempts += 1;
+
+    const section = document.querySelector("[data-ai-designer]");
+    const input = document.querySelector("[data-ai-designer-input]");
+
+    if (section) {
+      // Плавно прокрутить к блоку
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      // Чуть позже поставить фокус в поле ввода
+      setTimeout(() => {
+        if (input) {
+          input.focus();
+        }
+      }, 400);
+
+      clearInterval(intervalId);
+      return;
+    }
+
+    // Если за отведённое время блок так и не появился — прекращаем попытки
+    if (attempts >= maxAttempts) {
+      clearInterval(intervalId);
+    }
+  }, 150);
+}
+
+// ==========================================================================
+// ПЕРЕХВАТ КЛИКА ПО АВАТАРКЕ И ПЕРЕВОД В AI-ДИЗАЙНЕР
+// ==========================================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  const avatarBtn = document.querySelector("[data-madera-chat-open]");
+  if (!avatarBtn) return;
+
+  // Вешаем обработчик в capture-режиме и глушим все старые
+  avatarBtn.addEventListener(
+    "click",
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) {
+        event.stopImmediatePropagation();
+      }
+
+      goToAIDesignerHard();
+    },
+    true // capture: срабатываем до любых других слушателей
+  );
+});
