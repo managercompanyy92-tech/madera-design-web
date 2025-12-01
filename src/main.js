@@ -1549,3 +1549,25 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 
 initApp();
+document.addEventListener('DOMContentLoaded', function () {
+  const orderBtn = document.querySelector('[data-nav="order"]');
+  if (!orderBtn) return;
+
+  orderBtn.addEventListener('click', () => {
+    // Попытки найти подходящий блок
+    const target =
+      document.querySelector('#order') ||
+      document.querySelector('#order-section') ||
+      document.querySelector('#calculator') ||
+      document.querySelector('#quiz') ||
+      document.querySelector('#form') ||
+      document.querySelector('#ai-designer');
+
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Если нет блока — открываем заказ через URL
+      window.location.href = '/#order';
+    }
+  });
+});
