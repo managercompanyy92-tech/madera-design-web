@@ -728,3 +728,90 @@ document.addEventListener("DOMContentLoaded", () => {
     true // capture: срабатываем до любых других слушателей
   );
 });
+// ==========================================================================
+// ГЛОБАЛЬНЫЙ ПЕРЕХОД К AI-ДИЗАЙНЕРУ ИЗ АВАТАРКИ
+// ==========================================================================
+
+(function () {
+  // Функция, которая ищет блок AI-дизайнера, скроллит к нему и ставит фокус
+  function scrollToAIDesignerWithFocus() {
+    let attempts = 0;
+    const maxAttempts = 40; // ~6 секунд при интервале 150 мс
+
+    const intervalId = setInterval(() => {
+      attempts += 1;
+
+      const section = document.querySelector("[data-ai-designer]");
+      const input = document.querySelector("[data-ai-designer-input]");
+
+      if (section) {
+        // Плавный скролл к блоку
+        try {
+          section.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        } catch (e) {
+          // на всякий случай fallback
+          section.scrollIntoView();
+        }
+
+        // Небольшая задержка и фокус в поле ввода
+        setTimeout(() => {
+          if (input) {
+            input.focus();
+          }
+        }, 400);
+
+        clearInterval(intervalId);
+        return;
+      }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(intervalId);
+      }
+    }, 150);
+  }
+
+  // Перехватываем клик по круглой аватарке AI-ассистента
+  document.addEventListener("DOMContentLoaded", () => {
+    const avatarBtn = document.querySelector("[data-madera-chat-open]");
+    if (!avatarBtn) return;
+
+    avatarBtn.addEventListener(
+      "click",
+      (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.stopImmediatePropagation) {
+          event.stopImmediatePropagation();
+        }
+
+        // 1) Если мы уже на странице каталога — просто ищем блок и скроллим
+        const isAlreadyOnCatalog =
+          document.querySelector(".page--catalog") !== null;
+
+        if (isAlreadyOnCatalog) {
+          scrollToAIDesignerWithFocus();
+          return;
+        }
+
+        // 2) Иначе нажимаем настоящую кнопку "Каталог" в нижнем меню (SPA сам всё сделает)
+        const navBtn =
+          document.querySelector('.app-nav__item[data-page="catalog"]') ||
+          document.querySelector('.app-nav__item[data-route="catalog"]');
+
+        if (navBtn) {
+          navBtn.click();
+        } else {
+          // на всякий случай — смена hash, если вдруг нет кнопки
+          window.location.hash = "#catalog";
+        }
+
+        // 3) Запускаем поиск блока AI-дизайнера после переключения страницы
+        scrollToAIDesignerWithFocus();
+      },
+      true // capture: обработчик срабатывает раньше старых и глушит их
+    );
+  });
+})();
