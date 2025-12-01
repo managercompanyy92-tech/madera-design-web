@@ -1614,3 +1614,68 @@ document.addEventListener(
   },
   true // <-- режим capture, чтобы наш код выстреливал всегда
 );
+// ===== АВАТАРКА MADERA -> ОКНО AI-ДИЗАЙНЕРА =====
+(function attachAvatarToAiDesigner() {
+  // обработчик клика по аватарке
+  function handleAvatarClick(event) {
+    event.preventDefault();
+
+    // 1. если чат ещё не инициализирован — инициализируем
+    try {
+      if (typeof initAiDesignerChat === "function" && !window.__aiChatInitialized) {
+        initAiDesignerChat();
+        window.__aiChatInitialized = true;
+      }
+    } catch (e) {
+      console.warn("Ошибка при initAiDesignerChat:", e);
+    }
+
+    // 2. пробуем открыть окно AI-дизайнера штатной функцией
+    try {
+      if (typeof openAiDesignerChat === "function") {
+        openAiDesignerChat();
+        return;
+      }
+      if (typeof showAiChat === "function") {
+        showAiChat();
+        return;
+      }
+    } catch (e) {
+      console.warn("Ошибка при открытии AI-дизайнера:", e);
+    }
+
+    // 3. РЕЗЕРВ: пытаемся просто показать готовую панель чата
+    const chatRoot =
+      document.querySelector("[data-ai-chat-root]") || // если есть спец-атрибут
+      document.querySelector(".ai-chat") ||             // новый AI-дизайнер
+      document.querySelector("[data-madera-chat]");     // старая панель madera-chat
+
+    if (chatRoot) {
+      chatRoot.classList.add("ai-chat--open", "madera-chat--open");
+    } else {
+      console.warn("Не найден контейнер AI-чата");
+    }
+  }
+
+  // функция, которая ищет аватарку и вешает обработчик
+  function bindAvatar() {
+    const avatarBtn = document.querySelector(".madera-chat-avatar-btn");
+    if (!avatarBtn) {
+      return false;
+    }
+
+    // чтобы не навесить несколько раз
+    if (!avatarBtn.__aiDesignerBound) {
+      avatarBtn.addEventListener("click", handleAvatarClick);
+      avatarBtn.__aiDesignerBound = true;
+      // console.log("AI-дизайнер привязан к аватарке");
+    }
+    return true;
+  }
+
+  // Пытаемся привязаться сразу
+  if (!bindAvatar()) {
+    // если в момент выполнения элемента ещё нет — ждём загрузку DOM
+    document.addEventListener("DOMContentLoaded", bindAvatar);
+  }
+})();
