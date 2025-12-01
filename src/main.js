@@ -1614,25 +1614,33 @@ document.addEventListener(
   },
   true // <-- режим capture, чтобы наш код выстреливал всегда
 );
-// --- Супер-надёжный переход из аватарки в AI-дизайнер ---
-document.addEventListener("DOMContentLoaded", () => {
-    const avatarBtn = document.querySelector(".madera-chat-avatar-btn");
-    if (!avatarBtn) return;
+// --- КЛИК ПО АВАТАРКЕ -> ОТКРЫТЬ AI-ДИЗАЙНЕР ---
+document.addEventListener("click", function (event) {
+  // Ищем, кликнули ли по кнопке-аватарке или по её содержимому
+  const avatarBtn = event.target.closest(".madera-chat-avatar-btn");
+  if (!avatarBtn) return; // если клик не по аватарке — выходим
 
-    avatarBtn.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+  event.preventDefault();
+  event.stopPropagation();
 
-        // Мгновенный переход в AI-дизайнер
-        const target =
-            document.querySelector("#ai-designer") ||
-            document.querySelector("[data-ai-designer]");
+  // 1) Если есть спец-функция для AI-дизайнера — используем её
+  if (typeof openAiDesignerChat === "function") {
+    openAiDesignerChat();
+    return;
+  }
 
-        if (target) {
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-            // Если блока нет на странице — откроет /#ai-designer
-            window.location.href = "/#ai-designer";
-        }
-    });
+  // 2) Если есть общая функция показать AI-чат — используем её
+  if (typeof showAiChat === "function") {
+    showAiChat();
+    return;
+  }
+
+  // 3) Резервный вариант: просто открыть панель чата, если она есть в DOM
+  const chatPanel = document.querySelector("[data-madera-chat]");
+  if (chatPanel) {
+    chatPanel.classList.add("ai-chat--open", "madera-chat--open");
+  } else {
+    // На всякий случай – если ничего не нашли, можно перейти на якорь AI-дизайнера
+    window.location.href = "/#ai-designer";
+  }
 });
