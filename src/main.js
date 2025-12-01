@@ -1614,3 +1614,25 @@ document.addEventListener(
   },
   true // <-- режим capture, чтобы наш код выстреливал всегда
 );
+// --- Супер-надёжный переход из аватарки в AI-дизайнер ---
+document.addEventListener("DOMContentLoaded", () => {
+    const avatarBtn = document.querySelector(".madera-chat-avatar-btn");
+    if (!avatarBtn) return;
+
+    avatarBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Мгновенный переход в AI-дизайнер
+        const target =
+            document.querySelector("#ai-designer") ||
+            document.querySelector("[data-ai-designer]");
+
+        if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+            // Если блока нет на странице — откроет /#ai-designer
+            window.location.href = "/#ai-designer";
+        }
+    });
+});
