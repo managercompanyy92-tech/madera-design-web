@@ -620,53 +620,45 @@
   document.addEventListener("DOMContentLoaded", initChat);
 
 })();
-// ==========================================================================
-// ЖЁСТКАЯ ПЕРЕНАПРАВКА АВАТАРКИ В БЛОК AI-ДИЗАЙНЕРА ИЗ ЛЮБОЙ СТРАНИЦЫ
-// ==========================================================================
+// -------------------------------------------------------------
+// ГЛОБАЛЬНАЯ ФУНКЦИЯ: перейти в каталог → найти AI-дизайнера → фокус
+// -------------------------------------------------------------
+function goToAIDesigner() {
+  // 1. Переключаем SPA на маршрут "catalog"
+  window.location.hash = "catalog";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const avatarBtn = document.querySelector(".madera-chat-avatar-btn");
-  if (!avatarBtn) return;
+  // 2. Задержка — ждём рендер SPA
+  setTimeout(() => {
+    // Находим блок AI-дизайнера
+    const section = document.querySelector('[data-ai-designer]');
+    const input = document.querySelector('[data-ai-designer-input]');
 
-  avatarBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    // Блокируем ВСЕ другие обработчики на этой кнопке (старый чат и т.п.)
-    event.stopPropagation();
-    if (event.stopImmediatePropagation) {
-      event.stopImmediatePropagation();
-    }
-
-    // Функция: найти блок AI-дизайнера и прокрутить к нему
-    const scrollToAIDesigner = () => {
-      // Ищем либо по data-атрибуту, либо по id — на случай разных вариантов разметки
-      const aiSection =
-        document.querySelector("[data-ai-designer]") ||
-        document.getElementById("ai-designer");
-
-      if (!aiSection) return;
-
-      aiSection.scrollIntoView({
+    if (section) {
+      // Плавная прокрутка к блоку
+      section.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-
-      // Если внутри есть поле ввода — ставим туда фокус
-      const aiInput = aiSection.querySelector("[data-ai-designer-input], input, textarea");
-      if (aiInput) {
-        setTimeout(() => {
-          aiInput.focus();
-        }, 150);
-      }
-    };
-
-    // Если сейчас НЕ раздел "Заказ" — сначала переключаем роут, потом крутим
-    if (window.location.hash !== "#order") {
-      window.location.hash = "#order";
-      // Даём SPA время перерисоваться, затем скроллим
-      setTimeout(scrollToAIDesigner, 500);
-    } else {
-      // Уже на странице "Заказ" — сразу скроллим
-      scrollToAIDesigner();
     }
-  });
+
+    // 3. Ещё небольшая задержка — даём странице докрутиться
+    setTimeout(() => {
+      if (input) input.focus();
+    }, 400);
+
+  }, 300);
+}
+
+
+// -------------------------------------------------------------
+// ПРИКРЕПЛЯЕМ ФУНКЦИЮ К АВАТАРКЕ
+// -------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  const avatar = document.querySelector('[data-madera-chat-open]');
+  if (avatar) {
+    avatar.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToAIDesigner();
+    });
+  }
 });
