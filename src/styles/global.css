@@ -246,8 +246,7 @@ body .support-bubble {
 
 /* Карточка "AI & Маркетинг" */
 
-.hero-card,
-.highlights__item--accent">{
+.hero-card {
   width: 100%;
   max-width: 320px;
   padding: 16px 14px;
