@@ -1549,19 +1549,47 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 
 initApp();
-// Упрощённый и надёжный обработчик навигации по кнопкам hero
+// Кнопка "Рассчитать и оформить заказ"
 document.addEventListener('click', function (event) {
-  const btn = event.target.closest('.hero-face-btn[data-nav]');
-  if (!btn) return;
+  const orderBtn = event.target.closest('.hero-face-btn[data-nav="order"]');
+  if (!orderBtn) return; // кликнули не по этой кнопке
 
   event.preventDefault();
-  const targetId = btn.getAttribute('data-nav'); // order или catalog
-  const targetSection = document.getElementById(targetId);
 
-  if (targetSection) {
-    targetSection.scrollIntoView({
+  // Ищем любой подходящий блок "заказ"
+  const target =
+    document.querySelector('#order') ||
+    document.querySelector('#order-start') ||
+    document.querySelector('#calculator') ||
+    document.querySelector('#quiz') ||
+    document.querySelector('#form') ||
+    document.querySelector('#ai-design');
+
+  if (target) {
+    target.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     });
+  } else {
+    console.warn('Не найден блок заказа для кнопки "Рассчитать и оформить заказ"');
+  }
+});
+
+// Кнопка "Смотреть каталог идей"
+document.addEventListener('click', function (event) {
+  const catalogBtn = event.target.closest('.hero-face-btn[data-nav="catalog"]');
+  if (!catalogBtn) return; // кликнули не по этой кнопке
+
+  event.preventDefault();
+
+  const target = document.getElementById('catalog');
+
+  if (target) {
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  } else {
+    console.warn('Не найден блок каталога для кнопки "Смотреть каталог идей"');
   }
 });
