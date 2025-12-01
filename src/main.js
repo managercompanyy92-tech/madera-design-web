@@ -1614,3 +1614,32 @@ document.addEventListener(
   },
   true // <-- режим capture, чтобы наш код выстреливал всегда
 );
+document.addEventListener('DOMContentLoaded', () => {
+  // Кнопка-аватарка в правом нижнем углу
+  const avatarBtn = document.querySelector('.madera-chat-avatar-btn');
+
+  if (!avatarBtn) return;
+
+  avatarBtn.addEventListener('click', (event) => {
+    // Отключаем старое поведение (если было)
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Пытаемся найти блок AI-дизайнера разными способами
+    const target =
+      document.querySelector('#ai-design') ||
+      document.querySelector('#ai-designer') ||
+      document.querySelector('[data-section="ai-design"]');
+
+    if (target) {
+      // Плавный скролл к нужному блоку
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    } else {
+      // На всякий случай: открыть страницу с якорем
+      window.location.href = '/#ai-design';
+    }
+  });
+});
