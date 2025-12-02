@@ -214,8 +214,8 @@ function renderCatalog() {
 
           <div class="catalog-quiz__block">
             <div class="catalog-quiz__label">2. Какая цель проекта?</div>
-            <div class="catalog-quiz__options"> data-quiz-step="goal"
-              <button class="catalog-quiz__option" data-quiz-goal="self">
+            <div class="catalog-quiz__options"> 
+              <button class="catalog-quiz__option" data-quiz-step="goal" data-quiz-goal="self">
                 Для себя надолго
               </button>
               <button class="catalog-quiz__option" data-quiz-goal="rent">
@@ -229,9 +229,9 @@ function renderCatalog() {
 
           <div class="catalog-quiz__block">
             <div class="catalog-quiz__label">3. Какой ориентировочный бюджет на мебель?</div>
-            <div class="catalog-quiz__options"> data-quiz-step="budget"
+            <div class="catalog-quiz__options"> 
 
-              <button class="catalog-quiz__option" data-quiz-budget="low">
+              <button class="catalog-quiz__option" data-quiz-step="budget"data-quiz-budget="low">
                 до 15&nbsp;000 сом
               </button>
               <button class="catalog-quiz__option" data-quiz-budget="mid">
