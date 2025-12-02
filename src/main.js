@@ -1774,3 +1774,25 @@ function openAiDesignerFromQuiz(desc) {
     }, 700);
   };
 })();
+// переменные для хранения выбора
+let quizRoom = null;
+let quizGoal = null;
+let quizBudget = null;
+
+// обработчики кликов по кнопкам шагов
+// ...
+function buildQuizDescription() {
+  const parts = [];
+
+  if (quizRoom) {
+    parts.push(`Помещение: ${quizRoom}`);
+  }
+  if (quizGoal) {
+    parts.push(`Цель проекта: ${quizGoal}`);
+  }
+  if (quizBudget) {
+    parts.push(`Примерный бюджет: ${quizBudget}`);
+  }
+
+  return parts.join("; ");
+}
