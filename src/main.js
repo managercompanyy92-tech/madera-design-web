@@ -2063,3 +2063,140 @@ window.maderaCatalogQuiz = {
     // Дальше связь с самим чатом сделаем в chat.js
   });
 })();
+// ===================== КВИЗ "КАТАЛОГ МЕБЕЛИ" =====================
+
+// Храним выбранные ответы
+const catalogQuizState = {
+  category: null,
+  goal: null,
+  budget: null,
+};
+
+// Собрать человеко-понятный текст из выбранных ответов
+function getCatalogQuizDescription() {
+  const parts = [];
+
+  if (catalogQuizState.category) {
+    parts.push(`Направление: ${catalogQuizState.category}`);
+  }
+
+  if (catalogQuizState.goal) {
+    parts.push(`Цель проекта: ${catalogQuizState.goal}`);
+  }
+
+  if (catalogQuizState.budget) {
+    parts.push(`Ориентировочный бюджет на мебель: ${catalogQuizState.budget}`);
+  }
+
+  return parts.join("; ");
+}
+
+// Открыть страницу "Заказ" и подставить текст в поле "Кратко опишите проект"
+function goToOrderWithDescription(description) {
+  // 1) Переходим на страницу "Заказ"
+  const orderNavBtn = document.querySelector('[data-route="order"]');
+
+  if (orderNavBtn) {
+    // Кликаем по стандартной кнопке навигации, чтобы не ломать роутер
+    orderNavBtn.click();
+  } else if (typeof goToRoute === "function") {
+    // Запасной вариант, если есть глобальная функция роутинга
+    goToRoute("order");
+  }
+
+  // 2) Небольшая задержка, чтобы страница "Заказ" успела отрисоваться
+  setTimeout(() => {
+    const commentField = document.querySelector("[data-order-comment]");
+    if (!commentField || !description) return;
+
+    const prefix = "Кратко о проекте (автоматически заполнено из мини-квиза): ";
+    commentField.value = `${prefix}${description}`;
+    commentField.dispatchEvent(new Event("input", { bubbles: true }));
+  }, 300);
+}
+
+// Инициализация квиза: обработчики на варианты и кнопки
+function initCatalogQuiz() {
+  // Все варианты ответов
+  const optionButtons = document.querySelectorAll("[data-quiz-step]");
+  if (!optionButtons.length) return;
+
+  optionButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const step = btn.dataset.quizStep; // category | goal | budget
+      if (!step) return;
+
+      // Текст берём либо из data-quiz-value, либо из текста кнопки
+      const label = btn.dataset.quizValue || btn.textContent.trim();
+      if (!label) return;
+
+      // Сохраняем ответ
+      catalogQuizState[step] = label;
+
+      // Подсветка активного варианта внутри одного блока
+      const optionsContainer = btn.closest(".catalog-quiz__options");
+      if (optionsContainer) {
+        optionsContainer
+          .querySelectorAll(".catalog-quiz__option--active")
+          .forEach((activeBtn) => {
+            activeBtn.classList.remove("catalog-quiz__option--active");
+          });
+
+        btn.classList.add("catalog-quiz__option--active");
+      }
+    });
+  });
+
+  // Кнопка "Получить быстрый расчёт и идеи."
+  const goOrderBtn = document.querySelector("[data-quiz-go-order]");
+  if (goOrderBtn) {
+    goOrderBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const description = getCatalogQuizDescription();
+      if (!description) {
+        goOrderBtn.dataset.route && goToRoute
+          ? goToRoute(goOrderBtn.dataset.route)
+          : null;
+        return;
+      }
+
+      goToOrderWithDescription(description);
+    });
+  }
+
+  // Кнопка "Обсудить с AI-дизайнером мою ситуацию."
+  const goAiBtn = document.querySelector("[data-quiz-go-ai]");
+  if (goAiBtn) {
+    goAiBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const description = getCatalogQuizDescription();
+      if (!description) return;
+
+      // Подставляем текст в поле ввода AI-дизайнера
+      const aiInput = document.querySelector("[data-ai-designer-input]");
+      if (aiInput) {
+        const prefix =
+          "Помоги спланировать интерьер на основе моих ответов мини-квиза. ";
+
+        aiInput.value = prefix + description;
+        aiInput.focus();
+        aiInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+
+      // Если нужно — скроллим к блоку AI-дизайнера
+      const aiSection = document.querySelector("[data-madera-ai-section]");
+      if (aiSection && typeof aiSection.scrollIntoView === "function") {
+        aiSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
+}
+
+// Запускаем логику квиза после загрузки DOM
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCatalogQuiz);
+} else {
+  initCatalogQuiz();
+}
