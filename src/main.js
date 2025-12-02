@@ -193,12 +193,18 @@ function renderCatalog() {
           <div class="catalog-quiz__block">
             <div class="catalog-quiz__label">1. Что планируете в первую очередь?</div>
             <div class="catalog-quiz__options">
-              <button class="catalog-quiz__option" data-quiz-type="kitchens">Кухня</button>
-              <button class="catalog-quiz__option" data-quiz-type="wardrobes">Гардеробная</button>
-              <button class="catalog-quiz__option" data-quiz-type="bedrooms">Спальня</button>
-              <button class="catalog-quiz__option" data-quiz-type="kids">Детская</button>
-              <button class="catalog-quiz__option" data-quiz-type="hallways">Прихожая</button>
-              <button class="catalog-quiz__option" data-quiz-type="livingrooms">Гостиная</button>
+              <button class="catalog-quiz__option" data-quiz-group="room"
+data-quiz-type="kitchens">Кухня</button>
+              <button class="catalog-quiz__option" data-quiz-group="room"
+data-quiz-type="wardrobes">Гардеробная</button>
+              <button class="catalog-quiz__option" data-quiz-group="room"
+data-quiz-type="bedrooms">Спальня</button>
+              <button class="catalog-quiz__option" data-quiz-group="room"
+data-quiz-type="kids">Детская</button>
+              <button class="catalog-quiz__option" data-quiz-group="room"
+data-quiz-type="hallways">Прихожая</button>
+              <button class="catalog-quiz__option" data-quiz-group="room"
+data-quiz-type="livingrooms">Гостиная</button>
             </div>
           </div>
 
