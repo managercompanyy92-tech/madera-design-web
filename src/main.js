@@ -248,10 +248,12 @@ data-quiz-goal="sale">
               под вашу ситуацию.
             </div>
             <div class="catalog-quiz__actions">
-              <button class="btn btn--ghost" data-route="order">
+              <button class="btn btn--ghost"data-quiz-action="order"
+ data-route="order">
                 Перейти к быстрому расчёту
               </button>
-              <button class="btn btn--outline" data-action="open-chat">
+              <button class="btn btn--outline" data-quiz-action="ai"
+data-action="open-chat">
                 Спросить AI-дизайнера, с чего начать
               </button>
             </div>
@@ -1624,3 +1626,86 @@ document.addEventListener(
   },
   true // <-- режим capture, чтобы наш код выстреливал всегда
 );
+/* ============================================================
+   КВИЗ В КАТАЛОГЕ — ЛОГИКА ВЗАИМОДЕЙСТВИЯ
+============================================================ */
+
+const catalogQuizState = {
+  room: null,
+  goal: null,
+  budget: null,
+};
+
+function setupCatalogQuiz() {
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+
+    // 1. Выбор пункта квиза
+    const group = target.getAttribute("data-quiz-group");
+    if (group) {
+      catalogQuizState[group] = target.textContent.trim();
+
+      const allInGroup = document.querySelectorAll(`[data-quiz-group="${group}"]`);
+      allInGroup.forEach((btn) => btn.classList.remove("quiz-option--active"));
+
+      target.classList.add("quiz-option--active");
+      return;
+    }
+
+    // 2. Кнопки действий
+    const action = target.getAttribute("data-quiz-action");
+    if (action === "order") {
+      goToOrderFromQuiz();
+      return;
+    }
+    if (action === "ai") {
+      openAiDesignerFromQuiz();
+      return;
+    }
+  });
+}
+
+function goToOrderFromQuiz() {
+  renderRoute("order");
+  if (typeof window !== "undefined") {
+    window.location.hash = "order";
+  }
+}
+
+function buildQuizQuestionText() {
+  const parts = [];
+
+  if (catalogQuizState.room) {
+    parts.push(`хочу начать с помещения: ${catalogQuizState.room}`);
+  }
+  if (catalogQuizState.goal) {
+    parts.push(`цель проекта: ${catalogQuizState.goal}`);
+  }
+  if (catalogQuizState.budget) {
+    parts.push(`примерный бюджет на мебель: ${catalogQuizState.budget}`);
+  }
+
+  if (!parts.length) {
+    return "Помоги начать проект интерьера. С чего лучше начать?";
+  }
+
+  return (
+    "Помоги спланировать интерьер: " +
+    parts.join("; ") +
+    ". С чего лучше начать?"
+  );
+}
+
+function openAiDesignerFromQuiz() {
+  const question = buildQuizQuestionText();
+
+  if (typeof showAiChat === "function") {
+    showAiChat(question);
+  } else if (typeof openAiDesignerChat === "function") {
+    openAiDesignerChat(question);
+  } else {
+    alert("AI-дизайнер временно недоступен.");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", setupCatalogQuiz);
