@@ -2767,3 +2767,33 @@ section.page--home .hero__actions {
   margin-top: 10px;
   padding-left: 20px;
 }
+  /* Мини-инструкция к квизу */
+.catalog-quiz__intro {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 179, 71, 0.28);
+}
+
+.catalog-quiz__intro-title {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffb347;
+  margin-bottom: 6px;
+}
+
+.catalog-quiz__intro-text {
+  font-size: 13px;
+  opacity: 0.86;
+}
+
+/* Подсказка под кнопками квиза */
+.catalog-quiz__hint {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.65;
+  max-width: 640px;
+}
