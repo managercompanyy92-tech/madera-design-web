@@ -1632,3 +1632,96 @@ function goToOrderWithDescription(desc) {
 function openAiDesignerFromQuiz(desc) {
   console.log("TODO openAiDesignerFromQuiz:", desc);
 }
+// ========================
+// КВИЗ В КАТАЛОГЕ
+// ========================
+
+function initCatalogQuiz() {
+  const quizRoot = document.querySelector("[data-catalog-quiz]");
+  if (!quizRoot) return;
+
+  const state = {
+    category: null,
+    goal: null,
+    budget: null,
+  };
+
+  const options = quizRoot.querySelectorAll(".catalog-quiz__option");
+
+  // клик по вариантам
+  options.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const step = btn.dataset.quizStep;
+      const value = btn.dataset.quizValue;
+      if (!step || !value) return;
+
+      // запоминаем выбранное
+      state[step] = value;
+
+      // снимаем active со всех в этом шаге
+      options.forEach((b) => {
+        if (b.dataset.quizStep === step) {
+          b.classList.remove("catalog-quiz__option--active");
+        }
+      });
+
+      // ставим active на текущую кнопку
+      btn.classList.add("catalog-quiz__option--active");
+    });
+  });
+
+  // кнопка "быстрый расчёт"
+  const goOrderBtn = quizRoot.querySelector("[data-quiz-go-order]");
+  if (goOrderBtn) {
+    goOrderBtn.addEventListener("click", () => {
+      const description = buildQuizDescription(state);
+      goToOrderWithDescription(description);
+    });
+  }
+
+  // кнопка "обсудить с AI-дизайнером"
+  const goAiBtn = quizRoot.querySelector("[data-quiz-go-ai]");
+  if (goAiBtn) {
+    goAiBtn.addEventListener("click", () => {
+      const description = buildQuizDescription(state);
+      openAiDesignerFromQuiz(description);
+    });
+  }
+}
+
+// формируем понятный текст из ответов
+function buildQuizDescription(state) {
+  const parts = [];
+
+  if (state.category) {
+    parts.push("Помещение: " + state.category);
+  }
+  if (state.goal) {
+    parts.push("Цель проекта: " + state.goal);
+  }
+  if (state.budget) {
+    parts.push("Бюджет на мебель: " + state.budget);
+  }
+
+  if (parts.length === 0) {
+    return "Клиент пока не выбрал ответы в мини-квизе.";
+  }
+
+  return "Кратко о проекте (из мини-квиза): " + parts.join(" • ");
+}
+
+// ВРЕМЕННЫЕ ЗАГЛУШКИ, чтобы ничего не ломалось.
+// Позже сюда подключим реальный переход на страницу "Заказ".
+function goToOrderWithDescription(description) {
+  console.log("[QUIZ -> ORDER]", description);
+  alert("Позже здесь будет переход к форме заказа.\n\n" + description);
+}
+
+// Позже сюда подключим реальное открытие AI-дизайнера.
+function openAiDesignerFromQuiz(description) {
+  console.log("[QUIZ -> AI]", description);
+  alert("Позже здесь будет открываться AI-дизайнер.\n\n" + description);
+}
+
+// запуск квиза после загрузки страницы
+document.addEventListener("DOMContentLoaded", initCatalogQuiz);
