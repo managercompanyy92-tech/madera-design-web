@@ -2745,3 +2745,8 @@ section.page--home .hero__actions {
   box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.3);
   background: radial-gradient(circle at top left, #2a1a0a, #111);
 }
+  .catalog-quiz__btn--active {
+  background: linear-gradient(135deg, #ffb347, #ff7a00);
+  color: #1c1c1c;
+  box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.7), 0 12px 24px rgba(0, 0, 0, 0.8);
+  }
