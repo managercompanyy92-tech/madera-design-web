@@ -1625,3 +1625,10 @@ document.addEventListener(
   },
   true // <-- режим capture, чтобы наш код выстреливал всегда
 );
+function goToOrderWithDescription(desc) {
+  console.log("TODO goToOrderWithDescription:", desc);
+}
+
+function openAiDesignerFromQuiz(desc) {
+  console.log("TODO openAiDesignerFromQuiz:", desc);
+}
