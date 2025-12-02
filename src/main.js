@@ -233,15 +233,14 @@ function renderCatalog() {
 
           <div class="catalog-quiz__footer">
             <div class="catalog-quiz__hint">
-              Даже если вы пока «просто смотрите идеи», квиз помогает подобрать более точные сценарии
-              под вашу ситуацию.
+              Даже если вы пока просто присматриваетесь, мини-квиз поможет понять диапазон бюджета и с чего лучше начать именно Вам!
             </div>
             <div class="catalog-quiz__actions">
               <button class="btn btn--ghost" data-route="order">
-                Перейти к быстрому расчёту
+                Получить быстрый расчет и идеи.
               </button>
               <button class="btn btn--outline" data-action="open-chat">
-                Спросить AI-дизайнера, с чего начать
+                Обсудить с AI-дизайнером мою ситуацию.
               </button>
             </div>
           </div>
