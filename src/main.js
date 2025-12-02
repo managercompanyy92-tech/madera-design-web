@@ -1739,3 +1739,38 @@ function openAiDesignerFromQuiz(desc) {
     }
   });
 })();
+
+
+// ==========================
+// Переход на страницу "Заказ" с описанием проекта из квиза
+// ==========================
+
+(function initGoToOrderWithDescription() {
+  let pendingOrderDescription = "";
+
+  window.goToOrderWithDescription = function (description) {
+    if (!description || typeof description !== "string") return;
+
+    pendingOrderDescription = description;
+
+    // Переходим на страницу "Заказ"
+    const orderNavBtn = document.querySelector('[data-route="order"]');
+    if (orderNavBtn) {
+      orderNavBtn.click();
+    } else {
+      window.location.hash = "#order";
+    }
+
+    // Когда страница загрузилась, подставляем текст
+    setTimeout(() => {
+      if (!pendingOrderDescription) return;
+
+      const commentField = document.querySelector("[data-order-comment]");
+      if (commentField && !commentField.value) {
+        commentField.value = pendingOrderDescription;
+      }
+
+      pendingOrderDescription = "";
+    }, 700);
+  };
+})();
