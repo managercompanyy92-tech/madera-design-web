@@ -538,6 +538,26 @@
       ? aiDesignerSection.querySelector("[data-ai-designer-input]")
 
       : null;
+    // Кнопка "Перейти к оформлению"
+// атрибут в HTML: data-ai-go-order
+const goOrderBtn = qs("[data-ai-go-order]");
+
+if (goOrderBtn) {
+    goOrderBtn.addEventListener("click", () => {
+
+        const baseText =
+            window.lastAiUserQuestion &&
+            window.lastAiUserQuestion.trim().length > 0
+                ? window.lastAiUserQuestion.trim()
+                : "Хочу обсудить проект, который мы обсуждали с AI-дизайнером Madera Design.";
+
+        const description =
+            `Кратко о проекте (заполнено из AI-дизайнера): ` + baseText;
+
+        // Переход в раздел "Заказ"
+        goToOrderWithDescription(description);
+    });
+}
 
 
     // 1) КНОПКА-КРУЖОК AI-ASSISTANT MADERA
