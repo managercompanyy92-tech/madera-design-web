@@ -249,10 +249,10 @@ function renderCatalog() {
             </div>
             <div class="catalog-quiz__actions">
               <button class="btn btn--ghost"
-data-route="order"> 
+data-quiz-go-order> 
                 Получить быстрый расчет и идеи.
               </button>
-              <button class="btn btn--outline" data-action="open-chat">
+              <button class="btn btn--outline" data-quiz-go-order>
                 Обсудить с AI-дизайнером мою ситуацию.
               </button>
             </div>
