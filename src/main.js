@@ -248,10 +248,11 @@ function renderCatalog() {
               Даже если вы пока просто присматриваетесь, мини-квиз поможет понять диапазон бюджета и с чего лучше начать именно Вам!
             </div>
             <div class="catalog-quiz__actions">
-              <button class="btn btn--ghost" data-route="order">
+              <button class="btn btn--ghost" 
+data-route="order"> data-quiz-go-order>
                 Получить быстрый расчет и идеи.
               </button>
-              <button class="btn btn--outline" data-action="open-chat">
+              <button class="btn btn--outline" data-action="open-chat">data-quiz-go-ai>
                 Обсудить с AI-дизайнером мою ситуацию.
               </button>
             </div>
