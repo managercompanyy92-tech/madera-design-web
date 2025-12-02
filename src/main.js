@@ -211,13 +211,16 @@ data-quiz-type="livingrooms">Гостиная</button>
           <div class="catalog-quiz__block">
             <div class="catalog-quiz__label">2. Цель проекта</div>
             <div class="catalog-quiz__options">
-              <button class="catalog-quiz__option" data-quiz-goal="self">
+              <button class="catalog-quiz__option"data-quiz-group="goal"
+ data-quiz-goal="self">
                 Для себя надолго
               </button>
-              <button class="catalog-quiz__option" data-quiz-goal="rent">
+              <button class="catalog-quiz__option" data-quiz-group="goal"
+data-quiz-goal="rent">
                 Квартира под сдачу
               </button>
-              <button class="catalog-quiz__option" data-quiz-goal="sale">
+              <button class="catalog-quiz__option" data-quiz-group="goal"
+data-quiz-goal="sale">
                 Готовлю к продаже
               </button>
             </div>
