@@ -192,12 +192,23 @@ function renderCatalog() {
           <div class="catalog-quiz__block">
             <div class="catalog-quiz__label">1. С чего планируете начать интерьер?</div>
             <div class="catalog-quiz__options">
-              <button class="catalog-quiz__option" data-quiz-type="kitchens">Кухня</button>
-              <button class="catalog-quiz__option" data-quiz-type="wardrobes">Гардеробная</button>
-              <button class="catalog-quiz__option" data-quiz-type="bedrooms">Спальня</button>
-              <button class="catalog-quiz__option" data-quiz-type="kids">Детская</button>
-              <button class="catalog-quiz__option" data-quiz-type="hallways">Прихожая</button>
-              <button class="catalog-quiz__option" data-quiz-type="livingrooms">Гостиная</button>
+              <button class="catalog-quiz__option" data-quiz-step="category"
+
+  data-quiz-value="Кухня"data-quiz-type="kitchens">Кухня</button>
+              <button class="catalog-quiz__option" data-quiz-step="category"
+  data-quiz-value="Гардеробная" data-quiz-type="wardrobes">Гардеробная</button>
+              <button class="catalog-quiz__option" data-quiz-step="category"
+
+  data-quiz-value="Спальня"data-quiz-type="bedrooms">Спальня</button>
+              <button class="catalog-quiz__option" data-quiz-step="category"
+
+  data-quiz-value="Детская" data-quiz-type="kids">Детская</button>
+              <button class="catalog-quiz__option" data-quiz-step="category"
+
+  data-quiz-value="Прихожая" data-quiz-type="hallways">Прихожая</button>
+              <button class="catalog-quiz__option" data-quiz-step="category"
+
+  data-quiz-value="Гостиная"data-quiz-type="livingrooms">Гостиная</button>
             </div>
           </div>
 
