@@ -924,6 +924,15 @@ function initAiDesignerChat() {
         ></textarea>
         <button type="submit" class="ai-chat__send">Отправить</button>
       </form>
+      <div class="ai-chat__actions">
+  <button
+    type="button"
+    class="btn btn--secondary ai-chat__order-btn"
+    data-ai-go-order
+  >
+    Оставить заявку на замер и расчёт
+  </button>
+</div>
     </div>
   `.trim();
 
@@ -1132,7 +1141,9 @@ async function handleAiChatSubmit(event) {
   if (aiChatVoiceBlob) {
     userText += (userText ? "\n" : "") + "Прикреплено голосовое сообщение.";
   }
-
+if (userText) {
+  lastAiUserQuestion = userText;
+}
   appendAiMessage("user", userText || "Файлы/голосовое сообщение без текста");
   aiChatInputEl.value = "";
 
