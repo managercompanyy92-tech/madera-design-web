@@ -2745,3 +2745,44 @@ section.page--home .hero__actions {
   box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.3);
   background: radial-gradient(circle at top left, #2a1a0a, #111);
 }
+/* Мини-квиз в каталоге */
+
+.catalog-quiz {
+  border-radius: 28px;
+  padding: 24px 20px 28px;
+  background: radial-gradient(circle at top left, #3a2410, #15100b);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.catalog-quiz__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.catalog-quiz__option {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  line-height: 1.2;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.catalog-quiz__option:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.catalog-quiz__option--active {
+  border-color: #ffb347;
+  box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.4);
+  background: radial-gradient(circle at top left, #2a1607, #000);
+}
