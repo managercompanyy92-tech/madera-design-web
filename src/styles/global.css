@@ -2755,3 +2755,15 @@ section.page--home .hero__actions {
   line-height: 1.6;
   max-width: 640px;
 }
+  .catalog-discount-card {
+  border-radius: 24px;
+  background: radial-gradient(circle at top left, rgba(255, 122, 0, 0.16), transparent 60%),
+              rgba(20, 20, 20, 0.96);
+  border: 1px solid rgba(255, 179, 71, 0.35);
+  padding: 20px 18px 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
+}
+.catalog-discount-card ul {
+  margin-top: 10px;
+  padding-left: 20px;
+}
