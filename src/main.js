@@ -1635,3 +1635,107 @@ function goToOrderWithDescription(desc) {
 function openAiDesignerFromQuiz(desc) {
   console.log("TODO openAiDesignerFromQuiz:", desc);
 }
+
+
+// ==========================
+// КАТАЛОГ: МИНИ-КВИЗ
+// ==========================
+
+(function initCatalogQuiz() {
+  // Сюда собираем ответы квиза
+  const quizState = {
+    room: null,   // шаг 1
+    goal: null,   // шаг 2
+    budget: null, // шаг 3
+  };
+
+  // Собираем красивый текст из ответов
+  function buildBaseText() {
+    const parts = [];
+
+    if (quizState.room) {
+      parts.push(`планирую начать с: ${quizState.room}`);
+    }
+    if (quizState.goal) {
+      parts.push(`цель проекта: ${quizState.goal}`);
+    }
+    if (quizState.budget) {
+      parts.push(`бюджет на мебель: ${quizState.budget}`);
+    }
+
+    if (!parts.length) return "";
+
+    return `Помоги спланировать интерьер: ${parts.join("; ")}.`;
+  }
+
+  // Один общий обработчик кликов по странице
+  document.addEventListener("click", (event) => {
+    // 1) Выбор ответа в квизе
+    const answerBtn = event.target.closest("[data-quiz-step]");
+    if (answerBtn) {
+      const step = answerBtn.getAttribute("data-quiz-step");
+      const value =
+        answerBtn.getAttribute("data-quiz-value") ||
+        answerBtn.textContent.trim();
+
+      // Сохраняем только известные шаги
+      if (step && Object.prototype.hasOwnProperty.call(quizState, step)) {
+        quizState[step] = value;
+      }
+
+      // Подсветка активной кнопки внутри группы этого шага
+      const group =
+        answerBtn.closest("[data-quiz-group]") || answerBtn.parentElement;
+
+      if (group && step) {
+        const selector = `[data-quiz-step="${step}"]`;
+        group.querySelectorAll(selector).forEach((btn) => {
+          btn.classList.toggle("is-active", btn === answerBtn);
+        });
+      }
+    }
+
+    // 2) Кнопка "Получить быстрый расчёт и идеи"
+    const goOrderBtn = event.target.closest("[data-quiz-go-order]");
+    if (goOrderBtn) {
+      const baseText = buildBaseText();
+
+      // Если в проекте есть функция goToOrderWithDescription — используем её
+      if (baseText && typeof window.goToOrderWithDescription === "function") {
+        window.goToOrderWithDescription(baseText);
+      }
+      // Если функции нет — просто ничего не ломаем.
+    }
+
+    // 3) Кнопка "Обсудить с AI-дизайнером мою ситуацию"
+    const goAiBtn = event.target.closest("[data-quiz-go-ai]");
+    if (goAiBtn) {
+      const baseText = buildBaseText();
+
+      // Если у тебя есть спец-функция для открытия AI с готовым текстом
+      if (
+        baseText &&
+        typeof window.openAiDesignerWithPrefill === "function"
+      ) {
+        window.openAiDesignerWithPrefill(baseText);
+        return;
+      }
+
+      // Резервный вариант: просто открыть чат и, если получится, подставить текст
+      const openBtn = document.querySelector("[data-madera-chat-open]");
+      if (openBtn) {
+        openBtn.click();
+
+        if (baseText) {
+          // Даём чату открыться и пробуем подставить текст
+          setTimeout(() => {
+            const input = document.querySelector("[data-madera-chat-input]");
+            if (input) {
+              input.value = baseText;
+            }
+          }, 400);
+        }
+      }
+    }
+  });
+})();
