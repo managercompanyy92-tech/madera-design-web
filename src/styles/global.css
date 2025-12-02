@@ -2750,3 +2750,8 @@ section.page--home .hero__actions {
   color: #1c1c1c;
   box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.7), 0 12px 24px rgba(0, 0, 0, 0.8);
   }
+.page__subtitle,
+.catalog-quiz__description {
+  line-height: 1.6;
+  max-width: 640px;
+}
