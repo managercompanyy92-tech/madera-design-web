@@ -11,6 +11,18 @@ const BASE_RATES = {
 
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
+// Состояние мини-квиза каталога
+const catalogQuizState = {
+  room: null,   // помещение
+  goal: null,   // цель проекта
+  budget: null, // бюджет
+};
+
+// Текст, который надо подставить в форму заявки
+let pendingOrderDescription = "";
+
+// Последний вопрос пользователя в AI-чате
+let lastAiUserQuestion = "";
 
 /* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
 
@@ -123,6 +135,47 @@ function renderHome() {
     </section>
   `;
 }  
+// Собираем фразу по ответам мини-квиза
+function buildCatalogQuizSummary() {
+  const parts = [];
+
+  if (catalogQuizState.room) {
+    parts.push(`помещение: ${catalogQuizState.room}`);
+  }
+  if (catalogQuizState.goal) {
+    parts.push(`цель проекта: ${catalogQuizState.goal}`);
+  }
+  if (catalogQuizState.budget) {
+    parts.push(`примерный бюджет: ${catalogQuizState.budget}`);
+  }
+
+  if (!parts.length) {
+    return "";
+  }
+
+  return `Помоги спланировать интерьер: хочу начать с ${
+    catalogQuizState.room || "помещения"
+  }; ${parts.join("; ")}. С чего лучше начать?`;
+}
+
+// Переход в раздел "Заказ" c готовым описанием и фокусом на поле
+function goToOrderWithDescription(description) {
+  pendingOrderDescription = description || "";
+
+  // Переключаем маршрут
+  renderRoute("order");
+  if (typeof window !== "undefined") {
+    window.location.hash = "order";
+  }
+
+  // Ставим фокус в текстовое поле
+  if (typeof document !== "undefined") {
+    const textarea = document.querySelector("[data-order-project]");
+    if (textarea) {
+      textarea.focus();
+    }
+  }
+}
 
 /* ----------------------------- КАТАЛОГ МЕБЕЛИ ----------------------------- */
 
@@ -536,11 +589,11 @@ function renderOrder() {
               <div class="order-form__row order-form__row--full">
                 <label class="order-form__label">Кратко опишите проект</label>
                 <textarea
-                  class="order-form__textarea"
-                  rows="3"
-                  placeholder="Кухня в современной квартире, примерно 4.5 м, нужен встроенный холодильник и духовой шкаф..."
-                  data-order-comment
-                ></textarea>
+  class="order-form__textarea"
+  rows="3"
+  placeholder="Кухня в современной квартире, примерно 4.5 м, нужен встроенный холодильник и духовой шкаф..."
+  data-order-project
+>${pendingOrderDescription || ""}</textarea>
               </div>
 
               <div class="order-form__row order-form__row--full">
@@ -1460,6 +1513,39 @@ function setupRouter() {
       }
       return;
     }
+    // Ответы мини-квиза в каталоге
+  const quizOption = target.closest("[data-quiz]");
+  if (quizOption) {
+    const type = quizOption.getAttribute("data-quiz"); // room / goal / budget
+    const value = quizOption.textContent.trim();
+
+    if (type && value) {
+      catalogQuizState[type] = value;
+    }
+
+    // Подсветка активной кнопки в группе
+    const group = quizOption.closest(".catalog-quiz__options, .catalog-quiz__buttons-row");
+    if (group && type) {
+      group
+        .querySelectorAll(`[data-quiz="${type}"]`)
+        .forEach((btn) => {
+          btn.classList.toggle(
+            "catalog-quiz__option--active",
+            btn === quizOption
+          );
+        });
+    }
+
+    return;
+  }
+
+  // Кнопка "Перейти к быстрому расчёту"
+  const quizGoOrder = target.closest("[data-quiz-go-order]");
+  if (quizGoOrder) {
+    const description = buildCatalogQuizSummary();
+    goToOrderWithDescription(description);
+    return;
+  }
     // Открыть окно AI-дизайнера
     const chatTarget = target.closest("[data-action='open-chat']");
     if (chatTarget) {
