@@ -190,7 +190,7 @@ function renderCatalog() {
         <!-- Мини-квиз: с чего начинаем -->
         <div class="catalog-quiz">
           <div class="catalog-quiz__block">
-            <div class="catalog-quiz__label">1. Что планируете в первую очередь?</div>
+            <div class="catalog-quiz__label">1. С чего планируете начать интерьер?</div>
             <div class="catalog-quiz__options">
               <button class="catalog-quiz__option" data-quiz-type="kitchens">Кухня</button>
               <button class="catalog-quiz__option" data-quiz-type="wardrobes">Гардеробная</button>
@@ -202,7 +202,7 @@ function renderCatalog() {
           </div>
 
           <div class="catalog-quiz__block">
-            <div class="catalog-quiz__label">2. Цель проекта</div>
+            <div class="catalog-quiz__label">2. Какая цель проекта?</div>
             <div class="catalog-quiz__options">
               <button class="catalog-quiz__option" data-quiz-goal="self">
                 Для себя надолго
@@ -217,7 +217,7 @@ function renderCatalog() {
           </div>
 
           <div class="catalog-quiz__block">
-            <div class="catalog-quiz__label">3. Примерный бюджет на мебель</div>
+            <div class="catalog-quiz__label">3. Какой ориентировочный бюджет на мебель?</div>
             <div class="catalog-quiz__options">
               <button class="catalog-quiz__option" data-quiz-budget="low">
                 до 15&nbsp;000 сом
