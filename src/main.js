@@ -229,13 +229,14 @@ data-quiz-goal="sale">
           <div class="catalog-quiz__block">
             <div class="catalog-quiz__label">3. Примерный бюджет на мебель</div>
             <div class="catalog-quiz__options">
-              <button class="catalog-quiz__option" data-quiz-budget="low">
+              <button class="catalog-quiz__option"data-quiz-group="budget"
+ data-quiz-budget="low">
                 до 15&nbsp;000 сом
               </button>
-              <button class="catalog-quiz__option" data-quiz-budget="mid">
+              <button class="catalog-quiz__option" data-quiz-group="budget"data-quiz-budget="mid">
                 15–30&nbsp;000 сом
               </button>
-              <button class="catalog-quiz__option" data-quiz-budget="high">
+              <button class="catalog-quiz__option"data-quiz-group="budget" data-quiz-budget="high">
                 выше 30&nbsp;000 сом
               </button>
             </div>
