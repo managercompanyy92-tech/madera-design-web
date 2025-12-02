@@ -2722,3 +2722,26 @@ section.page--home .hero__actions {
   z-index: -1;
   pointer-events: none;
 }
+  /* Квиз в каталоге */
+
+.catalog-quiz__option {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  font-size: 14px;
+  line-height: 1.2;
+  transition: background 0.15s ease, transform 0.15s ease,
+    box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.catalog-quiz__option:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.catalog-quiz__option--active {
+  border-color: #ffb347;
+  box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.3);
+  background: radial-gradient(circle at top left, #2a1a0a, #111);
+}
