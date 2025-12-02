@@ -1921,3 +1921,145 @@ document.addEventListener("click", (e) => {
   // выделяем текущую
   btn.setAttribute("data-quiz-selected", "true");
 });
+// -----------------------------------------
+// КВИЗ КАТАЛОГА МЕБЕЛИ: ВЫБОР, СБОР, ПЕРЕДАЧА
+// -----------------------------------------
+
+// 1. Отмечаем выбранную опцию квиза
+document.addEventListener("click", (event) => {
+  const optionBtn = event.target.closest(".catalog-quiz__option");
+  if (!optionBtn) return;
+
+  const optionsBlock = optionBtn.closest(".catalog-quiz__options");
+  if (!optionsBlock) return;
+
+  // Снимаем отметку выбора со всех кнопок в этом блоке
+  optionsBlock
+    .querySelectorAll(".catalog-quiz__option[data-quiz-selected]")
+    .forEach((btn) => btn.removeAttribute("data-quiz-selected"));
+
+  // Отмечаем текущую кнопку как выбранную
+  optionBtn.setAttribute("data-quiz-selected", "true");
+});
+
+// 2. Читаем состояние квиза из DOM
+function getCatalogQuizState() {
+  const quizRoot = document.querySelector(".catalog-quiz");
+  if (!quizRoot) return null;
+
+  const result = {
+    category: null,
+    categoryValue: null,
+    goal: null,
+    goalValue: null,
+    budget: null,
+    budgetValue: null,
+  };
+
+  const selected = quizRoot.querySelectorAll(
+    ".catalog-quiz__option[data-quiz-selected]"
+  );
+
+  selected.forEach((btn) => {
+    const step = btn.getAttribute("data-quiz-step");
+    const value = btn.getAttribute("data-quiz-value") || btn.textContent.trim();
+
+    if (step === "category") {
+      result.category = btn.getAttribute("data-quiz-type") || null;
+      result.categoryValue = value;
+    } else if (step === "goal") {
+      result.goal = btn.getAttribute("data-quiz-goal") || null;
+      result.goalValue = value;
+    } else if (step === "budget") {
+      result.budget = btn.getAttribute("data-quiz-budget") || null;
+      result.budgetValue = value;
+    }
+  });
+
+  return result;
+}
+
+// 3. Формируем текстовое описание проекта по ответам квиза
+function buildCatalogQuizSummary(state) {
+  if (!state) return "";
+
+  const parts = [];
+
+  if (state.categoryValue) {
+    parts.push(`Планирую начать с: ${state.categoryValue}.`);
+  }
+
+  if (state.goalValue) {
+    parts.push(`Цель проекта: ${state.goalValue}.`);
+  }
+
+  if (state.budgetValue) {
+    parts.push(`Ориентировочный бюджет на мебель: ${state.budgetValue}.`);
+  }
+
+  return parts.join(" ");
+}
+
+// 4. Делаем квиз доступным глобально (для других скриптов, в т.ч. AI-дизайнера)
+window.maderaCatalogQuiz = {
+  getState: getCatalogQuizState,
+  buildSummary: () => buildCatalogQuizSummary(getCatalogQuizState()),
+};
+
+// 5. Подстановка описания из квиза в форму заказа
+(function initCatalogQuizToOrder() {
+  const QUIZ_GO_ORDER_SELECTOR = "[data-quiz-go-order]";
+  const ORDER_COMMENT_SELECTOR = "[data-order-comment]";
+
+  document.addEventListener("click", (event) => {
+    const goOrderBtn = event.target.closest(QUIZ_GO_ORDER_SELECTOR);
+    if (!goOrderBtn) return;
+
+    const state = getCatalogQuizState();
+    const summary = buildCatalogQuizSummary(state);
+
+    // сохраняем глобально — можно использовать и в других местах
+    window.maderaCatalogQuizLastState = state;
+    window.maderaCatalogQuizLastSummary = summary;
+
+    if (!summary) return;
+
+    // Ждем, пока отрисуется страница заказа, и подставляем текст в поле
+    let attempts = 0;
+    const maxAttempts = 20; // максимум ~5 секунд (20 * 250мс)
+    const interval = 250;
+
+    const timerId = setInterval(() => {
+      attempts += 1;
+      const commentField = document.querySelector(ORDER_COMMENT_SELECTOR);
+
+      if (commentField) {
+        // Не затираем, если человек уже что-то сам написал
+        if (!commentField.value) {
+          commentField.value = summary;
+        }
+        clearInterval(timerId);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(timerId);
+      }
+    }, interval);
+  });
+})();
+
+// 6. Заготовка для связи с AI-дизайнером (будем использовать в chat.js)
+(function initCatalogQuizToAi() {
+  const QUIZ_GO_AI_SELECTOR = "[data-quiz-go-ai]";
+
+  document.addEventListener("click", (event) => {
+    const goAiBtn = event.target.closest(QUIZ_GO_AI_SELECTOR);
+    if (!goAiBtn) return;
+
+    const state = getCatalogQuizState();
+    const summary = buildCatalogQuizSummary(state);
+
+    window.maderaCatalogQuizLastState = state;
+    window.maderaCatalogQuizLastSummary = summary;
+    window.maderaCatalogQuizForAi = summary;
+    // Дальше связь с самим чатом сделаем в chat.js
+  });
+})();
