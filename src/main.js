@@ -1903,3 +1903,21 @@ function buildQuizDescription() {
     });
   }
 })();
+// -----------------------------------------
+// ЛОГИКА ОТМЕТКИ ВЫБРАННЫХ ОПЦИЙ КВИЗА
+// -----------------------------------------
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".catalog-quiz__option");
+  if (!btn) return;
+
+  const parent = btn.closest(".catalog-quiz__options");
+  if (!parent) return;
+
+  // убираем выделение у всех в этом блоке
+  parent.querySelectorAll(".catalog-quiz__option").forEach((b) => {
+    b.removeAttribute("data-quiz-selected");
+  });
+
+  // выделяем текущую
+  btn.setAttribute("data-quiz-selected", "true");
+});
