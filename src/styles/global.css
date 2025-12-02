@@ -2687,3 +2687,38 @@ section.page--home .hero__actions {
 .hero-face-btn--accent {
   animation: heroFacePulse 2.8s ease-in-out infinite;
 }
+  /* --- Красивый фон каталога, убираем серые полосы ---- */
+.page--catalog {
+  padding-top: 4px; /* оставляем как было */
+  position: relative;
+  background: radial-gradient(
+      circle at top,
+      rgba(255, 153, 0, 0.08) 0,
+      #050208 55%,
+      #000000 100%
+  );
+}
+
+/* Сетка категорий не должна перекрашивать фон */
+.catalog-categories-grid {
+  background: transparent;
+}
+  /* --- Мягкое свечение вокруг карточек категорий ---- */
+.catalog-category-card {
+  position: relative;
+  background: rgba(10, 10, 10, 0.96); /* чуть темнее, чем #1c1c1c */
+  z-index: 1;
+}
+
+.catalog-category-card::before {
+  content: "";
+  position: absolute;
+  inset: -14px -12px; /* выступ за границы карточки */
+  background: radial-gradient(
+      circle,
+      rgba(255, 153, 0, 0.18),
+      transparent 70%
+  );
+  z-index: -1;
+  pointer-events: none;
+}
