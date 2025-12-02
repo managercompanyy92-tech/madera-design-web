@@ -1796,3 +1796,110 @@ function buildQuizDescription() {
 
   return parts.join("; ");
 }
+// ===============================
+// КВИЗ → ЗАКАЗ И AI-ДИЗАЙНЕР
+// ===============================
+(function initCatalogQuizBridge() {
+  const quizEl = document.querySelector(".catalog-quiz");
+  if (!quizEl) return;
+
+  // Собираем текст из выбранных опций квиза
+  function getQuizDescription() {
+    // кнопки с активным состоянием – подхватываем основные варианты классов
+    const selectedButtons = quizEl.querySelectorAll(
+      ".catalog-quiz__btn--active, .catalog-quiz__btn.is-active, [data-quiz-selected='true']"
+    );
+
+    const parts = Array.from(selectedButtons)
+      .map((btn) => btn.textContent.trim())
+      .filter(Boolean);
+
+    return parts.join("; ");
+  }
+
+  // ============================
+  // 1) Кнопка "Быстрый расчёт"
+  // ============================
+
+  const goOrderBtn = quizEl.querySelector("[data-quiz-go-order]");
+
+  if (goOrderBtn) {
+    goOrderBtn.addEventListener("click", () => {
+      const desc = getQuizDescription();
+
+      if (desc) {
+        // сохраняем глобально, если понадобится ещё где-то
+        window.maderaQuizDescription = desc;
+      }
+
+      // даём роутеру время отрисовать страницу "Заказ"
+      setTimeout(() => {
+        const commentField = document.querySelector("[data-order-comment]");
+        if (
+          commentField &&
+          window.maderaQuizDescription &&
+          !commentField.value
+        ) {
+          commentField.value = window.maderaQuizDescription;
+        }
+      }, 150);
+    });
+  }
+
+  // ============================
+  // 2) Кнопка "AI-дизайнер"
+  // ============================
+
+  const goAiBtn = quizEl.querySelector("[data-quiz-go-ai]");
+
+  if (goAiBtn) {
+    goAiBtn.addEventListener("click", (event) => {
+      // не мешаем работе остальных обработчиков, но убираем лишний скролл
+      event.preventDefault();
+
+      const desc = getQuizDescription();
+      if (desc) {
+        window.maderaQuizDescription = desc;
+      }
+
+      const baseText =
+        window.maderaQuizDescription &&
+        window.maderaQuizDescription.trim().length > 0
+          ? window.maderaQuizDescription.trim()
+          : "Хочу обсудить проект и подобрать идеи и расчёт.";
+
+      const message =
+        "Помоги спланировать интерьер: " + baseText;
+
+      // поле ввода в AI-дизайнере
+      const aiInput =
+        document.querySelector("[data-madera-chat-input]") ||
+        document.querySelector("[data-ai-designer-input]");
+
+      if (aiInput) {
+        aiInput.value = message;
+      }
+
+      // открываем панель чата
+      const chatPanel =
+        document.querySelector("[data-madera-chat-panel]") ||
+        document.querySelector("[data-ai-designer-panel]");
+
+      if (chatPanel) {
+        chatPanel.classList.add("is-open");
+      }
+
+      // аккуратно скроллим к блоку AI-дизайнера, если есть маркер секции
+      const aiSection =
+        document.querySelector("[data-madera-chat-section]") ||
+        document.querySelector("[data-ai-designer-section]");
+
+      if (aiSection) {
+        aiSection.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    });
+  }
+})();
