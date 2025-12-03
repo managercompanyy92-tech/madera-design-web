@@ -449,42 +449,109 @@ document.addEventListener("DOMContentLoaded", () => {
 // END IMAGE GENERATION LAYER
 // -----------------------------------------------------------
 // -----------------------------------------------------------
-// QUICK STYLE SUGGESTIONS FOR AI-DESIGNER (MADERA PREMIUM)
+// QUICK STYLE BUTTONS + SMART HINTS (MADERA PREMIUM UX)
 // -----------------------------------------------------------
 
-function renderStyleQuickButtons() {
-  const container = document.querySelector("[data-madera-chat-form]");
-  if (!container) return;
+function initMaderaChatExtras() {
+  const form = document.querySelector("[data-madera-chat-form]");
+  if (!form) return;
 
-  const block = document.createElement("div");
-  block.classList.add("madera-style-quick");
-
-  block.innerHTML = `
+  // ---------- БЫСТРЫЙ ВЫБОР СТИЛЯ ----------
+  const styleBlock = document.createElement("div");
+  styleBlock.classList.add("madera-style-quick");
+  styleBlock.innerHTML = `
     <div class="madera-style-quick__title">Быстрый выбор стиля</div>
     <div class="madera-style-quick__row">
       <button class="madera-style-btn" data-style="современный минимализм">Минимализм</button>
       <button class="madera-style-btn" data-style="современный дизайн">Современный</button>
       <button class="madera-style-btn" data-style="лофт стиль с текстурами">Лофт</button>
-      <button class="madera-style-btn" data-style="скандинавский теплый интерьер">Сканди</button>
+      <button class="madera-style-btn" data-style="скандинавский тёплый интерьер">Сканди</button>
       <button class="madera-style-btn" data-style="премиальный интерьер в стиле Madera Design">Премиум</button>
     </div>
   `;
 
-  container.parentElement.insertBefore(block, container);
+  // ---------- УМНЫЕ ПОДСКАЗКИ (HINTS) ----------
+  const hintsBlock = document.createElement("div");
+  hintsBlock.classList.add("madera-hints");
+  hintsBlock.innerHTML = `
+    <div class="madera-hints__title">Попробуйте спросить</div>
+    <div class="madera-hints__row">
+      <button class="madera-hint-btn" data-hint="Подбери идею кухни 4,5 метра под мой стиль и бюджет.">
+        Идея кухни 4,5 м
+      </button>
+      <button class="madera-hint-btn" data-hint="Оцени планировку моей будущей гардеробной и предложи улучшения.">
+        Гардеробная с улучшениями
+      </button>
+      <button class="мadera-hint-btn" data-hint="Сделай концепцию гостиной в стиле премиум под наш бренд.">
+        Премиум гостиная
+      </button>
+    </div>
+  `;
+
+  // Вставляем БЛОКИ ПЕРЕД формой
+  form.parentElement.insertBefore(styleBlock, form);
+  form.parentElement.insertBefore(hintsBlock, form.nextSibling);
 }
 
+// обработка клика по стилю
+async function handleQuickStyleClick(style) {
+  const userPhrase = "Хочу дизайн в стиле: " + style;
+
+  appendMessage("user", userPhrase);
+  addToHistory("user", userPhrase);
+  setStatus("Думаем над вариантом в этом стиле…");
+
+  const rawReply = await sendMessageToServer(
+    `Клиент хочет интерьер в стиле: ${style}.
+Сделай 3–5 конкретных идей: композиция мебели, материалы, цвета, фурнитура.
+Пиши кратко, структурированно, как профессиональный дизайнер и менеджер по продажам Madera Design.`
+  );
+
+  const replyText = normalizeAssistantReply(rawReply);
+  appendMessage("assistant", replyText);
+  addToHistory("assistant", replyText);
+  setStatus("Готова помочь с вашим следующим вопросом.");
+}
+
+// обработка клика по подсказке (hint)
+async function handleHintClick(promptText) {
+  appendMessage("user", promptText);
+  addToHistory("user", promptText);
+  setStatus("Обрабатываем ваш запрос…");
+
+  const rawReply = await sendMessageToServer(
+    `${promptText}
+Учитывай фирменный стиль и политику компании Madera Design.
+Отвечай кратко, структурированно, с мягким подведением к заказу.`
+  );
+
+  const replyText = normalizeAssistantReply(rawReply);
+  appendMessage("assistant", replyText);
+  addToHistory("assistant", replyText);
+  setStatus("Готова помочь с вашим следующим вопросом.");
+}
+
+// инициализация дополнительных элементов после загрузки
 document.addEventListener("DOMContentLoaded", () => {
-  renderStyleQuickButtons();
+  initMaderaChatExtras();
 
   document.body.addEventListener("click", async (e) => {
-    const btn = e.target.closest(".madera-style-btn");
-    if (!btn) return;
+    const styleBtn = e.target.closest(".madera-style-btn");
+    if (styleBtn) {
+      const style = styleBtn.getAttribute("data-style");
+      if (style) {
+        await handleQuickStyleClick(style);
+      }
+      return;
+    }
 
-    const style = btn.getAttribute("data-style");
-
-    appendMessage("user", "Хочу дизайн в стиле: " + style);
-    addToHistory("user", "Хочу дизайн в стиле: " + style);
-
-    await processAiRequest("Сгенерируй дизайн в стиле: " + style);
+    const hintBtn = e.target.closest(".madera-hint-btn");
+    if (hintBtn) {
+      const hint = hintBtn.getAttribute("data-hint");
+      if (hint) {
+        await handleHintClick(hint);
+      }
+      return;
+    }
   });
 });
