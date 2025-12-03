@@ -1657,3 +1657,35 @@ function openAiDesignerFromQuiz(desc) {
   window.addEventListener("load", adjustBottomPadding);
   window.addEventListener("resize", adjustBottomPadding);
 })();
+// ======================================================================
+// УБИЙСТВЕННОЕ РЕШЕНИЕ ПРОБЛЕМЫ: контент НИКОГДА не перекрывает нижнее меню
+// ======================================================================
+(function fixBottomNavOverlap() {
+  if (typeof document === "undefined") return;
+
+  function applySafeBottomPadding() {
+    try {
+      const nav = document.querySelector(".app-nav");
+      if (!nav) return;
+
+      const height = nav.getBoundingClientRect().height;
+
+      // Даем большой гарантированный запас поверх реальной высоты
+      const safeSpace = height + 32; 
+
+      // Устанавливаем ПРИНУДИТЕЛЬНО
+      document.body.style.setProperty("padding-bottom", safeSpace + "px", "important");
+
+    } catch (err) {
+      console.warn("Error in fixBottomNavOverlap:", err);
+    }
+  }
+
+  // Срабатывает всегда: при загрузке, обновлении DOM, смене ориентации
+  window.addEventListener("load", applySafeBottomPadding);
+  window.addEventListener("resize", applySafeBottomPadding);
+
+  // Дополнительная гарантия — если что-то динамически меняет высоту страницы
+  const observer = new MutationObserver(applySafeBottomPadding);
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
