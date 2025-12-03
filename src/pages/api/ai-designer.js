@@ -8,13 +8,12 @@ export default async function handler(req, res) {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    console.error("OPENAI_API_KEY missing");
     return res.status(500).json({
-      error: "AI service is not configured",
+      error: "AI service is not configured (missing OPENAI_API_KEY)",
     });
   }
 
-  const client = new OpenAI({ apiKey });
+  const openai = new OpenAI({ apiKey });
 
   try {
     const { message, history, systemPrompt } = req.body || {};
@@ -23,39 +22,40 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Empty message" });
     }
 
-    // Формируем запрос
     const messages = [];
 
     if (systemPrompt) {
       messages.push({ role: "system", content: systemPrompt });
     }
 
+    // Нормализация истории
     if (Array.isArray(history)) {
-      const trimmed = history.slice(-10);
-      for (const h of trimmed) {
-        if (!h || !h.text) continue;
-        messages.push({
-          role: h.role === "assistant" ? "assistant" : "user",
-          content: h.text,
-        });
-      }
+      history.slice(-10).forEach((msg) => {
+        if (!msg) return;
+        const role = msg.role === "assistant" ? "assistant" : "user";
+        const text = msg.text || msg.content || "";
+        if (text.trim()) {
+          messages.push({ role, content: text.trim() });
+        }
+      });
     }
 
     messages.push({ role: "user", content: message });
 
-    // Запрос к модели
-    const completion = await client.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       messages,
-      max_tokens: 600,
       temperature: 0.7,
+      max_tokens: 700,
     });
 
-    const reply = completion.choices?.[0]?.message?.content || "";
+    const reply =
+      completion.choices?.[0]?.message?.content?.trim() ||
+      "Не удалось получить ответ.";
 
-    return res.status(200).json({ reply: reply.trim() });
+    return res.status(200).json({ reply });
   } catch (err) {
-    console.error("AI_DESIGNER_SERVER_ERROR", err);
+    console.error("AI DESIGNER API ERROR:", err);
     return res.status(500).json({
       error: "AI service error",
     });
