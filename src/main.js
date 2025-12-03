@@ -2207,3 +2207,42 @@ if (document.readyState === "loading") {
 } else {
   initCatalogQuiz();
 }
+document.addEventListener("click", (e) => {
+    const btnOrder = e.target.closest("[data-quiz-go-order]");
+    const btnAI = e.target.closest("[data-quiz-go-ai]");
+
+    // Собираем ответы квиза
+    const type = document.querySelector("[data-quiz-type].active")?.dataset.quizType || "";
+    const goal = document.querySelector("[data-quiz-goal].active")?.dataset.quizGoal || "";
+    const budget = document.querySelector("[data-quiz-budget].active")?.dataset.quizBudget || "";
+
+    const text = 
+        `Тип: ${type}\n` +
+        `Цель: ${goal}\n` +
+        `Бюджет: ${budget}`;
+
+    // 1) ПЕРЕХОД В ЗАКАЗ
+    if (btnOrder) {
+        // переходим в раздел order
+        const routeBtn = document.querySelector("[data-route='order']");
+        if (routeBtn) routeBtn.click();
+
+        // вставляем значение в текстовое поле заказа
+        setTimeout(() => {
+            const input = document.querySelector("[data-order-comment]");
+            if (input) input.value = text;
+        }, 500);
+    }
+
+    // 2) ПЕРЕХОД К AI-ДИЗАЙНЕРУ
+    if (btnAI) {
+        // открываем AI-чát
+        setTimeout(() => {
+            const aiInput = document.querySelector(".ai-chat__input");
+            if (aiInput) {
+                aiInput.value = text;
+                aiInput.focus();
+            }
+        }, 500);
+    }
+});
