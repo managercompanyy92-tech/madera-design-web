@@ -1646,7 +1646,7 @@ function openAiDesignerFromQuiz(desc) {
       const navHeight = nav.offsetHeight || 0;
 
       // небольшой запас сверху (8–12px)
-      const extra = 12;
+      const extra = 20;
       document.body.style.paddingBottom =
         navHeight > 0 ? navHeight + extra + "px" : "";
     } catch (e) {
