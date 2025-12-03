@@ -1689,3 +1689,61 @@ function openAiDesignerFromQuiz(desc) {
   const observer = new MutationObserver(applySafeBottomPadding);
   observer.observe(document.body, { childList: true, subtree: true });
 })();
+// ======================================================================
+// ФИНАЛЬНОЕ РЕШЕНИЕ: контент никогда не залезает под .app-nav
+// ======================================================================
+(function fixBottomNavOverlapHard() {
+  if (typeof document === "undefined") return;
+
+  // Ищем основной скроллируемый контейнер
+  function getScrollContainer() {
+    // 1. В каталоге — пробуем сначала именно его
+    const directCatalog = document.querySelector(".page--catalog");
+    if (directCatalog) return directCatalog;
+
+    // 2. Любая страница
+    const anyPage = document.querySelector(".page");
+    if (anyPage) return anyPage;
+
+    // 3. Основной main
+    const main = document.querySelector("main");
+    if (main) return main;
+
+    // 4. В худшем случае — body
+    return document.body || document.documentElement;
+  }
+
+  function applySafePadding() {
+    try {
+      const nav = document.querySelector(".app-nav");
+      if (!nav) return;
+
+      const container = getScrollContainer();
+      if (!container) return;
+
+      const navHeight = nav.getBoundingClientRect().height || 60;
+
+      // Даем запас, чтобы точно ничего не перекрывалось
+      const safePadding = navHeight + 32; // px
+
+      container.style.setProperty(
+        "padding-bottom",
+        safePadding + "px",
+        "important"
+      );
+    } catch (e) {
+      console.warn("fixBottomNavOverlapHard error:", e);
+    }
+  }
+
+  // Запускаем в ключевые моменты
+  window.addEventListener("load", applySafePadding);
+  window.addEventListener("resize", applySafePadding);
+
+  // Если DOM динамически меняется (подгружаете обложки и т.п.)
+  const observer = new MutationObserver(applySafePadding);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // На всякий случай — небольшой таймер при первой загрузке
+  setTimeout(applySafePadding, 800);
+})();
