@@ -1,131 +1,43 @@
-export const config = {
-  runtime: "edge",
-};
-
-// Генератор изображений для AI-дизайнера Madera Design
-export default async function handler(req) {
-  try {
-    if (req.method !== "POST") {
-      return new Response(
-        JSON.stringify({ error: "Method not allowed" }),
-        { status: 405 }
-      );
-    }
-
-    const apiKey = process.env.OPENAI_API_KEY;
-
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: "OPENAI_API_KEY not configured" }),
-        { status: 500 }
-      );
-    }
-
-    const { prompt } = await req.json();
-
-    if (!prompt || prompt.trim().length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Prompt is empty" }),
-        { status: 400 }
-      );
-    }
-
-    // Формируем контекст для Madera Design
-    const stylePrompt = `
-Ты — старший интерьерный дизайнер компании Madera Design (г. Душанбе).
-Создай ультрареалистичный интерьер с учётом следующего запроса клиента.
-
-Требования к изображению:
-- Премиальное качество, фотореализм (8K детализация)
-- Мягкое тёплое освещение
-- Натуральные материалы: дерево, камень, стекло, металл
-- Цветовая гамма: фирменные тона Madera Design (графит, дерево, тёплый оранжевый)
-- Аккуратная композиция, перспективная камера
-- Без текста, людей, водяных знаков, логотипов
-- Современный минимализм в архитектуре и мебели
-- Атмосфера уюта и эстетики
-
-Клиент просит: ${prompt}.
-`;
-
-    // Запрос к OpenAI API
-    const openaiResponse = await fetch(
-      "https://api.openai.com/v1/images/generations",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-image-1",
-          prompt: stylePrompt,
-          size: "1024x1024",
-          quality: "hd",
-          n: 1,
-        }),
-      }
-    );
-
-    const data = await openaiResponse.json();
-
-    if (!data?.data?.[0]?.url) {
-      return new Response(
-        JSON.stringify({
-          error: "Image generation failed",
-          details: data,
-        }),
-        { status: 500 }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        imageUrl: data.data[0].url,
-      }),
-      { status: 200 }
-    );
-  } catch (err) {
-    console.error("AI_IMAGE_ERROR:", err);
-    return new Response(
-      JSON.stringify({ error: "Server error", detail: err.message }),
-      { status: 500 }
-    );
-  }
-}
 import OpenAI from "openai";
 
-const openai = new OpenAI({
+export const config = {
+  runtime: "nodejs", // ВАЖНО: заставляет Vercel использовать Node, а не Edge
+};
+
+const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     const { prompt } = req.body;
 
     if (!prompt) {
-      res.status(400).json({ error: "No prompt provided" });
-      return;
+      return res.status(400).json({ error: "No prompt provided" });
     }
 
-    // Генерация изображения
-    const result = await openai.images.generate({
+    const result = await client.images.generate({
       model: "gpt-image-1",
-      prompt: `Ультрареалистичный 3D дизайн интерьера. ${prompt}. Освещение, материалы, мебель, пропорции — фотореалистичные.`,
+      prompt: prompt,
       size: "1024x1024",
       quality: "high",
-      style: "photorealistic",
     });
 
-    const imageUrl = result.data[0].url;
-    res.status(200).json({ type: "image", url: imageUrl });
+    const imageBase64 = result.data[0].b64_json;
+
+    return res.status(200).json({
+      type: "image",
+      url: `data:image/png;base64,${imageBase64}`,
+      text: "Готово! Вот визуализация.",
+    });
   } catch (error) {
-    console.error("Ошибка при генерации изображения:", error);
-    res.status(500).json({ error: "Ошибка при создании изображения" });
+    console.error("AI IMAGE ERROR:", error);
+    return res.status(500).json({
+      error: "Failed to generate image",
+    });
   }
 }
