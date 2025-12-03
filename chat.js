@@ -335,3 +335,116 @@
 
   document.addEventListener("DOMContentLoaded", initChat);
 })();
+// -----------------------------------------------------------
+// AI IMAGE GENERATION MODULE (MADERA DESIGN PREMIUM ENGINE)
+// -----------------------------------------------------------
+
+const AI_IMAGE_TRIGGER_WORDS = [
+  "визуализа",
+  "картин",
+  "изображен",
+  "3d",
+  "рендер",
+  "render",
+  "сгенерируй",
+  "покажи дизайн",
+  "покажи идею",
+  "interior",
+  "дизайн комнаты",
+  "композицию",
+  "интерьер"
+];
+
+function shouldGenerateImage(text) {
+  const t = text.toLowerCase();
+  return AI_IMAGE_TRIGGER_WORDS.some((w) => t.includes(w));
+}
+
+// Рендер изображения в чат
+function appendImageCard(url, promptText) {
+  const container = document.querySelector("[data-madera-chat-messages]");
+  if (!container) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("madera-chat__message", "madera-chat__message--bot");
+
+  const card = document.createElement("div");
+  card.classList.add("madera-image-card");
+  card.innerHTML = `
+    <div class="madera-image-card__title">Сгенерированная визуализация</div>
+    <img src="${url}" alt="AI render" class="madera-image-card__img" />
+    <div class="madera-image-card__prompt">${promptText}</div>
+  `;
+
+  wrapper.appendChild(card);
+  container.appendChild(wrapper);
+  container.scrollTop = container.scrollHeight;
+}
+
+// Основная функция: куда отправлять запрос — текст или изображение
+async function processAiRequest(userMessage) {
+  // Если сообщение похоже на запрос о визуализации
+  if (shouldGenerateImage(userMessage)) {
+    appendMessage("assistant", "Готовлю визуализацию, пожалуйста подождите…");
+
+    try {
+      const response = await fetch("/api/ai-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: userMessage })
+      });
+
+      const data = await response.json();
+
+      if (data?.imageUrl) {
+        appendImageCard(data.imageUrl, userMessage);
+        return;
+      } else {
+        appendMessage(
+          "assistant",
+          "Не удалось получить изображение. Попробуйте описать задачу подробнее."
+        );
+      }
+    } catch (err) {
+      appendMessage(
+        "assistant",
+        "Ошибка генерации изображения. Попробуйте позже."
+      );
+    }
+
+    return;
+  }
+
+  // Иначе — отправляем как обычный текст на AI-дизайнера
+  const rawReply = await sendMessageToServer(userMessage);
+  const replyText = normalizeAssistantReply(rawReply);
+  appendMessage("assistant", replyText);
+  addToHistory("assistant", replyText);
+}
+
+// Перехватываем отправку формы
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("[data-madera-chat-form]");
+  const input = document.querySelector("[data-madera-chat-input]");
+
+  if (!form || !input) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendMessage("user", text);
+    addToHistory("user", text);
+
+    input.value = "";
+    input.focus();
+
+    await processAiRequest(text);
+  });
+});
+
+// -----------------------------------------------------------
+// END IMAGE GENERATION LAYER
+// -----------------------------------------------------------
