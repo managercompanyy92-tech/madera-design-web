@@ -271,3 +271,124 @@
 
   document.addEventListener("DOMContentLoaded", initAiDesigner);
 })();
+
+(function () {
+  const input = document.querySelector("[data-ai-designer-input]");
+  const form = document.querySelector("[data-ai-designer-form]");
+  const container = document.querySelector("[data-ai-designer-messages]");
+
+  if (!input || !form || !container) return;
+
+  // Детектор запросов на визуализацию
+  function isImagePrompt(text) {
+    const t = text.toLowerCase();
+    return (
+      t.includes("визуал") ||
+      t.includes("сделай дизайн") ||
+      t.includes("сделай интерьер") ||
+      t.includes("сделай планировку") ||
+      t.includes("нарисуй") ||
+      t.includes("покажи дизайн") ||
+      t.includes("создай дизайн") ||
+      t.includes("интерьер") ||
+      t.includes("комната") ||
+      t.includes("спальня") ||
+      t.includes("кухня") ||
+      t.includes("гостиная") ||
+      t.includes("детская") ||
+      t.includes("гардеробная")
+    );
+  }
+
+  // UI: сообщение
+  function appendMessage(role, text, imageUrl = null) {
+    const wrap = document.createElement("div");
+    wrap.className =
+      role === "user"
+        ? "madera-chat__message madera-chat__message--user"
+        : "madera-chat__message madera-chat__message--bot";
+
+    const bubble = document.createElement("div");
+    bubble.className = "madera-chat__bubble";
+
+    if (imageUrl) {
+      const img = document.createElement("img");
+      img.src = imageUrl;
+      img.alt = "AI дизайнер создал изображение";
+      img.style.width = "100%";
+      img.style.borderRadius = "14px";
+      img.style.marginTop = "8px";
+
+      bubble.innerHTML = text ? `<p>${text}</p>` : "";
+      bubble.appendChild(img);
+    } else {
+      bubble.textContent = text;
+    }
+
+    wrap.appendChild(bubble);
+    container.appendChild(wrap);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // Запрос для текста
+  async function sendTextToBackend(message) {
+    const res = await fetch("/api/ai-designer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    const data = await res.json();
+    return data.reply || "Не удалось получить ответ.";
+  }
+
+  // Запрос к генератору изображений
+  async function sendImagePrompt(prompt) {
+    const res = await fetch("/api/ai-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+
+    const data = await res.json();
+    if (data.imageUrl) return data.imageUrl;
+
+    return null;
+  }
+
+  // Основной обработчик
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendMessage("user", text);
+    input.value = "";
+
+    // Если визуализация → отправляем картинку
+    if (isImagePrompt(text)) {
+      appendMessage("assistant", "Создаю визуализацию… Подождите 5–10 секунд.");
+
+      const url = await sendImagePrompt(text);
+
+      if (url) {
+        appendMessage(
+          "assistant",
+          "Готово! Вот ультрареалистичный вариант:",
+          url
+        );
+      } else {
+        appendMessage(
+          "assistant",
+          "Не удалось создать изображение. Попробуйте снова."
+        );
+      }
+
+      return;
+    }
+
+    // Если обычный вопрос → отправляем в text backend
+    const reply = await sendTextToBackend(text);
+    appendMessage("assistant", reply);
+  });
+})();
