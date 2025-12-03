@@ -1,114 +1,170 @@
 import OpenAI from "openai";
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    const { messages } = req.body;
 
-    const { messages, imageRequest } = req.body;
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ error: "No messages provided" });
+    }
 
-    //
-    // --------------------------------------------------------
-    // 1) Если клиент просит визуализацию → генерируем картинку
-    // --------------------------------------------------------
-    //
-    if (imageRequest) {
-      const img = await openai.images.generate({
-        model: "gpt-image-1",
-        prompt:
-          imageRequest +
-          ". Ультрареалистичный интерьер, 8K, профессиональный свет, архитектурная визуализация, фотореализм.",
-        size: "1792x1024",
-        quality: "high",
-        style: "photorealistic",
-      });
+    const lastUserMessage = messages[messages.length - 1]?.content || "";
 
-      const imageUrl = img.data[0].url;
+    // === БАЗОВЫЕ ДАННЫЕ, КОТОРЫМИ ОБЯЗАН ОПЕРИРОВАТЬ ИИ ===
 
+    const PRICES = {
+      standard: 4000,
+      premium: 5000,
+    };
+
+    const MIN_LENGTH = 3;
+
+    const NOT_ACCEPTED = [
+      "классический стиль",
+      "неоклассика",
+      "коммерческие объекты",
+      "магазины",
+      "супермаркеты",
+      "офисы",
+      "школы",
+      "заводы",
+      "фабрики",
+      "рестораны",
+      "декоративные элементы для экстерьера",
+      "односпальная кровать",
+      "двуспальная кровать",
+      "двухярусная кровать",
+      "заказы за пределами города Душанбе",
+      "недоделки чужих мастеров",
+      "металлоконструкции",
+      "деревянные конструкции из массива",
+      "мягкая мебель",
+      "частичная предоплата",
+      "дешевые материалы",
+    ];
+
+    const MEASUREMENT_PRICE = 100;
+
+    // === ЛОГИКА ОТКАЗА НА НЕПОДХОДЯЩИЕ ЗАКАЗЫ ===
+
+    function checkForbidden(text) {
+      return NOT_ACCEPTED.find((item) =>
+        text.toLowerCase().includes(item.toLowerCase())
+      );
+    }
+
+    const forbidden = checkForbidden(lastUserMessage);
+
+    if (forbidden) {
       return res.status(200).json({
-        role: "assistant",
-        type: "image",
-        url: imageUrl,
-        text: "Вот один из вариантов визуализации. Могу подготовить дополнительные варианты!",
+        reply: `К сожалению, мы **не принимаем заказы** на: ${forbidden}. 
+Мы работаем только с современными корпусными решениями для квартир в г. Душанбе.  
+Если хотите — подскажу, какие работы мы выполняем и помогу рассчитать стоимость.`,
       });
     }
 
-    //
-    // --------------------------------------------------------
-    // 2) Генерация текстового ответа — AI-дизайнер и менеджер
-    // --------------------------------------------------------
-    //
+    // === РАСЧЁТ ЦЕНЫ ===
 
-    const systemPrompt = `
-Ты — профессиональный AI-дизайнер и AI-менеджер компании **Madera Design (Душанбе)**.  
-Отвечай красиво, уверенно, структурировано и по делу.
+    function calculatePrice(length, tariff) {
+      if (length < MIN_LENGTH) {
+        return `Минимальный заказ — от ${MIN_LENGTH} погонных метров.`;
+      }
 
-Всегда соблюдай правила:
+      const pricePerMeter = tariff === "премиум" ? PRICES.premium : PRICES.standard;
+      const sum = length * pricePerMeter;
 
-❌ МЫ НЕ ПРИНИМАЕМ:
-- Классический стиль  
-- Неоклассика  
-- Коммерческие объекты (магазины, офисы, заводы, школы, рестораны и т.д.)  
-- Декоративные элементы для экстерьера  
-- Односпальная кровать  
-- Двуспальная кровать  
-- Двухъярусная кровать  
-- Мягкая мебель для гостиных  
-- Металлоконструкции  
-- Мебель из дешёвых материалов  
-- Недоделки чужих мастеров  
-- Заказы за пределами Душанбе  
-- Заказы меньше 3 погонных метров  
+      return `Стоимость по тарифу "${tariff === "премиум" ? "Премиум" : "Стандарт"}":
 
-✔ НАШИ УСЛОВИЯ:
-- Минимальный заказ: **3 пог.м**
-- Стоимость 1 пог.м:
-  — Стандарт: **4000 сом**
-  — Премиум: **5000 сом**
-- Замер: **100 сом** (предоплата обязательна)
-- Обязателен дизайн-проект (клиентский или наш)
+• Длина: ${length} м  
+• Цена за метр: ${pricePerMeter} сом  
+—————————————  
+Итого: **${sum} сомони**  
 
-ЕСЛИ КЛИЕНТ СПРАШИВАЕТ СТОИМОСТЬ:
-— Используй 4000 или 5000 сом/м
-— Учитывай длину, стиль, материалы  
-— Если длина < 3 м → вежливо сообщи, что не принимаем такие заказы  
+Это предварительная стоимость без учёта дополнительных опций.  
+При необходимости могу подсказать оптимальный стиль, материалы или помочь собрать полноценный бриф.`;
+    }
 
-ЕСЛИ КЛИЕНТ ХОЧЕТ ДИЗАЙН:
-— Сначала уточни: размеры, стиль, материалы, бюджет  
-— Затем предложи создать ультрареалистичный дизайн  
-— Для генерации изображений используй imageRequest
+    // === ПАРСИНГ ЧИСЕЛ И ТАРИФОВ ===
+    const lengthMatch = lastUserMessage.match(/([0-9]+([.,][0-9]+)?)\s*м/);
+    const length = lengthMatch ? parseFloat(lengthMatch[1].replace(",", ".")) : null;
 
-Отвечай как профессионал Madera Design.
-    `;
+    let tariff = null;
+    if (/премиум/i.test(lastUserMessage)) tariff = "премиум";
+    if (/стандарт/i.test(lastUserMessage)) tariff = "стандарт";
+
+    // Если пользователь явно спрашивает цену погонного метра
+    if (/сколько.*метр/i.test(lastUserMessage) || /цена.*метр/i.test(lastUserMessage)) {
+      return res.status(200).json({
+        reply: `Стоимость одного погонного метра:
+
+• Стандарт — **${PRICES.standard} сом**  
+• Премиум — **${PRICES.premium} сом**
+
+Минимальный заказ — от ${MIN_LENGTH} погонных метров.  
+
+Хотите сразу рассчитать стоимость? Напишите длину мебели и тариф.`,
+      });
+    }
+
+    // Если есть длина и тариф — сделать расчёт
+    if (length && tariff) {
+      return res.status(200).json({
+        reply: calculatePrice(length, tariff),
+      });
+    }
+
+    // === ОБУЧЕННАЯ МОДЕЛЬ ДЛЯ ЛЮБЫХ ДРУГИХ ВОПРОСОВ ===
+
+    const SYSTEM_PROMPT = `
+Ты — профессиональный AI-ассистент компании Madera Design.
+
+ТВОИ ОБЯЗАННОСТИ:
+• рассчитывать стоимость мебели по нашим тарифам;
+• объяснять условия работы;
+• составлять бриф;
+• подсказывать стиль, цвет и конфигурацию мебели;
+• корректно отвечать на коммерческие вопросы;
+• соблюдать ценовую политику;
+• никогда не придумывать свои цены.
+
+ЦЕНЫ:
+• Стандарт — 4000 сом/м
+• Премиум — 5000 сом/м
+• Минимальный заказ — от 3 м
+• Замер — 100 сом, оплата обязательна заранее
+
+МЫ НЕ ПРИНИМАЕМ ЗАКАЗЫ:
+${NOT_ACCEPTED.map((i) => "- " + i).join("\n")}
+
+Если пользователь просит то, что мы НЕ выполняем — вежливо откажи.
+
+Отвечай структурировано, коротко и профессионально.
+Не используй странных фраз. Пиши простым языком.`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4.1",
+      model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system", content: SYSTEM_PROMPT },
         ...messages,
       ],
-      temperature: 0.6,
+      temperature: 0.4,
     });
 
-    const reply = completion.choices[0].message.content;
+    const answer = completion.choices[0].message.content;
 
-    return res.status(200).json({
-      role: "assistant",
-      type: "text",
-      text: reply,
-    });
+    return res.status(200).json({ reply: answer });
   } catch (error) {
-    console.error("AI ERROR:", error);
-
+    console.error("AI Designer API Error:", error);
     return res.status(500).json({
-      role: "assistant",
-      type: "text",
-      text: "Извините, сервис временно недоступен. Попробуйте позже.",
+      error: "AI-designer: internal error",
     });
   }
 }
