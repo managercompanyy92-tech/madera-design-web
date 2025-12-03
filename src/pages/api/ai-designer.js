@@ -1,33 +1,27 @@
 // src/pages/api/ai-designer.js
 
 export default async function handler(req, res) {
-  // Разрешаем только POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  // 1. Проверяем ключ OpenAI
   const apiKey = process.env.OPENAI_API_KEY;
+
   if (!apiKey) {
     console.error("AI_DESIGNER_ERROR: OPENAI_API_KEY is not set");
-
-    // Важно: всегда 200, чтобы фронт не падал в !response.ok
-    return res.status(200).json({
-      error:
-        "AI-сервис пока не настроен на сервере. Напишите задачу менеджеру — мы поможем вручную.",
+    return res.status(500).json({
+      error: "AI-сервис не сконфигурирован на сервере (нет API-ключа).",
     });
   }
 
   try {
-    const { message, history, systemPrompt } = req.body || {};
+    const { message, history = [], systemPrompt } = req.body || {};
 
     if (!message || typeof message !== "string") {
-      return res.status(200).json({
-        error: "Сообщение пустое. Напишите, пожалуйста, задачу подробнее.",
-      });
+      return res.status(400).json({ error: "Пустое сообщение." });
     }
 
-    // 2. Собираем сообщения для модели
+    // ---------- собираем messages ----------
     const messages = [];
 
     if (systemPrompt && typeof systemPrompt === "string") {
@@ -38,7 +32,7 @@ export default async function handler(req, res) {
     }
 
     if (Array.isArray(history)) {
-      const trimmed = history.slice(-10); // не раздуваем контекст
+      const trimmed = history.slice(-10);
       for (const item of trimmed) {
         if (!item || typeof item.text !== "string") continue;
         const role = item.role === "assistant" ? "assistant" : "user";
@@ -54,7 +48,7 @@ export default async function handler(req, res) {
       content: message,
     });
 
-    // 3. Запрос к OpenAI (chat completions)
+    // ---------- запрос в OpenAI ----------
     const openaiResponse = await fetch(
       "https://api.openai.com/v1/chat/completions",
       {
@@ -64,7 +58,7 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini", // при желании можно вынести в ENV
+          model: "gpt-4.1-mini",
           messages,
           temperature: 0.7,
           max_tokens: 800,
@@ -72,22 +66,28 @@ export default async function handler(req, res) {
       }
     );
 
+    const textBody = await openaiResponse.text();
+
     if (!openaiResponse.ok) {
-      const errorText = await openaiResponse.text().catch(() => "");
       console.error(
         "AI_DESIGNER_HTTP_ERROR",
         openaiResponse.status,
-        errorText
+        textBody
       );
-
-      // Возвращаем понятный текст в поле error, но статус 200
-      return res.status(200).json({
-        error:
-          "Сейчас не получается связаться с AI-дизайнером. Попробуйте ещё раз чуть позже.",
+      return res.status(502).json({
+        error: `Ошибка AI-сервиса (код ${openaiResponse.status}). Попробуйте ещё раз чуть позже.`,
       });
     }
 
-    const data = await openaiResponse.json();
+    let data = null;
+    try {
+      data = JSON.parse(textBody);
+    } catch (parseErr) {
+      console.error("AI_DESIGNER_PARSE_ERROR", parseErr, textBody);
+      return res.status(500).json({
+        error: "Ответ AI-сервиса в неверном формате.",
+      });
+    }
 
     const reply =
       data &&
@@ -99,23 +99,18 @@ export default async function handler(req, res) {
         : "";
 
     if (!reply) {
-      console.warn("AI_DESIGNER_EMPTY_REPLY", JSON.stringify(data || {}));
-
+      console.warn("AI_DESIGNER_EMPTY_REPLY", data);
       return res.status(200).json({
-        error:
-          "Не получилось получить понятный ответ от AI-дизайнера. Попробуйте задать вопрос чуть иначе.",
+        reply:
+          "Не получилось получить осмысленный ответ от AI-дизайнера. Попробуйте ещё раз сформулировать задачу.",
       });
     }
 
-    // 4. Успешный ответ
     return res.status(200).json({ reply });
   } catch (err) {
     console.error("AI_DESIGNER_UNEXPECTED_ERROR", err);
-
-    // Любая непойманная ошибка — тоже 200 + текст в error
-    return res.status(200).json({
-      error:
-        "Похоже, есть временная техническая проблема. Попробуйте ещё раз чуть позже.",
+    return res.status(500).json({
+      error: "Внутренняя ошибка AI-дизайнера на сервере.",
     });
   }
 }
