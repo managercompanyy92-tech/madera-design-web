@@ -15,23 +15,49 @@
   const API_URL = "/api/ai-designer";
   let history = [];
 
-  // 🔥 Прячем старый встроенный чат по тексту "Быстрый выбор стиля"
   function hideLegacyChat() {
-    try {
-      const allNodes = Array.from(document.querySelectorAll("*"));
-      const legacyLabel = allNodes.find((el) =>
-        el.textContent && el.textContent.includes("Быстрый выбор стиля")
-      );
+  try {
+    const selectors = [
+      "section.ai-section",
+      ".ai-block",
+      ".chat-block",
+      ".assistant-block",
+      ".chat-container",
+      "[data-ai-old]",
+    ];
 
-      if (legacyLabel) {
-        const container = legacyLabel.closest("section, div, form, .block");
-        if (container) {
-          container.style.display = "none";
-        }
+    // Все блоки с известными заголовками
+    const textMarkers = [
+      "Быстрый выбор стиля",
+      "Попробуйте спросить",
+      "AI-ассистент",
+      "Готова помочь с вашим следующим вопросом",
+      "Напишите вопрос или нажмите",
+      "No messages provided"
+    ];
+
+    // 1. Скрываем по селекторам
+    selectors.forEach((s) => {
+      document.querySelectorAll(s).forEach((el) => {
+        el.style.display = "none";
+      });
+    });
+
+    // 2. Скрываем по тексту
+    const allNodes = Array.from(document.querySelectorAll("*"));
+    allNodes.forEach((el) => {
+      if (!el.textContent) return;
+
+      const t = el.textContent.trim();
+      if (textMarkers.some((m) => t.includes(m))) {
+        const block = el.closest("section, div, form");
+        if (block) block.style.display = "none";
       }
-    } catch (e) {
-      console.error("Не удалось спрятать старый чат:", e);
-    }
+    });
+
+  } catch (e) {
+    console.error("Ошибка hideLegacyChat:", e);
+  }
   }
 
   // Открытие / закрытие
