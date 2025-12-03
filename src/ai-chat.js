@@ -10,7 +10,7 @@
 
   if (!toggleBtn || !panel || !input || !sendBtn || !messagesBox) {
     return;
-  }
+  } 
 
   const API_URL = "/api/chat"; // Поменяй на свой реальный endpoint
   const history = [];
