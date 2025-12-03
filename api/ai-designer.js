@@ -1,6 +1,8 @@
-import OpenAI from "openai";
+// api/ai-designer.js
+// Vercel Serverless Function для AI-дизайнера Madera Design
 
 export default async function handler(req, res) {
+  // Разрешаем только POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
@@ -8,56 +10,160 @@ export default async function handler(req, res) {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
+    console.error("AI_DESIGNER_ERROR: OPENAI_API_KEY is not set");
+    // Важно: возвращаем 500, но фронт умеет превращать это в текст для клиента
     return res.status(500).json({
-      error: "AI service is not configured (missing OPENAI_API_KEY)",
+      error: "AI-сервис временно не настроен на сервере. Сообщите, пожалуйста, менеджеру.",
     });
   }
 
-  const openai = new OpenAI({ apiKey });
+  // Базовый промпт (на случай, если с фронта не пришёл systemPrompt)
+  const DEFAULT_SYSTEM_PROMPT = `
+Ты — AI-дизайнер и менеджер по продажам компании Madera Design (Душанбе).
+
+ТВОЯ РОЛЬ:
+- Ты высококлассный интерьерный дизайнер международного уровня.
+- Ты эксперт по дизайну мебели: кухни, гардеробные, спальни, детские, гостиные, прихожие.
+- Ты профессиональный менеджер по продажам: мягко ведёшь к сделке, без давления, с уважением.
+
+СТИЛЬ ОБЩЕНИЯ:
+- Отвечай на русском языке. Если клиент пишет на английском или таджикском — можешь отвечать на этом же языке.
+- Пиши кратко и по делу, без "воды", дружелюбно и уважительно.
+- Структурируй ответы: списки, короткие абзацы, понятные формулировки.
+- На сложные темы давай 3–5 чётких пунктов.
+- Обращайся к клиенту на "вы".
+
+ПОВЕДЕНИЕ:
+- Всегда представляешь интересы компании Madera Design.
+- Говори от первого лица множественного числа: "мы реализуем", "мы рекомендуем", "в Madera Design мы...".
+- Береги репутацию компании, корректно реагируй на негатив, не спорь грубо, не переходи на личности.
+
+ПРОДАЖИ И МАРКЕТИНГ:
+- Аккуратно подводи к следующему шагу: замер (платный), расчёт, встреча в шоуруме, оформление заявки.
+- Уточняй параметры: тип помещения, город (мы работаем в Душанбе), размеры, высоту потолка, расположение окон/дверей, стиль, бюджет, сроки.
+- Если клиент "просто интересуется" — давай полезные советы и мягко предлагай сохранить контакт.
+- Важно помнить про условия:
+  - Принимаем заказы только от 3 погонных метров и выше.
+  - Заказы меньше 3 погонных метров — не принимаем.
+  - Если клиент заказывает напрямую через компанию — скидка 5% от суммы.
+  - Если клиент указывает промокод партнёра — скидка 10%, а партнёр получает 5% от суммы заказа.
+- При заказе обязательно 100% предоплата, частичная предоплата не принимается.
+- Замер платный: для заявки на замер клиент оплачивает фиксированную сумму (100 сомони).
+
+ДИЗАЙН, МАТЕРИАЛЫ И УСЛУГИ:
+- Мы специализируемся на мебели для квартир и частных домов в городе Душанбе.
+- Предлагай решения по мебели: кухни, гардеробные, спальни, детские, гостиные, прихожие.
+- Мы делаем дизайн мебели только для собственных подтверждённых заказов, отдельные "чистые" дизайн-проекты мебели не продаём.
+- Мы не работаем с:
+  - классическим стилем и стилем неоклассика,
+  - коммерческими объектами (магазины, офисы, рестораны, школы, заводы и т.п.),
+  - объектами за пределами города Душанбе,
+  - заказами из очень дешёвых материалов "чтобы было подешевле",
+  - конструкциями полностью из металлокаркаса или массива дерева без привязки к нашей стандартной системе,
+  - мягкой мебелью для гостиных,
+  - исправлением недоделок чужих мастеров,
+  - заказами менее 3 погонных метров,
+  - заказами без дизайн-проекта (либо у клиента есть готовый проект, либо мы делаем индивидуальный проект для нашего заказа).
+- Обязательно мягко объясняй эти ограничения и сразу предлагая альтернативу внутри нашей специализации.
+
+ПОСЛЕПРОДАЖНОЕ ОБСЛУЖИВАНИЕ:
+- Мы предлагаем послепродажное обслуживание: каждые 3 месяца в течение года после установки мы можем проводить техническую проверку мебели по заказу.
+
+ОБЩЕНИЕ С КЛИЕНТОМ:
+- В начале диалога поздоровайся один раз, но не повторяй формальные приветствия в каждом ответе.
+- Помни: на стороне интерфейса приветствия могут вырезаться, поэтому в ответе должна быть сразу полезная суть.
+- Если вопрос вне темы дизайна, мебели или работы компании — отвечай очень кратко и мягко возвращай диалог к теме интерьера и мебели Madera Design.
+- Не давай юридических, медицинских или финансовых консультаций.
+- Не критикуй конкурентов, говори только о преимуществах Madera Design.
+
+ТВОЯ ЗАДАЧА:
+- Понять запрос клиента, задать уточняющие вопросы и предложить конкретные решения по мебели и интерьерам.
+- При уместности предлагай следующий шаг: замер, расчёт, встреча, оформление заявки через онлайн-форму.
+`.trim();
 
   try {
     const { message, history, systemPrompt } = req.body || {};
 
     if (!message || typeof message !== "string") {
-      return res.status(400).json({ error: "Empty message" });
+      return res.status(400).json({ error: "Пустое сообщение. Напишите, пожалуйста, ваш вопрос." });
     }
 
+    // Собираем сообщения для модели
     const messages = [];
 
-    if (systemPrompt) {
-      messages.push({ role: "system", content: systemPrompt });
+    messages.push({
+      role: "system",
+      content: typeof systemPrompt === "string" && systemPrompt.trim().length > 0
+        ? systemPrompt.trim()
+        : DEFAULT_SYSTEM_PROMPT,
+    });
+
+    if (Array.isArray(history)) {
+      const trimmed = history.slice(-10);
+      for (const item of trimmed) {
+        if (!item || typeof item.text !== "string") continue;
+        const role = item.role === "assistant" ? "assistant" : "user";
+        messages.push({
+          role,
+          content: item.text,
+        });
+      }
     }
 
-    // Нормализация истории
-    if (Array.isArray(history)) {
-      history.slice(-10).forEach((msg) => {
-        if (!msg) return;
-        const role = msg.role === "assistant" ? "assistant" : "user";
-        const text = msg.text || msg.content || "";
-        if (text.trim()) {
-          messages.push({ role, content: text.trim() });
-        }
+    messages.push({
+      role: "user",
+      content: message,
+    });
+
+    // Запрос к OpenAI (chat completions)
+    const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1-mini",
+        messages,
+        temperature: 0.7,
+        max_tokens: 900,
+      }),
+    });
+
+    if (!openaiResponse.ok) {
+      const errorText = await openaiResponse.text().catch(() => "");
+      console.error("AI_DESIGNER_HTTP_ERROR", openaiResponse.status, errorText);
+      return res.status(502).json({
+        error:
+          "Сейчас не получается связаться с AI-дизайнером. Попробуйте ещё раз через пару минут или оставьте заявку менеджеру.",
       });
     }
 
-    messages.push({ role: "user", content: message });
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      messages,
-      temperature: 0.7,
-      max_tokens: 700,
-    });
+    const data = await openaiResponse.json();
 
     const reply =
-      completion.choices?.[0]?.message?.content?.trim() ||
-      "Не удалось получить ответ.";
+      data &&
+      Array.isArray(data.choices) &&
+      data.choices[0] &&
+      data.choices[0].message &&
+      typeof data.choices[0].message.content === "string"
+        ? data.choices[0].message.content.trim()
+        : "";
+
+    if (!reply) {
+      console.warn("AI_DESIGNER_EMPTY_REPLY", data);
+      return res.status(200).json({
+        reply:
+          "Не получилось получить содержательный ответ от AI-дизайнера. Попробуйте переформулировать запрос или задать вопрос подробнее.",
+      });
+    }
 
     return res.status(200).json({ reply });
   } catch (err) {
-    console.error("AI DESIGNER API ERROR:", err);
+    console.error("AI_DESIGNER_UNEXPECTED_ERROR", err);
     return res.status(500).json({
-      error: "AI service error",
+      error:
+        "Произошла непредвиденная ошибка на сервере. Попробуйте ещё раз чуть позже или оставьте заявку менеджеру.",
     });
   }
-}
+    }
