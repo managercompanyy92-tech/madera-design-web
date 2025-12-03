@@ -327,74 +327,49 @@
   }
 
 
-  // ---------------------------------------------------------------------------
-
   // ОТПРАВКА СООБЩЕНИЯ НА БЭКЕНД
+async function sendMessageToServer(messageText) {
+  try {
+    const payload = {
+      message: messageText,
+      history: chatState.messages,
+      systemPrompt: AI_DESIGNER_CONFIG.systemPrompt,
+    };
 
-  // ---------------------------------------------------------------------------
+    const response = await fetch("/api/ai-designer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-  async function sendMessageToServer(messageText) {
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (parseErr) {
+      console.error("AI_DESIGNER_PARSE_ERROR", parseErr);
+    }
 
-    try {
+    console.log("AI_DESIGNER_RESPONSE", data);
 
-      const payload = {
+    // 1. Если сервер вернул нормальный ответ модели
+    if (data && typeof data.reply === "string" && data.reply.trim().length > 0) {
+      return data.reply.trim();
+    }
 
-        message: messageText,
+    // 2. Если сервер вернул сообщение об ошибке
+    if (data && typeof data.error === "string" && data.error.trim().length > 0) {
+      return data.error.trim();
+    }
 
-        history: chatState.messages,
-
-        systemPrompt: AI_DESIGNER_CONFIG.systemPrompt,
-
-      };
-
-
-      const response = await fetch("/api/ai-designer", {
-
-        method: "POST",
-
-        headers: {
-
-          "Content-Type": "application/json",
-
-        },
-
-        body: JSON.stringify(payload),
-
-      });
-
-
-      if (!response.ok) {
-
-        console.error("AI_DESIGNER_HTTP_ERROR", response.status);
-
-        return "Сейчас не получается связаться с AI-дизайнером. Попробуйте ещё раз чуть позже.";
-
-      }
-
-
-      const data = await response.json();
-
-      const reply = data && (data.reply || data.answer || data.message);
-
-
-      if (!reply || typeof reply !== "string") {
-
-        return "Я получила пустой ответ от сервера. Давайте попробуем ещё раз или переформулируем вопрос.";
-
-      }
-
-
-      return reply;
-
-    } catch (err) {
-
-      console.error("AI_DESIGNER_NETWORK_ERROR", err);
-
-      return "Похоже, есть временная проблема с подключением. Попробуйте ещё раз через минуту.";
-
-    }
-
-  }
+    // 3. Если пришло что-то странное
+    return "Не получилось получить ответ от AI-дизайнера. Попробуйте ещё раз сформулировать задачу.";
+  } catch (err) {
+    console.error("AI_DESIGNER_NETWORK_ERROR", err);
+    return "Похоже, есть временная техническая проблема. Попробуйте ещё раз чуть позже.";
+  }
+}
 
 
   // ---------------------------------------------------------------------------
