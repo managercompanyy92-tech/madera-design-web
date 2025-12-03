@@ -1632,118 +1632,50 @@ function goToOrderWithDescription(desc) {
 function openAiDesignerFromQuiz(desc) {
   console.log("TODO openAiDesignerFromQuiz:", desc);
 }
-// ========================
-// Отступ под нижнюю навигацию
-// ========================
-(function () {
+
+// ======================================================================
+// ФИНАЛЬНЫЙ ФИКС НИЖНЕЙ НАВИГАЦИИ
+// - .app-nav всегда поверх контента
+// - внизу страницы создаётся "прокладка", чтобы ничего не заезжало под меню
+// ======================================================================
+(function setupBottomNavSpacer() {
   if (typeof document === "undefined") return;
 
-  function adjustBottomPadding() {
-    try {
-      const nav = document.querySelector(".app-nav");
-      if (!nav) return;
+  function applyNavSpacer() {
+    const nav = document.querySelector(".app-nav");
+    if (!nav) return;
 
-      const navHeight = nav.offsetHeight || 0;
+    // 1) навигация всегда поверх всего
+    nav.style.position = "fixed";
+    nav.style.left = "0";
+    nav.style.right = "0";
+    nav.style.bottom = "0";
+    nav.style.zIndex = "9999";
 
-      // небольшой запас сверху (8–12px)
-      const extra = 20;
-      document.body.style.paddingBottom =
-        navHeight > 0 ? navHeight + extra + "px" : "";
-    } catch (e) {
-      console.warn("Не удалось скорректировать отступ под навигацию", e);
+    // 2) ищем/создаём нижний spacer
+    let spacer = document.querySelector(".app-nav-spacer");
+    if (!spacer) {
+      spacer = document.createElement("div");
+      spacer.className = "app-nav-spacer";
+      spacer.style.width = "100%";
+      spacer.style.pointerEvents = "none";
+      document.body.appendChild(spacer);
     }
+
+    const navHeight = nav.getBoundingClientRect().height || 60;
+    const safeSpace = navHeight + 24; // запас, чтобы точно не перекрывало
+
+    spacer.style.height = safeSpace + "px";
   }
 
-  window.addEventListener("load", adjustBottomPadding);
-  window.addEventListener("resize", adjustBottomPadding);
-})();
-// ======================================================================
-// УБИЙСТВЕННОЕ РЕШЕНИЕ ПРОБЛЕМЫ: контент НИКОГДА не перекрывает нижнее меню
-// ======================================================================
-(function fixBottomNavOverlap() {
-  if (typeof document === "undefined") return;
+  window.addEventListener("load", applyNavSpacer);
+  window.addEventListener("resize", applyNavSpacer);
 
-  function applySafeBottomPadding() {
-    try {
-      const nav = document.querySelector(".app-nav");
-      if (!nav) return;
-
-      const height = nav.getBoundingClientRect().height;
-
-      // Даем большой гарантированный запас поверх реальной высоты
-      const safeSpace = height + 32; 
-
-      // Устанавливаем ПРИНУДИТЕЛЬНО
-      document.body.style.setProperty("padding-bottom", safeSpace + "px", "important");
-
-    } catch (err) {
-      console.warn("Error in fixBottomNavOverlap:", err);
-    }
-  }
-
-  // Срабатывает всегда: при загрузке, обновлении DOM, смене ориентации
-  window.addEventListener("load", applySafeBottomPadding);
-  window.addEventListener("resize", applySafeBottomPadding);
-
-  // Дополнительная гарантия — если что-то динамически меняет высоту страницы
-  const observer = new MutationObserver(applySafeBottomPadding);
-  observer.observe(document.body, { childList: true, subtree: true });
-})();
-// ======================================================================
-// ФИНАЛЬНОЕ РЕШЕНИЕ: контент никогда не залезает под .app-nav
-// ======================================================================
-(function fixBottomNavOverlapHard() {
-  if (typeof document === "undefined") return;
-
-  // Ищем основной скроллируемый контейнер
-  function getScrollContainer() {
-    // 1. В каталоге — пробуем сначала именно его
-    const directCatalog = document.querySelector(".page--catalog");
-    if (directCatalog) return directCatalog;
-
-    // 2. Любая страница
-    const anyPage = document.querySelector(".page");
-    if (anyPage) return anyPage;
-
-    // 3. Основной main
-    const main = document.querySelector("main");
-    if (main) return main;
-
-    // 4. В худшем случае — body
-    return document.body || document.documentElement;
-  }
-
-  function applySafePadding() {
-    try {
-      const nav = document.querySelector(".app-nav");
-      if (!nav) return;
-
-      const container = getScrollContainer();
-      if (!container) return;
-
-      const navHeight = nav.getBoundingClientRect().height || 60;
-
-      // Даем запас, чтобы точно ничего не перекрывалось
-      const safePadding = navHeight + 32; // px
-
-      container.style.setProperty(
-        "padding-bottom",
-        safePadding + "px",
-        "important"
-      );
-    } catch (e) {
-      console.warn("fixBottomNavOverlapHard error:", e);
-    }
-  }
-
-  // Запускаем в ключевые моменты
-  window.addEventListener("load", applySafePadding);
-  window.addEventListener("resize", applySafePadding);
-
-  // Если DOM динамически меняется (подгружаете обложки и т.п.)
-  const observer = new MutationObserver(applySafePadding);
+  // На всякий случай — если динамически грузится контент
+  const observer = new MutationObserver(applyNavSpacer);
   observer.observe(document.body, { childList: true, subtree: true });
 
-  // На всякий случай — небольшой таймер при первой загрузке
-  setTimeout(applySafePadding, 800);
+  // и небольшой таймер после старта
+  setTimeout(applyNavSpacer, 1000);
 })();
+  
