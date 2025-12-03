@@ -1632,3 +1632,28 @@ function goToOrderWithDescription(desc) {
 function openAiDesignerFromQuiz(desc) {
   console.log("TODO openAiDesignerFromQuiz:", desc);
 }
+// ========================
+// Отступ под нижнюю навигацию
+// ========================
+(function () {
+  if (typeof document === "undefined") return;
+
+  function adjustBottomPadding() {
+    try {
+      const nav = document.querySelector(".app-nav");
+      if (!nav) return;
+
+      const navHeight = nav.offsetHeight || 0;
+
+      // небольшой запас сверху (8–12px)
+      const extra = 12;
+      document.body.style.paddingBottom =
+        navHeight > 0 ? navHeight + extra + "px" : "";
+    } catch (e) {
+      console.warn("Не удалось скорректировать отступ под навигацию", e);
+    }
+  }
+
+  window.addEventListener("load", adjustBottomPadding);
+  window.addEventListener("resize", adjustBottomPadding);
+})();
