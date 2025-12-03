@@ -151,14 +151,44 @@
       }
     }
 
-    /* --------------------------- ОБРАБОТКА ФОРМЫ ------------------------------ */
+  // ===== Новый обработчик отправки AI-дизайнеру =====
+form.addEventListener("submit", async function (evt) {
+  evt.preventDefault();
 
-    form.addEventListener("submit", function (evt) {
-      evt.preventDefault();
-      const text = input.value;
-      input.value = "";
-      sendToBackend(text);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  appendMessage("user", text);
+  input.value = "";
+
+  try {
+    const resp = await fetch("/api/ai-designer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        context: "Каталог — пользователь задаёт вопрос о мебели или дизайне."
+      })
     });
+
+    let reply = "Спасибо! Сейчас предложу решение...";
+
+    if (resp.ok) {
+      const data = await resp.json().catch(() => null);
+      if (data?.reply) reply = data.reply;
+    } else {
+      reply = "Сервис временно недоступен. Попробуйте ещё раз через минуту.";
+    }
+
+    appendMessage("bot", reply);
+  } catch (err) {
+    appendMessage(
+      "bot",
+      "Произошла ошибка соединения. Проверьте интернет и попробуйте позже."
+    );
+  }
+});
 
     /* -------------------------- ГОЛОСОВОЙ ВВОД (WEB API) ---------------------- */
 
