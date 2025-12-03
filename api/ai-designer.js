@@ -1,105 +1,82 @@
-// api/ai-designer.js
+// pages/api/ai-designer.js
+// Серверный обработчик запросов от AI-дизайнера
 
 export default async function handler(req, res) {
-  // Разрешаем только POST
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { message, context } = req.body || {};
-
-  if (!message || typeof message !== "string") {
-    res.status(400).json({ error: "No message" });
-    return;
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  // 1) Если ключа нет — отдаём демонстрационный ответ, но СТАТУС 200
-  if (!apiKey) {
-    const demoReply =
-      "Я AI-дизайнер Madera Design. Сейчас работаю в демо-режиме без подключения к ИИ-сервису, " +
-      "но уже могу подсказать базовые вещи по планировке и мебели. " +
-      "Напишите, какая комната, стиль и примерный бюджет — предложу варианты, " +
-      "а менеджер уточнит детали и подготовит просчёт.";
-
-    res.status(200).json({ reply: demoReply });
-    return;
-  }
-
-  // 2) Основной вариант: вызываем OpenAI
   try {
-    const llmRes = await fetch("https://api.openai.com/v1/responses", {
+    const { message, context } = req.body || {};
+
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ error: "No message provided" });
+    }
+
+    // ----- Вариант 1. Заглушка (можно оставить, чтобы просто проверить, что всё работает) -----
+    // Когда убедишься, что всё ок, можно заменить на вызов OpenAI (см. ниже Вариант 2).
+
+    const reply =
+      "Я вас услышал: «" +
+      message +
+      "». Сейчас это тестовый ответ сервера AI-дизайнера. " +
+      "Можем настроить детальную логику под ваши задачи (кухни, шкафы, расчёты и т.д.).";
+
+    return res.status(200).json({ reply });
+
+    // ----- Вариант 2. Реальный вызов OpenAI (раскомментировать при необходимости) -----
+    /*
+    const openaiKey = process.env.OPENAI_API_KEY;
+    if (!openaiKey) {
+      return res.status(500).json({ error: "OPENAI_API_KEY is not set" });
+    }
+
+    const prompt =
+      (context ? context + "\n\n" : "") +
+      "Сообщение клиента: " +
+      message;
+
+    const apiResp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        Authorization: "Bearer "openaiKey,
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: [
+        model: "gpt-4o-mini",
+        messages: [
           {
             role: "system",
             content:
-              "Ты AI-дизайнер мебели Madera Design. " +
-              "Помогаешь клиентам с планировкой, цветами, материалами и примерным бюджетом. " +
-              "Отвечай конкретно, на 3–6 предложений, с учётом задач клиента. " +
-              "Если данных мало — задай 2–3 уточняющих вопроса.",
+              "Ты AI-дизайнер интерьеров Madera Design. " +
+              "Отвечай коротко, по делу, на русском, предлагая варианты мебели и планировок.",
           },
-          {
-            role: "user",
-            content: context
-              ? `Контекст: ${context}\n\nВопрос клиента: ${message}`
-              : message,
-          },
+          { role: "user", content: prompt },
         ],
+        temperature: 0.6,
       }),
     });
 
-    // Если OpenAI вернул ошибку — логируем, но клиенту всё равно даём нормальный ответ (200)
-    if (!llmRes.ok) {
-      const text = await llmRes.text();
-      console.error("OpenAI error:", llmRes.status, text);
-
-      const fallbackReply =
-        "Я получил ваш запрос, но сейчас не могу обратиться к ИИ-сервису. " +
-        "Могу предложить базовые рекомендации: продумать хранение, удобство проходов и эргономику. " +
-        "Опишите, пожалуйста, размеры комнаты и желаемый стиль — мы подготовим варианты и свяжемся с вами.";
-
-      res.status(200).json({ reply: fallbackReply });
-      return;
+    if (!apiResp.ok) {
+      const text = await apiResp.text();
+      console.error("OPENAI API ERROR:", apiResp.status, text);
+      return res
+        .status(500)
+        .json({ error: "Failed to get response from OpenAI" });
     }
 
-    const data = await llmRes.json();
+    const data = await apiResp.json();
+    const reply =
+      data.choices?.[0]?.message?.content?.trim() ||
+      "Не удалось получить ответ от AI-дизайнера. Попробуйте позже.";
 
-    // Структура Responses API: data.output[0].content[...]
-    const outputItem = data.output && data.output[0];
-    let reply = "";
-
-    if (outputItem && Array.isArray(outputItem.content)) {
-      const textPart = outputItem.content.find(
-        (c) => c.type === "output_text" && c.text && c.text.length
-      );
-      reply = textPart?.text || "";
-    }
-
-    if (!reply) {
-      reply =
-        "Я получил ваш вопрос, но не смог сформировать ответ. " +
-        "Попробуйте переформулировать задачу или написать её чуть подробнее.";
-    }
-
-    res.status(200).json({ reply });
-  } catch (error) {
-    console.error("AI-designer handler error:", error);
-
-    // Любую ошибку гасим и возвращаем вменяемый текст с 200
-    const fallbackReply =
-      "Извините, при обработке запроса возникла техническая ошибка. " +
-      "Тем не менее вы можете описать комнату, стиль и бюджет — мы свяжемся с вами, " +
-      "чтобы предложить конкретные решения.";
-
-    res.status(200).json({ reply: fallbackReply });
+    return res.status(200).json({ reply });
+    */
+  } catch (err) {
+    console.error("AI_DESIGNER_HANDLER_ERROR:", err);
+    return res
+      .status(500)
+      .json({ error: "Internal server error in ai-designer handler" });
   }
 }
