@@ -2813,3 +2813,45 @@ section.page--home .hero__actions {
   background: #E97A00;
   border-color: #E97A00;
 }
+  .madera-style-quick,
+.madera-hints {
+  margin: 10px 0;
+  padding: 10px 12px;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 12px;
+}
+
+.madera-style-quick__title,
+.madera-hints__title {
+  color: #E97A00;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.madera-style-quick__row,
+.madera-hints__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.madera-style-btn,
+.madera-hint-btn {
+  background: #222;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.madera-style-btn:hover,
+.madera-hint-btn:hover {
+  background: #E97A00;
+  border-color: #E97A00;
+}
