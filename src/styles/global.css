@@ -327,7 +327,6 @@ body .support-bubble {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1000;
   max-width: 1200px;
   margin: 0 auto;
   padding: 8px 12px 10px;
