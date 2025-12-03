@@ -93,3 +93,39 @@ export default async function handler(req) {
     );
   }
 }
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
+
+  try {
+    const { prompt } = req.body;
+
+    if (!prompt) {
+      res.status(400).json({ error: "No prompt provided" });
+      return;
+    }
+
+    // Генерация изображения
+    const result = await openai.images.generate({
+      model: "gpt-image-1",
+      prompt: `Ультрареалистичный 3D дизайн интерьера. ${prompt}. Освещение, материалы, мебель, пропорции — фотореалистичные.`,
+      size: "1024x1024",
+      quality: "high",
+      style: "photorealistic",
+    });
+
+    const imageUrl = result.data[0].url;
+    res.status(200).json({ type: "image", url: imageUrl });
+  } catch (error) {
+    console.error("Ошибка при генерации изображения:", error);
+    res.status(500).json({ error: "Ошибка при создании изображения" });
+  }
+}
