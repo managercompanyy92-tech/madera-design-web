@@ -810,6 +810,28 @@ function renderMore() {
     </section>
   `;
 }
+// КНОПКА "Обсудить с AI-дизайнером мою ситуацию"
+document.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-quiz-go-ai]");
+  if (!btn) return;
+
+  event.preventDefault();
+
+  // собираем выбранные значения квиза
+  let initialQuestion = "";
+  try {
+    const selected = [...document.querySelectorAll(".catalog-quiz__option--selected")]
+      .map((el) => el.textContent.trim());
+    if (selected.length) {
+      initialQuestion = "Моя ситуация: " + selected.join(", ");
+    }
+  } catch (e) {
+    console.warn("Не удалось собрать данные квиза", e);
+  }
+
+  // открываем AI-дизайнер
+  openAiDesignerChat(initialQuestion);
+});
 /* --------------------------- AI-ДИЗАЙНЕР (CHAT) --------------------------- */
 
 let aiChatRoot = null;
