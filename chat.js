@@ -448,3 +448,43 @@ document.addEventListener("DOMContentLoaded", () => {
 // -----------------------------------------------------------
 // END IMAGE GENERATION LAYER
 // -----------------------------------------------------------
+// -----------------------------------------------------------
+// QUICK STYLE SUGGESTIONS FOR AI-DESIGNER (MADERA PREMIUM)
+// -----------------------------------------------------------
+
+function renderStyleQuickButtons() {
+  const container = document.querySelector("[data-madera-chat-form]");
+  if (!container) return;
+
+  const block = document.createElement("div");
+  block.classList.add("madera-style-quick");
+
+  block.innerHTML = `
+    <div class="madera-style-quick__title">Быстрый выбор стиля</div>
+    <div class="madera-style-quick__row">
+      <button class="madera-style-btn" data-style="современный минимализм">Минимализм</button>
+      <button class="madera-style-btn" data-style="современный дизайн">Современный</button>
+      <button class="madera-style-btn" data-style="лофт стиль с текстурами">Лофт</button>
+      <button class="madera-style-btn" data-style="скандинавский теплый интерьер">Сканди</button>
+      <button class="madera-style-btn" data-style="премиальный интерьер в стиле Madera Design">Премиум</button>
+    </div>
+  `;
+
+  container.parentElement.insertBefore(block, container);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderStyleQuickButtons();
+
+  document.body.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".madera-style-btn");
+    if (!btn) return;
+
+    const style = btn.getAttribute("data-style");
+
+    appendMessage("user", "Хочу дизайн в стиле: " + style);
+    addToHistory("user", "Хочу дизайн в стиле: " + style);
+
+    await processAiRequest("Сгенерируй дизайн в стиле: " + style);
+  });
+});
