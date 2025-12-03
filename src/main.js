@@ -811,26 +811,39 @@ function renderMore() {
     </section>
   `;
 }
-// КНОПКА "Обсудить с AI-дизайнером мою ситуацию"
+// КНОПКА / ВИДЖЕТ AI-ДИЗАЙНЕРА (квиз + кружок в углу)
 document.addEventListener("click", (event) => {
-  const btn = event.target.closest("[data-quiz-go-ai]");
-  if (!btn) return;
+  // Ищем, попали ли кликом в любую кнопку/виджет, который должен открыть чат
+  const trigger = event.target.closest(
+    "[data-quiz-go-ai]," +              // кнопка под квизом
+    "[data-ai-chat-open]," +            // кружок-виджет AI на странице
+    "[data-ai-designer-open]," +        // запасной вариант атрибута
+    ".ai-designer-widget"               // запасной вариант по классу
+  );
+
+  if (!trigger) return;
 
   event.preventDefault();
 
-  // собираем выбранные значения квиза
   let initialQuestion = "";
-  try {
-    const selected = [...document.querySelectorAll(".catalog-quiz__option--selected")]
-      .map((el) => el.textContent.trim());
-    if (selected.length) {
-      initialQuestion = "Моя ситуация: " + selected.join(", ");
+
+  // Если клик был внутри блока квиза каталога — собираем выбранные ответы
+  const quizEl = trigger.closest(".catalog-quiz");
+  if (quizEl) {
+    try {
+      const selected = [...quizEl.querySelectorAll(".catalog-quiz__option--selected")]
+        .map((el) => el.textContent.trim())
+        .filter(Boolean);
+
+      if (selected.length) {
+        initialQuestion = "Моя ситуация: " + selected.join(", ");
+      }
+    } catch (e) {
+      console.warn("AI designer: не удалось собрать данные квиза", e);
     }
-  } catch (e) {
-    console.warn("Не удалось собрать данные квиза", e);
   }
 
-  // открываем AI-дизайнер
+  // Открываем окно AI-дизайнера
   openAiDesignerChat(initialQuestion);
 });
 /* --------------------------- AI-ДИЗАЙНЕР (CHAT) --------------------------- */
