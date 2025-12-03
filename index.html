@@ -17,10 +17,10 @@
   </head>
 
   <body>
-    <!-- Корневой контейнер SPA -->
+    <!-- Корневой контейнер SPA (всё приложение рендерится из src/main.js) -->
     <div id="app"></div>
 
-    <!-- Кнопка-иконка AI-ассистента (красивый портрет) -->
+    <!-- Кнопка-иконка AI-ассистента (круглый портрет) -->
     <button
       class="madera-chat-avatar-btn"
       type="button"
@@ -29,7 +29,7 @@
     >
       <div class="madera-chat-avatar">
         <img
-          src="/public/assistant/assistant.jpg"
+          src="assets/madera-assistant.webp"
           alt="AI-ассистент Madera"
           class="madera-chat-avatar__img"
         />
@@ -37,7 +37,7 @@
       </div>
     </button>
 
-    <!-- Панель AI-чата -->
+    <!-- Панель AI-чата (микро-чат, если он используется) -->
     <div class="madera-chat" data-madera-chat>
       <div class="madera-chat__header">
         <div class="madera-chat__header-main">
@@ -122,7 +122,10 @@
     <!-- Входная точка SPA -->
     <script type="module" src="src/main.js"></script>
 
-    <!-- Логика фронтенда чата + голосовой ввод + TTS -->
+    <!-- Логика большого блока AI-дизайнера в разделе "Каталог" -->
+    <script src="src/ai-designer.js" defer></script>
+
+    <!-- Логика плавающего чата / аватарки -->
     <script src="chat.js" defer></script>
   </body>
 </html>
