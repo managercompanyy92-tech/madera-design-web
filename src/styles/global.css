@@ -2777,3 +2777,39 @@ section.page--home .hero__actions {
   color: #aaa;
   margin-top: 6px;
 }
+  .madera-style-quick {
+  margin: 12px 0 6px;
+  padding: 10px;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 12px;
+}
+
+.madera-style-quick__title {
+  color: #E97A00;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.madera-style-quick__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.madera-style-btn {
+  background: #222;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.madera-style-btn:hover {
+  background: #E97A00;
+  border-color: #E97A00;
+}
