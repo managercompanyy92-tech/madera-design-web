@@ -348,26 +348,26 @@ async function sendMessageToServer(messageText) {
     try {
       data = await response.json();
     } catch (parseErr) {
-      console.error("AI_DESIGNER_PARSE_ERROR", parseErr);
+      console.error("AI_DESIGNER_FRONT_PARSE_ERROR", parseErr);
     }
 
-    console.log("AI_DESIGNER_RESPONSE", data);
+    console.log("AI_DESIGNER_FRONT_RESPONSE", data);
 
-    // 1. Если сервер вернул нормальный ответ модели
+    // 1. Нормальный ответ от бэкенда
     if (data && typeof data.reply === "string" && data.reply.trim().length > 0) {
       return data.reply.trim();
     }
 
-    // 2. Если сервер вернул сообщение об ошибке
+    // 2. Бэкенд вернул error
     if (data && typeof data.error === "string" && data.error.trim().length > 0) {
       return data.error.trim();
     }
 
-    // 3. Если пришло что-то странное
-    return "Не получилось получить ответ от AI-дизайнера. Попробуйте ещё раз сформулировать задачу.";
+    // 3. Нечто странное
+    return "Не получилось получить ответ от AI-дизайнера. Попробуйте ещё раз.";
   } catch (err) {
-    console.error("AI_DESIGNER_NETWORK_ERROR", err);
-    return "Похоже, есть временная техническая проблема. Попробуйте ещё раз чуть позже.";
+    console.error("AI_DESIGNER_FRONT_NETWORK_ERROR", err);
+    return "Похоже, есть временная проблема c соединением. Попробуйте ещё раз чуть позже.";
   }
 }
 
