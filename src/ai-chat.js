@@ -6,76 +6,70 @@
   const sendBtn = document.getElementById("aiChatSend");
   const messagesBox = document.getElementById("aiChatMessages");
 
-  if (!panel || !toggleBtn || !input || !sendBtn) return;
+  if (!panel || !toggleBtn || !input || !sendBtn || !messagesBox) return;
 
-  const API_URL = "/api/ai-designer";
-
+  const DESIGN_API = "/api/ai-designer";
+  const IMAGE_API = "/api/ai-image";
   let history = [];
 
-  // Открытие чата
+  // === UI ===
   function openChat() {
-    panel.classList.add("ai-open");
+    panel.classList.add("ai-fullscreen");
     input.focus();
   }
 
-  // Закрытие чата
   function closeChat() {
-    panel.classList.remove("ai-open");
+    panel.classList.remove("ai-fullscreen");
   }
 
   toggleBtn.addEventListener("click", openChat);
   closeBtn.addEventListener("click", closeChat);
 
-  // Добавление текста в чат
+  // === Helpers ===
   function addMessage(role, text) {
-    const row = document.createElement("div");
-    row.className = `ai-msg ai-${role}`;
-    row.textContent = text;
-    messagesBox.appendChild(row);
+    const msg = document.createElement("div");
+    msg.className = `ai-msg ai-${role}`;
+    msg.textContent = text;
+    messagesBox.appendChild(msg);
     messagesBox.scrollTop = messagesBox.scrollHeight;
   }
 
-  // Добавление картинки
-  function addImage(url, text) {
+  function addImage(url, caption) {
     const wrapper = document.createElement("div");
     wrapper.className = "ai-msg ai-assistant";
 
     const img = document.createElement("img");
     img.src = url;
+    img.alt = "Визуализация дизайна";
     img.className = "ai-image";
 
-    const caption = document.createElement("div");
-    caption.className = "ai-caption";
-    caption.textContent = text || "Визуализация готова.";
+    const text = document.createElement("div");
+    text.className = "ai-caption";
+    text.textContent = caption || "Визуализация по вашему описанию.";
 
     wrapper.appendChild(img);
-    wrapper.appendChild(caption);
-
+    wrapper.appendChild(text);
     messagesBox.appendChild(wrapper);
     messagesBox.scrollTop = messagesBox.scrollHeight;
   }
 
-  // Определяем, просит ли человек дизайн
-  function detectImageRequest(text) {
-    const keywords = [
-      "визуал",
+  function isDesignRequest(text) {
+    const words = [
       "дизайн",
-      "картинку",
-      "фото",
-      "покажи вариант",
-      "сгенерируй",
-      "ултрареалистичный",
+      "визуал",
+      "визуализация",
+      "покажи",
+      "сделай проект",
       "реалистичный",
-      "визуализацию",
-      "оформи дизайн",
-      "сделай дизайн",
-      "как будет выглядеть"
+      "вариант",
+      "3d",
+      "интерьер",
+      "оформи"
     ];
-
-    return keywords.some((k) => text.toLowerCase().includes(k));
+    return words.some((w) => text.toLowerCase().includes(w));
   }
 
-  // Отправка сообщения
+  // === Main Logic ===
   async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
@@ -85,40 +79,53 @@
     input.value = "";
     sendBtn.disabled = true;
 
-    const isImageRequest = detectImageRequest(text);
-
     try {
-      const res = await fetch(API_URL, {
+      const wantsDesign = isDesignRequest(text);
+
+      if (wantsDesign) {
+        addMessage("assistant", "Создаю визуализацию...");
+        const imgRes = await fetch(IMAGE_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: text }),
+        });
+        const imgData = await imgRes.json();
+
+        if (imgData?.url) {
+          addImage(imgData.url, "Вот визуализация по вашему описанию.");
+        } else {
+          addMessage(
+            "assistant",
+            "Не удалось создать изображение. Попробуйте уточнить запрос."
+          );
+        }
+        sendBtn.disabled = false;
+        return;
+      }
+
+      const res = await fetch(DESIGN_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: history,
-          imageRequest: isImageRequest ? text : null,
-        }),
+        body: JSON.stringify({ messages: history }),
       });
 
       const data = await res.json();
+      const reply = data?.reply || data?.text || data?.answer;
 
-      if (data.type === "image") {
-        addImage(data.url, data.text);
-        history.push({ role: "assistant", content: "[IMAGE GENERATED]" });
-      } else {
-        addMessage("assistant", data.text);
-        history.push({ role: "assistant", content: data.text });
-      }
-    } catch (e) {
-      console.error(e);
+      addMessage("assistant", reply || "Готово. Хотите визуализацию?");
+      history.push({ role: "assistant", content: reply });
+    } catch (err) {
+      console.error(err);
       addMessage(
         "assistant",
-        "Извините, сервис временно недоступен. Попробуйте чуть позже."
+        "Сервис временно недоступен. Попробуйте позже или оставьте заявку."
       );
+    } finally {
+      sendBtn.disabled = false;
     }
-
-    sendBtn.disabled = false;
   }
 
   sendBtn.addEventListener("click", sendMessage);
-
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
