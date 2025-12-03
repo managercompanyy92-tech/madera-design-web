@@ -251,7 +251,7 @@ function renderCatalog() {
              <button class="btn btn--ghost" data-route="order" data-quiz-go-order>
                 Получить быстрый расчет и идеи.
               </button>
-              <button class="btn btn--outline" data-quiz-go-ai
+              <button class="btn btn--outline" data-quiz-go-ai>
                 Обсудить с AI-дизайнером мою ситуацию.
               </button>
             </div>
