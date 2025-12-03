@@ -1,117 +1,128 @@
-// src/ai-chat.js
-// Клиентский скрипт для AI-дизайнера Madera Design
-
 (function () {
-  const toggleBtn = document.getElementById("aiChatToggle");
   const panel = document.getElementById("aiChatPanel");
+  const toggleBtn = document.getElementById("aiChatToggle");
   const closeBtn = document.getElementById("aiChatClose");
   const input = document.getElementById("aiChatInput");
   const sendBtn = document.getElementById("aiChatSend");
   const messagesBox = document.getElementById("aiChatMessages");
 
-  if (!toggleBtn || !panel || !input || !sendBtn || !messagesBox) {
-    return;
-  }
+  if (!panel || !toggleBtn || !input || !sendBtn) return;
 
-  // Используем новый бекенд эндпоинт
   const API_URL = "/api/ai-designer";
 
-  const history = [];
+  let history = [];
 
+  // Открытие чата
   function openChat() {
-    panel.classList.add("ai-chat-panel--open");
-    panel.setAttribute("aria-hidden", "false");
+    panel.classList.add("ai-open");
     input.focus();
   }
 
+  // Закрытие чата
   function closeChat() {
-    panel.classList.remove("ai-chat-panel--open");
-    panel.setAttribute("aria-hidden", "true");
+    panel.classList.remove("ai-open");
   }
 
-  function appendMessage(role, text) {
-    const msgEl = document.createElement("div");
-    msgEl.className =
-      "ai-chat-msg " + (role === "user" ? "ai-chat-msg--user" : "ai-chat-msg--bot");
-    const textEl = document.createElement("div");
-    textEl.className = "ai-chat-msg__text";
-    textEl.textContent = text;
-    msgEl.appendChild(textEl);
-    messagesBox.appendChild(msgEl);
+  toggleBtn.addEventListener("click", openChat);
+  closeBtn.addEventListener("click", closeChat);
+
+  // Добавление текста в чат
+  function addMessage(role, text) {
+    const row = document.createElement("div");
+    row.className = `ai-msg ai-${role}`;
+    row.textContent = text;
+    messagesBox.appendChild(row);
     messagesBox.scrollTop = messagesBox.scrollHeight;
   }
 
+  // Добавление картинки
+  function addImage(url, text) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "ai-msg ai-assistant";
+
+    const img = document.createElement("img");
+    img.src = url;
+    img.className = "ai-image";
+
+    const caption = document.createElement("div");
+    caption.className = "ai-caption";
+    caption.textContent = text || "Визуализация готова.";
+
+    wrapper.appendChild(img);
+    wrapper.appendChild(caption);
+
+    messagesBox.appendChild(wrapper);
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+  }
+
+  // Определяем, просит ли человек дизайн
+  function detectImageRequest(text) {
+    const keywords = [
+      "визуал",
+      "дизайн",
+      "картинку",
+      "фото",
+      "покажи вариант",
+      "сгенерируй",
+      "ултрареалистичный",
+      "реалистичный",
+      "визуализацию",
+      "оформи дизайн",
+      "сделай дизайн",
+      "как будет выглядеть"
+    ];
+
+    return keywords.some((k) => text.toLowerCase().includes(k));
+  }
+
+  // Отправка сообщения
   async function sendMessage() {
-    const text = (input.value || "").trim();
+    const text = input.value.trim();
     if (!text) return;
 
-    appendMessage("user", text);
+    addMessage("user", text);
     history.push({ role: "user", content: text });
     input.value = "";
-    input.focus();
     sendBtn.disabled = true;
+
+    const isImageRequest = detectImageRequest(text);
 
     try {
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history }),
+        body: JSON.stringify({
+          messages: history,
+          imageRequest: isImageRequest ? text : null,
+        }),
       });
 
-      if (!res.ok) throw new Error("Bad response: " + res.status);
-
       const data = await res.json();
-      const answer = data?.reply || data?.answer || data?.message;
 
-      const botText =
-        typeof answer === "string" && answer.trim()
-          ? answer.trim()
-          : "Извините, сейчас сервис временно недоступен. Попробуйте позже.";
-
-      appendMessage("assistant", botText);
-      history.push({ role: "assistant", content: botText });
+      if (data.type === "image") {
+        addImage(data.url, data.text);
+        history.push({ role: "assistant", content: "[IMAGE GENERATED]" });
+      } else {
+        addMessage("assistant", data.text);
+        history.push({ role: "assistant", content: data.text });
+      }
     } catch (e) {
       console.error(e);
-      appendMessage(
+      addMessage(
         "assistant",
-        "Извините, не удалось получить ответ. Попробуйте снова чуть позже."
+        "Извините, сервис временно недоступен. Попробуйте чуть позже."
       );
-    } finally {
-      sendBtn.disabled = false;
     }
+
+    sendBtn.disabled = false;
   }
 
-  toggleBtn.addEventListener("click", () => {
-    const isOpen = panel.classList.contains("ai-chat-panel--open");
-    if (isOpen) closeChat();
-    else openChat();
-  });
-
-  closeBtn.addEventListener("click", closeChat);
   sendBtn.addEventListener("click", sendMessage);
 
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
       sendMessage();
     }
   });
-
-  // Свайп вверх для открытия на мобильных
-  let startY = null;
-  window.addEventListener(
-    "touchstart",
-    (e) => (startY = e.touches[0].clientY),
-    { passive: true }
-  );
-  window.addEventListener(
-    "touchend",
-    (e) => {
-      if (startY == null) return;
-      const deltaY = startY - e.changedTouches[0].clientY;
-      if (deltaY > 60 && startY > window.innerHeight - 140) openChat();
-      startY = null;
-    },
-    { passive: true }
-  );
 })();
