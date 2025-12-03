@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "multiparty": "^4.2.3"
+    "multiparty": "^4.2.3",
+    "openai": "^4.52.0"
   }
 }
