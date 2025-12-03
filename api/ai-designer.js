@@ -1,71 +1,7 @@
 // api/ai-designer.js
-// Серверная функция Vercel для AI-дизайнера Madera Design
+// Vercel serverless-функция для AI-дизайнера Madera Design
 
-const SYSTEM_FALLBACK_PROMPT = `
-Ты — AI-дизайнер и менеджер по продажам компании Madera Design (Душанбе).
-
-ТВОЯ РОЛЬ:
-- Ты высококлассный интерьерный дизайнер международного уровня.
-- Ты эксперт по дизайну мебели: кухни, гардеробные, спальни, детские, гостиные, прихожие.
-- Ты профессиональный менеджер по продажам: мягко ведёшь клиента к сделке, без давления, с уважением.
-
-СТИЛЬ ОБЩЕНИЯ:
-- Отвечай на русском языке. Если клиент пишет на английском или таджикском — можешь отвечать на том же языке.
-- Пиши кратко, по делу, без "воды", но дружелюбно и уважительно.
-- Структурируй ответы: списки, короткие абзацы, понятные формулировки.
-- На сложные темы давай 3–5 чётких пунктов.
-- Обращайся к клиенту вежливо, на "вы".
-
-ПОВЕДЕНИЕ:
-- Ты всегда представляешь интересы компании Madera Design.
-- Говори от первого лица множественного числа: "мы реализуем", "мы рекомендуем", "в Madera Design мы...".
-- Корректно реагируй на негатив, не спорь грубо и не переходи на личности.
-
-ПРОДАЖИ И МАРКЕТИНГ:
-- Мягко подводи клиента к следующему шагу: замер, расчёт, встреча в шоуруме, оформление заказа.
-- Всегда уточняй важные параметры: тип помещения, размеры, стиль, бюджет, сроки, город (мы работаем только в Душанбе).
-- Напоминай клиенту:
-  - мы принимаем заказы ОТ 3 погонных метров и выше;
-  - если клиент заказывает напрямую через компанию — скидка 5%;
-  - если клиент использует промокод партнёра — скидка 10%, а партнёр получает 5% от суммы заказа.
-- О скидках упоминай аккуратно, когда это уместно, но не в каждом сообщении.
-
-ДИЗАЙН И ВИЗУАЛИЗАЦИИ:
-- Ты предлагаешь планировочные решения и композиции мебели словами.
-- Если клиент описывает помещение или прикрепляет фото/план, уточни:
-  - размеры,
-  - высоту потолка,
-  - расположение окон и дверей,
-  - желаемый стиль (минимализм, современный, неоклассика и т.д.),
-  - бытовую технику, которую нужно встроить.
-- Затем предложи конкретные идеи: где разместить мебель, какие фасады, цвета, фурнитуру и материалы выбрать.
-- Если клиент просит оценить существующий проект — вежливо разберись, что хорошо, что можно улучшить, и предложи правки.
-
-ОГРАНИЧЕНИЯ (что мы НЕ делаем, честно объясняй клиенту):
-- Не работаем с классическим стилем и неоклассикой.
-- Не берём коммерческие объекты (магазины, офисы, школы, заводы, рестораны и т.п.).
-- Специализируемся только на квартирах и частных домах в городе Душанбе.
-- Не делаем декоративные элементы для экстерьера.
-- Не принимаем заказы:
-  - длиной меньше 3 погонных метров,
-  - за пределами города Душанбе,
-  - на переделку/исправление чужих недоделок,
-  - без дизайн-проекта (либо есть готовый, либо мы сами делаем для своих заказов),
-  - только на дизайн мебели без последующего изготовления,
-  - на мягкую мебель для гостиных,
-  - из откровенно дешёвых материалов "чтобы только было подешевле",
-  - из металлоконструкций, цельного дерева и т.д., если это выходит за рамки нашей стандартной линейки,
-  - с частичной предоплатой (мы работаем только по 100% предоплате).
-
-СЕРВИС:
-- Замер объекта платный — 100 сомони. Для записи на замер обязательно полная предоплата за замер.
-- Мы предлагаем послепродажное обслуживание: в течение года после установки каждые 3 месяца выезжаем на объект и проверяем состояние мебели.
-
-ВАЖНО:
-- Приветствовать клиента красиво нужно только в первом ответе.
-- Формальные фразы вроде "Здравствуйте, меня зовут..." можно опустить — клиент сразу должен видеть суть.
-- Всегда веди диалог так, чтобы в конце у клиента была понятная следующая ступень: оставить контакт, записаться на замер, прислать план и т.п.
-`.trim();
+// Важно: на Vercel должен быть задан ENV-параметр OPENAI_API_KEY
 
 module.exports = async (req, res) => {
   // Разрешаем только POST
@@ -78,79 +14,91 @@ module.exports = async (req, res) => {
 
   if (!apiKey) {
     console.error("AI_DESIGNER_ERROR: OPENAI_API_KEY is not set");
-    return res.status(500).json({
-      error: "AI-сервис на сервере не настроен. Свяжитесь с администратором.",
-    });
+    return res
+      .status(500)
+      .json({ error: "AI-сервис не настроен на сервере (нет ключа OpenAI)." });
   }
 
   try {
-    const body = req.body || {};
-    const userMessage = typeof body.message === "string" ? body.message.trim() : "";
-    const clientHistory = Array.isArray(body.history) ? body.history : [];
-    const systemPrompt =
-      typeof body.systemPrompt === "string" && body.systemPrompt.trim().length > 0
-        ? body.systemPrompt
-        : SYSTEM_FALLBACK_PROMPT;
-
-    if (!userMessage) {
-      return res.status(400).json({ error: "Пустое сообщение" });
+    // На Vercel body может быть уже объектом, а может быть строкой
+    let body = req.body;
+    if (typeof body === "string") {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        console.error("AI_DESIGNER_PARSE_ERROR:", e);
+        return res.status(400).json({ error: "Некорректный формат запроса." });
+      }
     }
 
-    // Сборка истории диалога
+    const { message, history, systemPrompt } = body || {};
+
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ error: "Пустое сообщение." });
+    }
+
+    // Сборка сообщений для модели
     const messages = [];
 
-    messages.push({
-      role: "system",
-      content: systemPrompt,
-    });
-
-    // Обрезаем историю, чтобы не раздувать запрос
-    const trimmedHistory = clientHistory.slice(-12);
-
-    for (const item of trimmedHistory) {
-      if (!item || typeof item.text !== "string") continue;
-      const role = item.role === "assistant" ? "assistant" : "user";
+    // 1) system-промпт — всё ТЗ для AI-дизайнера (роль, стиль, правила)
+    if (systemPrompt && typeof systemPrompt === "string") {
       messages.push({
-        role,
-        content: item.text,
+        role: "system",
+        content: systemPrompt,
       });
     }
 
+    // 2) История диалога (только последние 10 обменов)
+    if (Array.isArray(history)) {
+      const trimmed = history.slice(-10);
+      for (const item of trimmed) {
+        if (!item || typeof item.text !== "string") continue;
+        const role = item.role === "assistant" ? "assistant" : "user";
+        messages.push({
+          role,
+          content: item.text,
+        });
+      }
+    }
+
+    // 3) Текущее сообщение пользователя
     messages.push({
       role: "user",
-      content: userMessage,
+      content: message,
     });
 
-    // Запрос к OpenAI Chat Completions
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        messages,
-        temperature: 0.7,
-        max_tokens: 800,
-      }),
-    });
+    // Вызов OpenAI Chat Completions
+    const openaiResponse = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4.1-mini",
+          messages,
+          temperature: 0.7,
+          max_tokens: 800,
+        }),
+      }
+    );
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "");
+    if (!openaiResponse.ok) {
+      const errorText = await openaiResponse.text().catch(() => "");
       console.error(
         "AI_DESIGNER_HTTP_ERROR",
-        response.status,
-        response.statusText,
+        openaiResponse.status,
         errorText
       );
-      return res.status(502).json({
-        error:
-          "Сейчас не получается связаться с AI-дизайнером. Попробуйте ещё раз чуть позже.",
-      });
+      return res
+        .status(502)
+        .json({ error: "Ошибка внешнего AI-сервиса. Попробуйте позже." });
     }
 
-    const data = await response.json();
+    const data = await openaiResponse.json();
+
     const reply =
       data &&
       Array.isArray(data.choices) &&
@@ -164,16 +112,16 @@ module.exports = async (req, res) => {
       console.warn("AI_DESIGNER_EMPTY_REPLY", data);
       return res.status(200).json({
         reply:
-          "Не получилось получить осмысленный ответ от AI-дизайнера. Попробуйте переформулировать задачу.",
+          "Не получилось получить содержательный ответ от AI-дизайнера. Попробуйте ещё раз переформулировать запрос.",
       });
     }
 
+    // Успешный ответ фронту
     return res.status(200).json({ reply });
   } catch (err) {
     console.error("AI_DESIGNER_UNEXPECTED_ERROR", err);
-    return res.status(500).json({
-      error:
-        "На сервере возникла непредвиденная ошибка. Попробуйте ещё раз немного позже.",
-    });
+    return res
+      .status(500)
+      .json({ error: "Неожиданная ошибка сервера AI-дизайнера." });
   }
 };
