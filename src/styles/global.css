@@ -2751,3 +2751,29 @@ section.page--home .hero__actions {
     padding-bottom: 88px; /* высота .app-nav + небольшой запас */
   }
 }
+  .madera-image-card {
+  background: #1a1a1a;
+  border-radius: 14px;
+  padding: 12px;
+  border: 1px solid #333;
+  max-width: 90%;
+}
+
+.madera-image-card__title {
+  color: #E97A00;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.madera-image-card__img {
+  width: 100%;
+  border-radius: 12px;
+  margin: 8px 0;
+}
+
+.madera-image-card__prompt {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 6px;
+}
