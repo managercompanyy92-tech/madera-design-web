@@ -1,34 +1,46 @@
-// pages/api/ai-designer.js
-// Серверный обработчик запросов от AI-дизайнера
+// api/ai-designer.js
+// Серверная функция для Vercel (без Next.js)
 
-export default async function handler(req, res) {
+// Можно сразу подключить OpenAI, но сначала сделаем рабочую заглушку,
+// чтобы убедиться, что всё вообще ходит туда-обратно.
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || null;
+
+module.exports = async (req, res) => {
   if (req.method !== "POST") {
-    res.setHeader("Allow", ["POST"]);
+    res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   try {
-    const { message, context } = req.body || {};
+    // На Vercel req.body может быть строкой — аккуратно разбираем
+    let body = req.body || {};
+    if (typeof body === "string") {
+      try {
+        body = JSON.parse(body);
+      } catch {
+        body = {};
+      }
+    }
+
+    const { message, context } = body;
 
     if (!message || typeof message !== "string") {
       return res.status(400).json({ error: "No message provided" });
     }
 
-    // ----- Вариант 1. Заглушка (можно оставить, чтобы просто проверить, что всё работает) -----
-    // Когда убедишься, что всё ок, можно заменить на вызов OpenAI (см. ниже Вариант 2).
-
+    // ---------- ВАРИАНТ 1. РАБОЧАЯ ЗАГЛУШКА (оставь для проверки) ----------
     const reply =
       "Я вас услышал: «" +
       message +
-      "». Сейчас это тестовый ответ сервера AI-дизайнера. " +
-      "Можем настроить детальную логику под ваши задачи (кухни, шкафы, расчёты и т.д.).";
+      "». Сейчас работаю в тестовом режиме AI-дизайнера. " +
+      "Могу предложить варианты планировки, цвета и мебели под вашу задачу.";
 
     return res.status(200).json({ reply });
 
-    // ----- Вариант 2. Реальный вызов OpenAI (раскомментировать при необходимости) -----
+    // ---------- ВАРИАНТ 2. РЕАЛЬНЫЙ ВЫЗОВ OPENAI (включишь позже) ----------
     /*
-    const openaiKey = process.env.OPENAI_API_KEY;
-    if (!openaiKey) {
+    if (!OPENAI_API_KEY) {
       return res.status(500).json({ error: "OPENAI_API_KEY is not set" });
     }
 
@@ -41,7 +53,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer "openaiKey,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
@@ -50,7 +62,7 @@ export default async function handler(req, res) {
             role: "system",
             content:
               "Ты AI-дизайнер интерьеров Madera Design. " +
-              "Отвечай коротко, по делу, на русском, предлагая варианты мебели и планировок.",
+              "Отвечай по-русски, по делу, учитывай, что клиент делает мебель на заказ.",
           },
           { role: "user", content: prompt },
         ],
@@ -61,15 +73,13 @@ export default async function handler(req, res) {
     if (!apiResp.ok) {
       const text = await apiResp.text();
       console.error("OPENAI API ERROR:", apiResp.status, text);
-      return res
-        .status(500)
-        .json({ error: "Failed to get response from OpenAI" });
+      return res.status(500).json({ error: "Failed to get response from OpenAI" });
     }
 
     const data = await apiResp.json();
     const reply =
       data.choices?.[0]?.message?.content?.trim() ||
-      "Не удалось получить ответ от AI-дизайнера. Попробуйте позже.";
+      "Не смог получить ответ от AI-дизайнера. Попробуйте ещё раз позже.";
 
     return res.status(200).json({ reply });
     */
@@ -79,4 +89,4 @@ export default async function handler(req, res) {
       .status(500)
       .json({ error: "Internal server error in ai-designer handler" });
   }
-}
+};
