@@ -2745,3 +2745,9 @@ section.page--home .hero__actions {
   box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.3);
   background: radial-gradient(circle at top left, #2a1a0a, #111);
 }
+  /* ===== Отступ под нижнюю навигацию, чтобы обложки не прятались ===== */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 88px; /* высота .app-nav + небольшой запас */
+  }
+}
