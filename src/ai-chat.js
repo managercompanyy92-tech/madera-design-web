@@ -1,3 +1,4 @@
+// src/ai-chat.js
 (function () {
   const panel = document.getElementById("ai-panel");
   const toggleBtn = document.getElementById("ai-toggle");
@@ -6,15 +7,34 @@
   const sendBtn = document.getElementById("ai-send");
   const messagesBox = document.getElementById("ai-messages");
 
-  if (!panel || !toggleBtn || !closeBtn || !input || !sendBtn) return;
+  // Если нужных элементов нет на странице — спокойно выходим
+  if (!panel || !toggleBtn || !closeBtn || !input || !sendBtn || !messagesBox) {
+    return;
+  }
 
-  const TEXT_API = "/api/ai-designer"; 
-  const IMAGE_API = "/api/ai-image";
-
+  const API_URL = "/api/ai-designer";
   let history = [];
 
+  // 🔥 Прячем старый встроенный чат по тексту "Быстрый выбор стиля"
+  function hideLegacyChat() {
+    try {
+      const allNodes = Array.from(document.querySelectorAll("*"));
+      const legacyLabel = allNodes.find((el) =>
+        el.textContent && el.textContent.includes("Быстрый выбор стиля")
+      );
 
-  // ---------- Открытие / закрытие чата ----------
+      if (legacyLabel) {
+        const container = legacyLabel.closest("section, div, form, .block");
+        if (container) {
+          container.style.display = "none";
+        }
+      }
+    } catch (e) {
+      console.error("Не удалось спрятать старый чат:", e);
+    }
+  }
+
+  // Открытие / закрытие
   function openChat() {
     panel.classList.add("ai-open");
     input.focus();
@@ -27,8 +47,7 @@
   toggleBtn.addEventListener("click", openChat);
   closeBtn.addEventListener("click", closeChat);
 
-
-  // ---------- Добавление текстового сообщения ----------
+  // Добавление текстового сообщения
   function addMessage(role, text) {
     const row = document.createElement("div");
     row.className = `ai-msg ai-${role}`;
@@ -37,120 +56,81 @@
     messagesBox.scrollTop = messagesBox.scrollHeight;
   }
 
-
-  // ---------- Добавление изображения ----------
-  function addImage(url, captionText) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "ai-msg ai-assistant ai-image-wrapper";
-
-    const img = document.createElement("img");
-    img.src = url;
-    img.className = "ai-image";
-
-    const caption = document.createElement("div");
-    caption.className = "ai-caption";
-    caption.textContent = captionText || "Вариант визуализации";
-
-    wrapper.appendChild(img);
-    wrapper.appendChild(caption);
-
-    messagesBox.appendChild(wrapper);
-    messagesBox.scrollTop = messagesBox.scrollHeight;
-  }
-
-
-
-  // ---------- Определяем, просит ли пользователь картинку ----------
-  function needImage(text) {
+  // Определяем, просит ли человек дизайн-картинку
+  function detectImageRequest(text) {
     const keywords = [
       "визуал",
-      "визуализация",
-      "сделай дизайн",
-      "покажи",
-      "покажи вариант",
+      "дизайн",
       "картинку",
       "фото",
-      "как будет выглядеть",
+      "покажи вариант",
+      "сгенерируй",
       "ультрареалистичный",
-      "реалистичный дизайн",
-      "сгенерируй"
+      "реалистичный",
+      "визуализацию",
+      "оформи дизайн",
+      "сделай дизайн",
+      "как будет выглядеть",
     ];
-    return keywords.some(k => text.toLowerCase().includes(k));
+
+    const lower = text.toLowerCase();
+    return keywords.some((k) => lower.includes(k));
   }
 
-
-  // ---------- Генерация промпта для изображения ----------
-  function buildImagePrompt(userText) {
-    return `
-Создай ультрареалистичный интерьер мебели по запросу клиента.
-Описание клиента: ${userText}
-
-Стиль, материалы, цвет и конфигурация должны быть логичны, современные и премиальные.
-Освещение реалистичное. Акцент на деталях. Без людей.
-`.trim();
-  }
-
-
-  // ---------- Отправка сообщения ----------
+  // Отправка сообщения
   async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
 
     addMessage("user", text);
     history.push({ role: "user", content: text });
-
     input.value = "";
     sendBtn.disabled = true;
 
-    const reqImage = needImage(text);
+    const isImageRequest = detectImageRequest(text);
 
     try {
-      let response;
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: history,
+          imageRequest: isImageRequest,
+        }),
+      });
 
-      if (reqImage) {
-        // ОТПРАВЛЯЕМ НА ГЕНЕРАЦИЮ КАРТИНКИ
-        const prompt = buildImagePrompt(text);
+      const data = await res.json();
 
-        response = await fetch(IMAGE_API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt }),
+      if (data.type === "image") {
+        // Пока только текст, но оставляем на будущее
+        addMessage(
+          "assistant",
+          "Подготовлю визуализацию по вашему запросу. Сейчас опишу идею словами."
+        );
+        history.push({
+          role: "assistant",
+          content: "Подготовлю визуализацию по вашему запросу.",
         });
-
-        const data = await response.json();
-
-        if (data.type === "image") {
-          addImage(data.url, data.text);
-        } else {
-          addMessage("assistant", "Не удалось создать изображение.");
-        }
-
       } else {
-        // ОТПРАВЛЯЕМ НА ТЕКСТОВУЮ ЛОГИКУ
-        response = await fetch(TEXT_API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history }),
+        addMessage("assistant", data.text || "Готово, чем ещё помочь?");
+        history.push({
+          role: "assistant",
+          content: data.text || "",
         });
-
-        const data = await response.json();
-
-        addMessage("assistant", data.reply);
-        history.push({ role: "assistant", content: data.reply });
       }
-
-    } catch (error) {
-      console.error(error);
-      addMessage("assistant", "Ошибка соединения. Попробуйте позже.");
+    } catch (e) {
+      console.error(e);
+      addMessage(
+        "assistant",
+        "Извините, сервис временно недоступен. Попробуйте ещё раз чуть позже."
+      );
+    } finally {
+      sendBtn.disabled = false;
     }
-
-    sendBtn.disabled = false;
   }
-
 
   sendBtn.addEventListener("click", sendMessage);
 
-  // Отправка по Enter
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -158,4 +138,10 @@
     }
   });
 
+  // Запускаем скрытие старого чата после загрузки страницы
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    hideLegacyChat();
+  } else {
+    document.addEventListener("DOMContentLoaded", hideLegacyChat);
+  }
 })();
