@@ -2748,6 +2748,6 @@ section.page--home .hero__actions {
   /* ===== Отступ под нижнюю навигацию, чтобы обложки не прятались ===== */
 @media (max-width: 768px) {
   body {
-    padding-bottom: 88px; /* высота .app-nav + небольшой запас */
+    padding-bottom: 96px; /* высота .app-nav + небольшой запас */
   }
 }
