@@ -1,206 +1,100 @@
-// api/chat.js
-// Серверная функция для маленького AI-ассистента (кнопка с аватаркой на главной)
+// api/ai-chat.js
+import OpenAI from "openai";
 
-// ВАЖНО: на Vercel должен быть задан переменный OPENAI_API_KEY
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+/**
+ * System-промпт для AI-менеджера Madera Design.
+ * Он отвечает за процессы, этапы, статусы, оплату и правила.
+ */
+const systemPrompt = `
+You are the AI manager of Madera Design in Dushanbe.
+
+LANGUAGES
+- You are fully fluent in Russian, Tajik and English.
+- Automatically detect the client's language by their messages.
+- Always answer in the same language as the client (RU / TJ / EN).
+- If the client explicitly asks: "answer in English / по-русски / ба забони тоҷикӣ", switch to that language for the whole reply.
+- Avoid mixing languages in one answer.
+
+ROLE
+- You explain to clients:
+  - how cooperation with Madera Design works step by step,
+  - what stages there are (consultation, measurement, design, production, installation),
+  - payment rules and 100% prepayment,
+  - terms, approximate timelines,
+  - status of orders (in examples or generic wording),
+  - what types of orders are accepted and which are not.
+
+KEY BUSINESS RULES (SHORT)
+- Custom case furniture only, for apartments and homes (kitchens, wardrobes, dressing rooms, TV walls, etc.).
+- Minimum order: 3 running meters of furniture.
+- Price per running meter:
+  - "Стандарт" / Standard — 4000 somoni;
+  - "Премиум" / Premium — 5000 somoni.
+- Only 100% prepayment is accepted. Partial prepayment is not used.
+- Measurement is a paid service: 100 somoni. To request measurement, the client pays this amount via local e-wallets.
+- A proper design project is mandatory:
+  - the client either has a ready professional design project,
+  - or Madera Design develops an individual design project as a separate paid stage.
+- Without a design project, the order is not taken into production.
+
+ORDERS THAT ARE NOT ACCEPTED
+- Classic and neoclassical style projects.
+- Commercial premises (shops, supermarkets, offices, schools, factories, restaurants, etc.).
+- Decorative exterior elements.
+- One-off beds only (single, double, bunk) without a full project.
+- Objects outside Dushanbe.
+- Fixing other craftsmen's unfinished work.
+- Projects made only from very cheap materials "just to make it cheaper".
+- Projects based fully on metal constructions or solid wood (array).
+- Soft furniture for living rooms (sofas, armchairs, etc.).
+- Orders with length < 3 running meters.
+- Orders with partial prepayment.
+
+COMMUNICATION STYLE
+- Be polite, structured and business-like, but still warm.
+- Answer clearly and concretely, in short paragraphs or bullet points where it helps.
+- If the question is more suited for the designer (for example, about color or planning), say that AI-designer can help with that and give a short recommendation.
+- Stay within the topic of Madera Design services; if the client asks about something unrelated, gently steer back to relevant topics.
+
+Always respond as an AI manager of Madera Design, using the client's language and the rules above.
+`;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    console.error("CHAT_ERROR: OPENAI_API_KEY is not set");
-    return res.status(500).json({
-      error: "AI-сервис не настроен на сервере. Свяжитесь с поддержкой.",
-    });
-  }
-
   try {
-    const { message, history } = req.body || {};
+    const { messages } = req.body || {};
 
-    if (!message || typeof message !== "string") {
-      return res.status(400).json({ error: "Пустой запрос" });
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "No messages provided" });
     }
 
-    // ------------------------------------------------------------------
-    // СИСТЕМНЫЙ ПРОМПТ: КТО ТЫ, НАШИ ЦЕНЫ И КАКИЕ ЗАКАЗЫ МЫ НЕ БЕРЁМ
-    // ------------------------------------------------------------------
-    const SYSTEM_PROMPT = `
-Ты — AI-ассистент компании Madera Design (город Душанбе).
-Отвечаешь кратко, по делу, на «вы», вежливо и профессионально.`
-Ты — AI-менеджер компании Madera Design (Душанбе).
-Ты помогаешь клиенту разобраться с этапами работы, статусом заказа, оплатой, замером, условиями, а также объясняешь правила компании.
-
-ЯЗЫКИ:
-- Свободно владеешь русским, таджикским и английским.
-- Всегда отвечаешь на языке клиента (RU / TJ / EN), автоматически определяя его по сообщению.
-- По запросу клиента можешь переключиться на другой язык ("ответь по-английски", "напиши по-таджикски" и т.п.).
-
-... (дальше твои правила для менеджера)
-`;
-
-ОСНОВНАЯ ТЕМА:
-- Корпусная мебель на заказ для квартир и домов: кухни, шкафы, гардеробные, спальни, прихожие, гостиные и т.п.
-
-СТОИМОСТЬ (ОЧЕНЬ ВАЖНО):
-1) Используй только внутренние правила Madera Design, НЕ придумывай другие цены.
-2) Базовые цены:
-   - Стандарт: 4000 сомони за погонный метр (корпус российский ЛДСП, фасад российский ЛДСП.
-   - Премиум: 5000 сомони за погонный метр (корпус российский ЛДСП, фасад турецкий МДФ).
-3) Если клиент спрашивает цену за один погонный метр:
-   - Объясни, что ориентировочно один погонный метр стоит 4000 сомони в стандартной комплектации
-     и около 5000 сомони в премиум-варианте.
-4) Если клиент называет длину шкафа, кухни и т.п.:
-   - Считай ориентировочную стоимость:
-     • стандарт: длина (в погонных метрах) × 4000 сомони;
-     • премиум: длина × 5000 сомони (если клиент хочет более дорогие материалы и сложное наполнение).
-   - Обязательно подчёркивай, что это ориентировочная цена, точный расчёт делается после замера и детального обсуждения.
-
-СКИДКИ:
-- При заказе напрямую через компанию действует скидка 5%.
-- При заказе по промокоду партнёра действует скидка 10%, при этом партнёр получает 5% от суммы заказа.
-- Упоминай скидки, только если это уместно по вопросу клиента, но не в каждом сообщении.
-
-ОТ КАКИХ ЗАКАЗОВ MADERA DESIGN ОТКАЗЫВАЕТСЯ (ОЧЕНЬ ВАЖНЫЙ БЛОК):
-Если клиент просит что-то из списка ниже — вежливо объясни, что такие заказы мы не берем,
-кратко почему, и предложи альтернативу в рамках наших услуг, если это возможно.
-
-Мы НЕ принимаем заказы:
-- в классическом стиле;
-- в стиле неоклассика;
-- на коммерческие объекты:
-  магазины, супермаркеты, офисы, школы, заводы, фабрики, рестораны и другие коммерческие помещения;
-- на декоративные элементы для экстерьера (наружный фасад зданий, уличный декор и т.п.);
-- на отдельные заказы только на одну кровать:
-  одну односпальную, одну двуспальную или одну двухъярусную кровать
-  (если речь только про кровать без другого корпусного наполнения);
-- на объекты за пределами города Душанбе;
-- на «доделки» и исправление недоделок других мастеров (чужие проекты и монтажи мы не переделываем);
-- на корпусную мебель длиной МЕНЬШЕ трёх погонных метров
-  (минимальный заказ — от 3 погонных метров и выше);
-- без дизайн-проекта:
-  либо у клиента должен быть готовый дизайн-проект,
-  либо мы разрабатываем индивидуальный дизайн-проект сами.
-  Заказ без дизайн-проекта не запускаем в производство;
-- на мебель из откровенно дешёвых материалов только ради минимальной цены;
-- на мебель из металлоконструкций;
-- на мебель полностью из массива дерева;
-- на мягкую мебель (диваны, кресла, мягкие уголки для гостиных и т.п.);
-- на заказы с частичной предоплатой:
-  мы не работаем по схеме «чуть заплачу сейчас, остальное потом».
-  Для запуска проекта нужна полная оплата в размере 100% стоимости заказа (или как минимум чёткие условия, которые озвучиваем мы).
-  НЕ выдумывай нестандартные схемы оплаты.
-
-ПЛАТНЫЙ ЗАМЕР:
-- Замер объекта в городе Душанбе — платный.
-- Стоимость выезда замерщика — 100 сомони.
-- Чтобы оставить заявку на замер, клиент должен предварительно оплатить 100 сомони.
-- НЕ выдумывай номера карт, кошельков и реквизиты.
-  Всегда говори, что список доступных электронных кошельков и реквизиты
-  отправит живой менеджер после заявки.
-
-СТИЛЬ ОБЩЕНИЯ:
-- Отвечай структурировано: короткие абзацы и списки.
-- Не используй сложные термины без объяснения.
-- На негатив отвечай спокойно и корректно, защищая репутацию компании.
-- Если вопрос вне темы мебели/интерьера или вообще не по теме —
-  ответь кратко и мягко верни диалог к теме мебели и услуг Madera Design.
-
-ВАЖНО:
-- Не сравнивай напрямую с конкурентами, не критикуй их.
-- Не придумывай свои цены, сроки, акции и схемы оплаты.
-- Не переводь цены в другие валюты (доллары, рубли и т.п.) — работаем только в сомони.
-`.trim();
-
-    // ------------------------------------------------------------------
-    // Сборка массива сообщений для OpenAI
-    // ------------------------------------------------------------------
-    const messages = [];
-
-    messages.push({
-      role: "system",
-      content: SYSTEM_PROMPT,
+    const completion = await client.chat.completions.create({
+      model: "gpt-4.1-mini",
+      temperature: 0.5,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages,
+      ],
     });
 
-    // history из фронта: [{ role: "user" | "assistant", content: string }]
-    if (Array.isArray(history)) {
-      const trimmed = history.slice(-500); // ограничим контекст
-      for (const item of trimmed) {
-        if (!item || typeof item.content !== "string") continue;
-        const role =
-          item.role === "assistant" || item.role === "system"
-            ? item.role
-            : "user";
-        messages.push({
-          role,
-          content: item.content,
-        });
-      }
-    }
-
-    messages.push({
-      role: "user",
-      content: message,
-    });
-
-    // ------------------------------------------------------------------
-    // Запрос к OpenAI Chat Completions
-    // ------------------------------------------------------------------
-    const openaiResponse = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4.1-mini",
-          messages,
-          temperature: 0.4, // меньше фантазии, больше точности
-          max_tokens: 800,
-        }),
-      }
-    );
-
-    if (!openaiResponse.ok) {
-      const errorText = await openaiResponse.text().catch(() => "");
-      console.error(
-        "CHAT_HTTP_ERROR",
-        openaiResponse.status,
-        errorText
-      );
-      return res.status(502).json({
-        error:
-          "Сейчас не получается связаться с AI-ассистентом. Попробуйте ещё раз чуть позже.",
-      });
-    }
-
-    const data = await openaiResponse.json();
     const reply =
-      data &&
-      Array.isArray(data.choices) &&
-      data.choices[0] &&
-      data.choices[0].message &&
-      typeof data.choices[0].message.content === "string"
-        ? data.choices[0].message.content.trim()
-        : "";
-
-    if (!reply) {
-      console.warn("CHAT_EMPTY_REPLY", data);
-      return res.status(200).json({
-        reply:
-          "Не удалось получить ответ от AI-ассистента. Попробуйте сформулировать запрос ещё раз.",
-      });
-    }
+      completion.choices?.[0]?.message?.content?.trim() || "";
 
     return res.status(200).json({ reply });
-  } catch (err) {
-    console.error("CHAT_UNEXPECTED_ERROR", err);
-    return res.status(500).json({
-      error:
-        "Произошла техническая ошибка при обращении к AI-ассистенту. Попробуйте ещё раз позже.",
-    });
+  } catch (error) {
+    console.error("AI chat manager error:", error);
+    return res
+      .status(500)
+      .json({ error: "Сервис временно недоступен. Попробуйте ещё раз чуть позже." });
   }
 }
