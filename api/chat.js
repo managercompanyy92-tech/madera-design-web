@@ -24,70 +24,6 @@ export default async function handler(req, res) {
     }
 
     // ----------------------------------------------------
-    // ОПРЕДЕЛЯЕМ ЯЗЫК СООБЩЕНИЯ (RU / TJ / EN)
-    // ----------------------------------------------------
-    function detectLanguage(text) {
-      const lower = text.toLowerCase();
-
-      // латиница
-      const hasLatin = /[a-z]/i.test(lower);
-      // кириллица
-      const hasCyrillic = /[а-яёҳқғҷӯӣ]/i.test(lower);
-      // таджикские специальные буквы, которых нет в русском
-      const hasTajikLetters = /[ҳқғҷӯӣ]/i.test(lower);
-
-      // типичные таджикские слова
-      const tajikWords = [
-        "меёяд",
-        "мешавад",
-        "меша",
-        "рӯз",
-        "чанд",
-        "ҳаст",
-        "мебошад",
-        "кард",
-        "кунед",
-        "кунед",
-        "фармоиш",
-        "таёр",
-        "мебел",
-        "дар",
-        "агар",
-      ];
-
-      const isTajikWord = tajikWords.some((w) => lower.includes(w));
-
-      if (hasLatin && !hasCyrillic) {
-        return "en";
-      }
-
-      if (hasTajikLetters || isTajikWord) {
-        return "tj";
-      }
-
-      if (hasCyrillic) {
-        return "ru";
-      }
-
-      // по умолчанию русский
-      return "ru";
-    }
-
-    const lang = detectLanguage(message);
-
-    let languageInstruction = "";
-    if (lang === "tj") {
-      languageInstruction =
-        "Клиент пишет на таджикском языке. Отвечай строго на таджикском языке. Не используй русский или английский, если клиент об этом явно не попросил.";
-    } else if (lang === "en") {
-      languageInstruction =
-        "The client is writing in English. Answer strictly in English. Do not switch to Russian or Tajik unless the client explicitly asks for it.";
-    } else {
-      languageInstruction =
-        "Клиент пишет на русском языке. Отвечай строго на русском языке. Не переключайся на другие языки без явной просьбы.";
-    }
-
-    // ----------------------------------------------------
     // СИСТЕМНЫЙ ПРОМПТ: КТО ТЫ, НАШ СЕРВИС И ПРАВИЛА
     // ----------------------------------------------------
     const SYSTEM_PROMPT = `
@@ -107,9 +43,14 @@ export default async function handler(req, res) {
 - Отвечай спокойно, профессионально, без грубости и паники.
 - Пиши коротко и по делу, но при необходимости можешь пояснить детали.
 
-ЯЗЫК:
+ЯЗЫК (ОЧЕНЬ ВАЖНО):
 - Ты понимаешь и свободно говоришь на русском, таджикском и английском.
-- Но всегда придерживайся специальной инструкции по языку, которую получишь дополнительно.
+- ВСЕГДА отвечай на том же языке, на котором написан ПОСЛЕДНИЙ вопрос клиента.
+- Определяй язык автоматически.
+- Если видишь таджикский (даже если он написан кириллицей, похожей на русскую),
+  отвечай естественным таджикским языком.
+- Если клиент смешивает языки, отвечай в основном на том языке, который доминирует
+  в последнем вопросе клиента.
 
 ОСНОВНАЯ ТЕМА:
 - Корпусная мебель на заказ для квартир и домов.
@@ -193,15 +134,15 @@ export default async function handler(req, res) {
 - Если клиент уже задавал параметры (длина, бюджет, стиль), старайся на них опираться в дальнейших ответах.
 `;
 
-    // Дополнительная системная подсказка по языку
-    const LANGUAGE_HINT = {
+    // Дополнительная подсказка прямо перед вопросом:
+    const LANGUAGE_ECHO_HINT = {
       role: "system",
-      content: languageInstruction,
+      content: `Последний вопрос клиента: «${message}». Ответь на том же языке, на котором написан этот вопрос.`,
     };
 
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
-      LANGUAGE_HINT,
+      LANGUAGE_ECHO_HINT,
       ...(Array.isArray(history) ? history : []),
       { role: "user", content: message },
     ];
@@ -239,7 +180,7 @@ export default async function handler(req, res) {
       json.choices?.[0]?.message?.content?.trim() ||
       "Извините, я сейчас не могу ответить. Попробуйте ещё раз позже.";
 
-    // Возвращаем в том же формате, к которому привязан фронтенд
+    // Возвращаем в формате, который ждёт фронтенд
     return res.status(200).json({
       reply: assistantMessage,
       answer: assistantMessage,
