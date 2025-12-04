@@ -1,4 +1,4 @@
-// src/ai-chat.js
+// src/ai-chat.js 
 // Клиентский скрипт для AI-дизайнера Madera Design
 
 (function () {
