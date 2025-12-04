@@ -1,95 +1,179 @@
-export const config = {
-  runtime: "edge",
-};
+// api/ai-image.js
+// Серверная функция для генерации визуализаций (AI-дизайнер Madera Design)
 
-// Генератор изображений для AI-дизайнера Madera Design
-export default async function handler(req) {
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Простая детекция языка последнего сообщения
+function detectLanguage(text) {
+  const hasCyrillic = /[А-Яа-яЁёҒғҚқҶҷҲҳӢӣҶҷӮӯ]/.test(text);
+  const hasLatin = /[A-Za-z]/.test(text);
+
+  if (hasCyrillic && !hasLatin) {
+    // Русский или таджикский. Очень грубо: если много типичных таджикских слов
+    const tjPatterns = /(шероз|хона|девор|курси|мебел|ҳуҷра|ошхона|меҳмонхона|ҷойи хоб)/i;
+    return tjPatterns.test(text) ? "tj" : "ru";
+  }
+  if (hasLatin && !hasCyrillic) return "en";
+  return "ru"; // дефолт
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    console.error("AI_IMAGE_ERROR: OPENAI_API_KEY is not set");
+    return res.status(500).json({
+      error: "AI-сервис для визуализаций временно не настроен (нет API-ключа).",
+    });
+  }
+
   try {
-    if (req.method !== "POST") {
-      return new Response(
-        JSON.stringify({ error: "Method not allowed" }),
-        { status: 405 }
-      );
+    const { messages, imageRequest } = req.body || {};
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: "No messages provided" });
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    // Последнее пользовательское сообщение
+    const lastUser =
+      [...messages].reverse().find((m) => m.role === "user") || messages[messages.length - 1];
 
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: "OPENAI_API_KEY not configured" }),
-        { status: 500 }
-      );
-    }
+    const userText = String(lastUser.content || "");
+    const lang = detectLanguage(userText);
 
-    const { prompt } = await req.json();
+    // -----------------------
+    // ЕСЛИ НУЖНА ИМЕННО КАРТИНКА
+    // -----------------------
+    if (imageRequest) {
+      // 1) Формируем англоязычный промпт для модели картинок
+      const imagePrompt = `
+Ultra realistic interior render for a custom-made furniture project.
 
-    if (!prompt || prompt.trim().length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Prompt is empty" }),
-        { status: 400 }
-      );
-    }
+Project context from client (may be Russian or Tajik, translate mentally to English):
+"${userText}"
 
-    // Формируем контекст для Madera Design
-    const stylePrompt = `
-Ты — старший интерьерный дизайнер компании Madera Design (г. Душанбе).
-Создай ультрареалистичный интерьер с учётом следующего запроса клиента.
+Requirements:
+- photorealistic visualization;
+- premium apartment interior in Dushanbe;
+- stylish built-in furniture (kitchen, wardrobe, living room etc. depending on context);
+- pleasant warm lighting;
+- composition suitable for portfolio of a high-end furniture studio;
+- no people in the frame.
 
-Требования к изображению:
-- Премиальное качество, фотореализм (8K детализация)
-- Мягкое тёплое освещение
-- Натуральные материалы: дерево, камень, стекло, металл
-- Цветовая гамма: фирменные тона Madera Design (графит, дерево, тёплый оранжевый)
-- Аккуратная композиция, перспективная камера
-- Без текста, людей, водяных знаков, логотипов
-- Современный минимализм в архитектуре и мебели
-- Атмосфера уюта и эстетики
-
-Клиент просит: ${prompt}.
+Do NOT add text in the picture.
 `;
 
-    // Запрос к OpenAI API
-    const openaiResponse = await fetch(
-      "https://api.openai.com/v1/images/generations",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-image-1",
-          prompt: stylePrompt,
-          size: "1024x1024",
-          quality: "hd",
-          n: 1,
-        }),
+      // 2) Генерируем картинку
+      const imgResponse = await client.images.generate({
+        model: "gpt-image-1",
+        prompt: imagePrompt,
+        size: "1024x1024",
+      });
+
+      const imageUrl = imgResponse.data?.[0]?.url;
+      if (!imageUrl) {
+        throw new Error("No image URL in OpenAI response");
       }
-    );
 
-    const data = await openaiResponse.json();
+      // 3) Короткая подпись к визуализации на языке клиента
+      let captionSystem;
+      if (lang === "tj") {
+        captionSystem = `
+Шумо ассистенти AI аз ширкати Madera Design ҳастед.
+Навиштаҷоти кӯтоҳ барои визуализатсияи тарҳи мебел месозед.
+Ҳама вақт бо забони тоҷикӣ, услуби расмӣ ва дӯстона ҷавоб диҳед.
+`;
+      } else if (lang === "en") {
+        captionSystem = `
+You are an AI assistant of Madera Design.
+Write a very short description of the generated interior visualization.
+Always answer in English in a polite, business style.
+`;
+      } else {
+        captionSystem = `
+Ты — AI-ассистент компании Madera Design.
+Составь очень короткое описание визуализации интерьера.
+Всегда отвечай по-русски, деловым, но дружелюбным тоном.
+`;
+      }
 
-    if (!data?.data?.[0]?.url) {
-      return new Response(
-        JSON.stringify({
-          error: "Image generation failed",
-          details: data,
-        }),
-        { status: 500 }
-      );
+      const captionCompletion = await client.chat.completions.create({
+        model: "gpt-4.1-mini",
+        temperature: 0.6,
+        max_tokens: 120,
+        messages: [
+          { role: "system", content: captionSystem },
+          {
+            role: "user",
+            content: userText || "Кратко опиши визуализацию интерьера для клиента.",
+          },
+        ],
+      });
+
+      const caption =
+        captionCompletion.choices?.[0]?.message?.content?.trim() ||
+        (lang === "tj"
+          ? "Визуализатсияи тарҳи пешниҳодшуда."
+          : lang === "en"
+          ? "Visualization of a proposed interior design."
+          : "Визуализация предложенного дизайна интерьера.");
+
+      return res.status(200).json({
+        type: "image",
+        url: imageUrl,
+        text: caption,
+      });
     }
 
-    return new Response(
-      JSON.stringify({
-        imageUrl: data.data[0].url,
-      }),
-      { status: 200 }
-    );
+    // -----------------------
+    // ЕСЛИ imageRequest = false (подстраховка)
+    // Текстовый ответ AI-дизайнера
+    // -----------------------
+    const SYSTEM_PROMPT = `
+Ты — AI-дизайнер компании Madera Design (Душанбе).
+Отвечаешь кратко и по делу, помогаешь с идеями планировки и стилем
+для корпусной мебели: кухни, гардеробные, спальни, прихожие, гостиные, детские.
+
+Важно:
+- Говори на языке последнего сообщения клиента.
+- Не называй точные цены здесь — для точного расчёта клиенту нужен AI-ассистент.
+- Даёшь рекомендации по стилю, цветам, материалам и функционалу мебели.
+`;
+
+    const openaiMessages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...messages.map((m) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: String(m.content || ""),
+      })),
+    ];
+
+    const completion = await client.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: openaiMessages,
+      temperature: 0.5,
+      max_tokens: 600,
+    });
+
+    const textReply =
+      completion.choices?.[0]?.message?.content?.trim() ||
+      "Извините, сейчас не удалось получить ответ. Попробуйте ещё раз.";
+
+    return res.status(200).json({
+      type: "text",
+      text: textReply,
+    });
   } catch (err) {
     console.error("AI_IMAGE_ERROR:", err);
-    return new Response(
-      JSON.stringify({ error: "Server error", detail: err.message }),
-      { status: 500 }
-    );
+    return res.status(500).json({
+      error: "Извините, сервис визуализаций временно недоступен. Попробуйте позже.",
+    });
   }
 }
