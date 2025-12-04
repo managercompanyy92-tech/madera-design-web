@@ -204,7 +204,11 @@ const safeHistory = Array.isArray(history)
 
     return res.status(200).json({ reply });
   } catch (err) {
-    console.error("AI_DESIGNER_ERROR:", err);
+    console.error(
+  "AI_DESIGNER_ERROR:",
+  err?.status || err?.response?.status || "",
+  err?.response?.data || err.message || err
+);
     return res.status(500).json({
       error: "Извините, сервис временно недоступен. Попробуйте позже.",
     });
