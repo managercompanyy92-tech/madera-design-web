@@ -182,16 +182,14 @@ const safeHistory = Array.isArray(history)
 `;
 
     // Подготовка истории сообщений для OpenAI
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...(Array.isArray(history)
-        ? history.map((m) => ({
-            role: m.role === "assistant" ? "assistant" : "user",
-            content: String(m.content || ""),
-          }))
-        : []),
-      { role: "user", content: message },
-    ];
+   const messages = [
+  { role: "system", content: SYSTEM_PROMPT },
+  ...safeHistory.map((m) => ({
+    role: m.role === "assistant" ? "assistant" : "user",
+    content: String(m.content || ""),
+  })),
+  { role: "user", content: message },
+];
 
     const completion = await client.chat.completions.create({
       model: "gpt-4.1-mini",
