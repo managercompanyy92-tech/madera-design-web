@@ -26,6 +26,10 @@ export default async function handler(req, res) {
     if (!message || typeof message !== "string") {
       return res.status(400).json({ error: "No message provided" });
     }
+    // Аккуратно ограничиваем историю, чтобы не переполнить контекст модели
+const safeHistory = Array.isArray(history)
+  ? history.slice(-MAX_HISTORY_MESSAGES)
+  : [];
 
     // -------------------------------------------------
     // СИСТЕМНЫЙ ПРОМПТ: КТО ТЫ, КАК ОТВЕЧАЕШЬ
