@@ -1,33 +1,59 @@
 // src/ai-chat.js
-// Фронт-чат Madera Design: текст + визуализации через /api/ai-designer
+// Круглый чат Madera Design: текст + визуализации через /api/ai-designer
 
-// ========== Конфиг ==========
+const API_URL = "/api/ai-designer";
+const STORAGE_KEY = "madera_ai_chat_history";
+const MAX_HISTORY = 50;
 
-const AI_CHAT_CONFIG = {
-  apiEndpoint: "/api/ai-designer",
-  storageKey: "madera_ai_chat_history",
-  maxMessagesInHistory: 50,
-};
+// === DOM-элементы (адаптированы под типичную разметку виджета) ===
+const chatRoot = document; // если будет отдельный контейнер — можно заменить
 
-// ========== Вспомогательные функции ==========
+const messagesBox =
+  chatRoot.querySelector('[data-ai-chat="messages"]') ||
+  chatRoot.querySelector(".ai-chat-messages");
 
-function loadFromStorage(key, fallback = null) {
-  try {
-    const raw = window.localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch (e) {
-    console.warn("Failed to load from storage", e);
-    return fallback;
-  }
-}
+const inputEl =
+  chatRoot.querySelector('[data-ai-chat="input"]') ||
+  chatRoot.querySelector(".ai-chat-input");
 
-function saveToStorage(key, value) {
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.warn("Failed to save to storage", e);
-  }
-}
+const formEl =
+  chatRoot.querySelector('[data-ai-chat="form"]') ||
+  chatRoot.querySelector(".ai-chat-form");
+
+const sendBtn =
+  chatRoot.querySelector('[data-ai-chat="send"]') ||
+  chatRoot.querySelector(".ai-chat-send");
+
+const loaderEl =
+  chatRoot.querySelector('[data-ai-chat="loader"]') ||
+  chatRoot.querySelector(".ai-chat-loader");
+
+const errorBox =
+  chatRoot.querySelector('[data-ai-chat="error"]') ||
+  chatRoot.querySelector(".ai-chat-error");
+
+const clearHistoryBtn =
+  chatRoot.querySelector('[data-ai-chat="clear-history"]') ||
+  chatRoot.querySelector(".ai-chat-clear-history");
+
+// при наличии кнопок открытия/закрытия чата
+const openChatBtn =
+  chatRoot.querySelector('[data-ai-chat="open"]') ||
+  chatRoot.querySelector(".ai-chat-open");
+
+const closeChatBtn =
+  chatRoot.querySelector('[data-ai-chat="close"]') ||
+  chatRoot.querySelector(".ai-chat-close");
+
+const chatWindow =
+  chatRoot.querySelector('[data-ai-chat="window"]') ||
+  chatRoot.querySelector(".ai-chat-window");
+
+// === Состояние ===
+let history = [];
+let isSending = false;
+
+// === Вспомогательные функции ===
 
 function escapeHtml(str) {
   if (typeof str !== "string") return "";
@@ -69,381 +95,239 @@ function detectImageRequest(text) {
   return keywords.some((k) => lower.includes(k));
 }
 
-// ========== Класс ChatUI ==========
+function setLoadingState(loading) {
+  isSending = loading;
 
-class ChatUI {
-  constructor(root = document) {
-    // DOM-элементы (подстрой под свою разметку при необходимости)
-    this.messagesContainer =
-      root.querySelector('[data-ai-chat="messages"]') ||
-      root.querySelector(".ai-chat-messages") ||
-      root.querySelector("#ai-chat-messages");
+  if (sendBtn) sendBtn.disabled = loading;
+  if (inputEl) inputEl.disabled = loading;
+  if (loaderEl) loaderEl.style.display = loading ? "flex" : "none";
+}
 
-    this.form =
-      root.querySelector('[data-ai-chat="form"]') ||
-      root.querySelector(".ai-chat-form");
-
-    this.input =
-      root.querySelector('[data-ai-chat="input"]') ||
-      root.querySelector(".ai-chat-input") ||
-      root.querySelector("#ai-chat-input");
-
-    this.sendButton =
-      root.querySelector('[data-ai-chat="send"]') ||
-      root.querySelector(".ai-chat-send") ||
-      root.querySelector("#ai-chat-send");
-
-    this.loader =
-      root.querySelector('[data-ai-chat="loader"]') ||
-      root.querySelector(".ai-chat-loader");
-
-    this.errorBox =
-      root.querySelector('[data-ai-chat="error"]') ||
-      root.querySelector(".ai-chat-error");
-
-    this.clearHistoryButton =
-      root.querySelector('[data-ai-chat="clear-history"]') ||
-      root.querySelector(".ai-chat-clear-history");
-
-    this.suggestionButtons = Array.from(
-      root.querySelectorAll('[data-ai-chat="suggestion"]')
-    );
-
-    // Состояние
-    this.messages = [];
-    this.isLoading = false;
-    this.abortController = null;
-
-    this.init();
+function showError(message) {
+  if (!errorBox) return;
+  if (!message) {
+    errorBox.textContent = "";
+    errorBox.style.display = "none";
+    return;
   }
+  errorBox.textContent = message;
+  errorBox.style.display = "block";
+}
 
-  // ===== Инициализация =====
+function scrollMessagesToBottom() {
+  if (!messagesBox) return;
+  messagesBox.scrollTop = messagesBox.scrollHeight;
+}
 
-  init() {
-    this.restoreHistory();
-    this.bindEvents();
-    this.updateUIState();
-  }
+// === Работа с localStorage ===
 
-  bindEvents() {
-    if (this.form && this.input) {
-      this.form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        this.handleSubmit();
-      });
-
-      // Отправка по Enter (кроме Shift+Enter)
-      this.input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          this.handleSubmit();
-        }
-      });
-    }
-
-    if (this.clearHistoryButton) {
-      this.clearHistoryButton.addEventListener("click", () =>
-        this.handleClearHistory()
-      );
-    }
-
-    if (this.suggestionButtons.length > 0) {
-      this.suggestionButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const text = btn.dataset.text || btn.textContent || "";
-          this.handleSuggestionClick(text.trim());
-        });
-      });
-    }
-  }
-
-  // ===== История =====
-
-  restoreHistory() {
-    const stored = loadFromStorage(AI_CHAT_CONFIG.storageKey, []);
-    if (Array.isArray(stored) && stored.length > 0) {
-      this.messages = stored;
-      this.renderAllMessages();
-    }
-  }
-
-  persistHistory() {
-    const toSave = this.messages.slice(
-      -AI_CHAT_CONFIG.maxMessagesInHistory
-    );
-    saveToStorage(AI_CHAT_CONFIG.storageKey, toSave);
-  }
-
-  handleClearHistory() {
-    this.messages = [];
-    this.persistHistory();
-    if (this.messagesContainer) {
-      this.messagesContainer.innerHTML = "";
-    }
-    this.showError(null);
-  }
-
-  // ===== Рендер =====
-
-  renderAllMessages() {
-    if (!this.messagesContainer) return;
-    this.messagesContainer.innerHTML = "";
-    this.messages.forEach((m) => {
-      if (m.type === "image" && m.url) {
-        this.appendImageMessage(m.url, m.caption, { persist: false });
-      } else {
-        this.appendMessageToDOM(m);
-      }
-    });
-    this.scrollToBottom();
-  }
-
-  appendMessageToDOM(message) {
-    if (!this.messagesContainer) return;
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("ai-chat-message");
-    wrapper.classList.add(`ai-chat-message--${message.role}`);
-
-    wrapper.innerHTML = `
-      <div class="ai-chat-message__bubble">
-        ${escapeHtml(message.content)}
-      </div>
-    `;
-
-    this.messagesContainer.appendChild(wrapper);
-  }
-
-  // Добавление изображения в чат (визуализация)
-  appendImageMessage(url, caption, options = { persist: true }) {
-    if (!this.messagesContainer || !url) return;
-
-    const msgEl = document.createElement("div");
-    msgEl.classList.add("ai-chat-message", "ai-chat-message--assistant", "ai-chat-message--image");
-
-    const imgEl = document.createElement("img");
-    imgEl.classList.add("ai-chat-message__image");
-    imgEl.src = url;
-    imgEl.alt = caption || "AI design";
-
-    msgEl.appendChild(imgEl);
-
-    if (caption) {
-      const captionEl = document.createElement("div");
-      captionEl.classList.add("ai-chat-message__caption");
-      captionEl.textContent = caption;
-      msgEl.appendChild(captionEl);
-    }
-
-    this.messagesContainer.appendChild(msgEl);
-    this.scrollToBottom();
-
-    if (options.persist) {
-      // сохраняем в истории как спец-сообщение
-      this.messages.push({
-        role: "assistant",
-        type: "image",
-        url,
-        caption: caption || "",
-        // текстовое описание для контекста модели
-        content: ((caption || "").trim() + " [image]").trim(),
-      });
-      this.persistHistory();
-    }
-  }
-
-  scrollToBottom() {
-    if (!this.messagesContainer) return;
-    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-  }
-
-  addMessage(role, content, options = { render: true, persist: true }) {
-    const msg = { role, content: (content || "").trim() };
-    this.messages.push(msg);
-
-    if (options.render) {
-      this.appendMessageToDOM(msg);
-      this.scrollToBottom();
-    }
-
-    if (options.persist) {
-      this.persistHistory();
-    }
-
-    return msg;
-  }
-
-  // ===== UI-состояние =====
-
-  setLoading(isLoading) {
-    this.isLoading = isLoading;
-
-    if (this.loader) {
-      this.loader.style.display = isLoading ? "flex" : "none";
-    }
-
-    if (this.sendButton) {
-      this.sendButton.disabled = isLoading;
-    }
-
-    if (this.input) {
-      this.input.disabled = isLoading;
-    }
-  }
-
-  showError(message) {
-    if (!this.errorBox) return;
-
-    if (!message) {
-      this.errorBox.textContent = "";
-      this.errorBox.style.display = "none";
-      return;
-    }
-
-    this.errorBox.textContent = message;
-    this.errorBox.style.display = "block";
-  }
-
-  updateUIState() {
-    this.setLoading(this.isLoading);
-  }
-
-  // ===== Обработка действий пользователя =====
-
-  handleSuggestionClick(text) {
-    if (!text) return;
-    if (this.input) {
-      this.input.value = text;
-      this.input.focus();
-    }
-    this.handleSubmit();
-  }
-
-  handleSubmit() {
-    if (!this.input) return;
-    const text = (this.input.value || "").trim();
-    if (!text || this.isLoading) return;
-
-    this.showError(null);
-    this.sendUserMessage(text);
-  }
-
-  // ===== Работа с API (включая imageRequest) =====
-
-  async sendUserMessage(text) {
-    // 1. Добавляем сообщение пользователя в чат и историю
-    this.addMessage("user", text);
-
-    // 2. Вычисляем, просит ли человек визуализацию
-    const isImageRequest = detectImageRequest(text);
-
-    // 3. Очищаем поле ввода
-    if (this.input) {
-      this.input.value = "";
-    }
-
-    // 4. Готовим запрос
-    this.setLoading(true);
-    this.abortController = new AbortController();
-
-    try {
-      const payloadMessages = this.messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-
-      const response = await fetch(AI_CHAT_CONFIG.apiEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: this.abortController.signal,
-        body: JSON.stringify({
-          messages: payloadMessages,
-          imageRequest: isImageRequest,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => "");
-        throw new Error(
-          errorText || `Ошибка сервера (${response.status})`
-        );
-      }
-
-      const data = await response.json();
-
-      // 5. Обрабатываем вариант с картинкой
-      if (data && data.type === "image" && data.url) {
-        const caption = data.text || "";
-        this.appendImageMessage(data.url, caption);
-
-        // в history для модели уже записали спец-сообщение внутри appendImageMessage
-        return;
-      }
-
-      // 6. Обычный текстовый ответ (совместим со старыми форматами)
-      if (
-        data &&
-        (typeof data.text === "string" ||
-          typeof data.reply === "string" ||
-          typeof data.answer === "string")
-      ) {
-        const answer =
-          data.text ||
-          data.reply ||
-          data.answer ||
-          "Извините, сейчас не удалось получить ответ. Попробуйте позже.";
-
-        this.addMessage("assistant", answer);
-        return;
-      }
-
-      // 7. Формат { messages: [...] }, как ранее
-      if (data && Array.isArray(data.messages)) {
-        const assistantMessages = data.messages.filter(
-          (m) => m.role === "assistant"
-        );
-        if (assistantMessages.length === 0) {
-          throw new Error("Пустой ответ от модели");
-        }
-
-        assistantMessages.forEach((m) =>
-          this.addMessage("assistant", m.content)
-        );
-        return;
-      }
-
-      throw new Error("Неподдерживаемый формат ответа от API");
-    } catch (err) {
-      if (err.name === "AbortError") {
-        this.showError("Запрос был прерван.");
-      } else {
-        console.error(err);
-        this.showError(
-          err.message || "Произошла ошибка при запросе к AI-сервису."
-        );
-      }
-    } finally {
-      this.setLoading(false);
-      this.abortController = null;
-    }
-  }
-
-  // ===== Публичные методы =====
-
-  sendSystemMessage(content) {
-    this.addMessage("system", content);
-  }
-
-  abortRequest() {
-    if (this.abortController) {
-      this.abortController.abort();
-    }
+function loadHistory() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.warn("Failed to load chat history", e);
+    return [];
   }
 }
 
-// ========== Автоинициализация ==========
+function saveHistory() {
+  try {
+    const trimmed = history.slice(-MAX_HISTORY);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+  } catch (e) {
+    console.warn("Failed to save chat history", e);
+  }
+}
 
-document.addEventListener("DOMContentLoaded", () => {
-  window.maderaAIChat = new ChatUI(document);
-});
+// === Рендер сообщений ===
+
+function appendMessage(role, text) {
+  if (!messagesBox) return;
+  const msgEl = document.createElement("div");
+  msgEl.className = `ai-chat-msg ai-chat-msg--${role}`;
+
+  msgEl.innerHTML = `
+    <div class="ai-chat-msg__bubble">
+      ${escapeHtml(text)}
+    </div>
+  `;
+
+  messagesBox.appendChild(msgEl);
+  scrollMessagesToBottom();
+}
+
+// Добавление изображения в чат (визуализация)
+function appendImage(url, caption) {
+  if (!messagesBox || !url) return;
+
+  const msgEl = document.createElement("div");
+  msgEl.className = "ai-chat-msg ai-chat-msg--assistant ai-chat-msg--image";
+
+  const imgEl = document.createElement("img");
+  imgEl.className = "ai-chat-msg__image";
+  imgEl.src = url;
+  imgEl.alt = caption || "AI design";
+
+  msgEl.appendChild(imgEl);
+
+  if (caption) {
+    const captionEl = document.createElement("div");
+    captionEl.className = "ai-chat-msg__caption";
+    captionEl.textContent = caption;
+    msgEl.appendChild(captionEl);
+  }
+
+  messagesBox.appendChild(msgEl);
+  scrollMessagesToBottom();
+}
+
+// Восстановление истории из localStorage
+function renderHistory() {
+  if (!messagesBox) return;
+  messagesBox.innerHTML = "";
+  history.forEach((msg) => {
+    if (msg.type === "image" && msg.url) {
+      appendImage(msg.url, msg.caption);
+    } else {
+      appendMessage(msg.role || "assistant", msg.content || "");
+    }
+  });
+}
+
+// === Основная логика отправки сообщений ===
+
+async function sendMessage() {
+  if (!inputEl) return;
+  const text = (inputEl.value || "").trim();
+  if (!text || isSending) return;
+
+  showError(null);
+
+  // 1. Добавляем пользовательское сообщение в чат и историю
+  appendMessage("user", text);
+  history.push({ role: "user", content: text });
+  saveHistory();
+
+  // 2. Определяем, просит ли человек визуализацию
+  const isImageRequest = detectImageRequest(text);
+
+  // 3. Очищаем поле ввода
+  inputEl.value = "";
+
+  // 4. Отправляем запрос на /api/ai-designer
+  setLoadingState(true);
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: history.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        imageRequest: isImageRequest,
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      throw new Error(errText || `Ошибка сервера (${res.status})`);
+    }
+
+    const data = await res.json();
+
+    // 5. Обрабатываем вариант с картинкой
+    if (data.type === "image" && data.url) {
+      const caption = data.text || "";
+      appendImage(data.url, caption);
+
+      history.push({
+        role: "assistant",
+        type: "image",
+        url: data.url,
+        caption,
+        content: ((caption || "") + " [image]").trim(),
+      });
+      saveHistory();
+      return;
+    }
+
+    // 6. Обычный текстовый ответ (универсальный формат)
+    const answer =
+      data.text ||
+      data.reply ||
+      data.answer ||
+      "Извините, сейчас не удалось получить ответ. Попробуйте позже.";
+
+    appendMessage("assistant", answer);
+    history.push({ role: "assistant", content: answer });
+    saveHistory();
+  } catch (err) {
+    console.error(err);
+    showError(err.message || "Произошла ошибка при запросе к AI-сервису.");
+  } finally {
+    setLoadingState(false);
+    if (inputEl) inputEl.focus();
+  }
+}
+
+// === Обработчики событий ===
+
+function initChat() {
+  // загрузка истории
+  history = loadHistory();
+  renderHistory();
+
+  // отправка по кнопке / submit формы
+  if (formEl) {
+    formEl.addEventListener("submit", function (e) {
+      e.preventDefault();
+      sendMessage();
+    });
+  } else if (sendBtn) {
+    sendBtn.addEventListener("click", function () {
+      sendMessage();
+    });
+  }
+
+  // отправка по Enter (без Shift)
+  if (inputEl) {
+    inputEl.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  }
+
+  // очистка истории
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener("click", function () {
+      history = [];
+      saveHistory();
+      if (messagesBox) messagesBox.innerHTML = "";
+      showError(null);
+    });
+  }
+
+  // открытие/закрытие круглого чата (если элементы есть)
+  if (openChatBtn && chatWindow) {
+    openChatBtn.addEventListener("click", function () {
+      chatWindow.classList.add("ai-chat-window--open");
+      if (inputEl) inputEl.focus();
+    });
+  }
+
+  if (closeChatBtn && chatWindow) {
+    closeChatBtn.addEventListener("click", function () {
+      chatWindow.classList.remove("ai-chat-window--open");
+    });
+  }
+}
+
+// === Инициализация после загрузки DOM ===
+document.addEventListener("DOMContentLoaded", initChat);
