@@ -1,7 +1,7 @@
 // api/ai-designer.js
 // Серверная функция для AI-ассистента / AI-дизайнера Madera Design
 
-import OpenAI from "openai";
+import OpenAI from "openai"; 
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
