@@ -1,5 +1,6 @@
 // api/ai-designer.js
 // Серверная функция для AI-ассистента / AI-дизайнера Madera Design
+// Поддерживает текстовые ответы и визуализации (imageRequest)
 
 import OpenAI from "openai";
 
@@ -7,31 +8,9 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    console.error("AI_DESIGNER_ERROR: OPENAI_API_KEY is not set");
-    return res
-      .status(500)
-      .json({ error: "AI-сервис временно не настроен (нет API-ключа)." });
-  }
-
-  try {
-    const { message, history } = req.body || {};
-
-    if (!message || typeof message !== "string") {
-      return res.status(400).json({ error: "No message provided" });
-    }
-
-    // -------------------------------------------------
-    // СИСТЕМНЫЙ ПРОМПТ: КТО ТЫ, КАК ОТВЕЧАЕШЬ
-    // -------------------------------------------------
-    const SYSTEM_PROMPT = `
-Ты — AI-ассистент компании Madera Design (Душанбе).
+// Системный промпт: кто ты и как отвечаешь
+const SYSTEM_PROMPT = `
+Ты — AI-ассистент и AI-дизайнер компании Madera Design (Душанбе).
 Основная задача — помочь клиенту с корпусной мебелью на заказ:
 кухни, гардеробные, спальни, прихожие, детские, гостиные.
 
@@ -93,15 +72,16 @@ export default async function handler(req, res) {
 - Если спрашивают "за сколько дней сделаете", отвечай диапазоном
   и проси уточнить тип мебели и объёмы.
 
-5. ДИЗАЙН И ВИЗУАЛИЗАЦИЯ:
-- Компания делает профессиональные дизайн-проекты и визуализации.
-- Объясняй, что полноценные ультрареалистичные 3D-дизайны готовятся
-  после заполнения брифа и 100% предоплаты за дизайн.
-- Срок подготовки 3 вариантов ультрареалистичного дизайна
-  может занимать до 7 рабочих дней.
-- В этом чате ты ТЕКСТОВЫЙ ассистент. Если тебя просят "пришли фото",
-  "сгенерируй дизайн сейчас", поясни, что визуализации готовятся отдельно
-  по брифу, и предложи оставить контакты/заполнить заявку.
+5. ДИЗАЙН И ВИЗУАЛИЗАЦИЯ (МГНОВЕННО В ЧАТЕ):
+- Прямо в этом чате ты можешь сразу предлагать концепции дизайна мебели и интерьера.
+- Если клиент просит: "сделай дизайн", "сделай визуализацию", "рендер", "как будет выглядеть" и т.п.:
+  • давай конкретное предложение: планировка, пропорции, модули, материалы, цвета, фурнитура;
+  • при необходимости предложи 2–3 варианта (например, стандарт и премиум);
+  • НЕ пиши, что ты не можешь сделать дизайн или визуализацию в чате.
+- Можно упомянуть, что у компании есть услуга профессионального 3D-дизайна от живых дизайнеров,
+  но без описания предоплаты и сумм, и только если клиент сам спрашивает про полноценный 3D-проект.
+- Для бэкенда: твои ответы будут использоваться для генерации AI-рендера,
+  поэтому описывай дизайн достаточно подробно: стиль, цвет, материалы, свет, ракурс.
 
 6. ОТ КАКИХ ЗАКАЗОВ MADERA DESIGN ОТКАЗЫВАЕТСЯ:
 Если клиент просит что-то из списка ниже, ты ВЕЖЛИВО отказываешь,
@@ -143,7 +123,7 @@ export default async function handler(req, res) {
   • удобное время,
   • контактный телефон.
 - Про оплату:
-  • Компания работает только с 100% предоплатой.
+  • Компания работает только с 100% предоплатой за изготовление мебели.
   • Не обещай рассрочку или частичную предоплату.
 
 8. СТРУКТУРА ОТВЕТОВ:
@@ -160,30 +140,121 @@ export default async function handler(req, res) {
   и предложи оставить контакты для связи.
 `;
 
-    // Подготовка истории сообщений для OpenAI
-    const messages = [
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    console.error("AI_DESIGNER_ERROR: OPENAI_API_KEY is not set");
+    return res
+      .status(500)
+      .json({ error: "AI-сервис временно не настроен (нет API-ключа)." });
+  }
+
+  try {
+    const body = req.body || {};
+
+    // Новый формат от фронта: { messages, imageRequest }
+    const { messages: rawMessages, imageRequest } = body;
+
+    // Старый формат на всякий случай: { message, history }
+    const { message, history } = body;
+
+    let conversation = [];
+
+    if (Array.isArray(rawMessages) && rawMessages.length > 0) {
+      // Нормализуем messages, пришедшие с фронта
+      conversation = rawMessages.map((m) => ({
+        role:
+          m.role === "assistant"
+            ? "assistant"
+            : m.role === "system"
+            ? "system"
+            : "user",
+        content: String(m.content || ""),
+      }));
+    } else {
+      // Совместимость со старым форматом
+      if (Array.isArray(history)) {
+        conversation = history.map((m) => ({
+          role: m.role === "assistant" ? "assistant" : "user",
+          content: String(m.content || ""),
+        }));
+      }
+      if (message && typeof message === "string") {
+        conversation.push({ role: "user", content: message });
+      }
+    }
+
+    // Проверка, что есть хоть одно пользовательское сообщение
+    const lastUserMsg =
+      [...conversation].reverse().find((m) => m.role === "user") || null;
+    if (!lastUserMsg) {
+      return res
+        .status(400)
+        .json({ error: "No user message provided in request" });
+    }
+
+    const messagesForModel = [
       { role: "system", content: SYSTEM_PROMPT },
-      ...(Array.isArray(history)
-        ? history.map((m) => ({
-            role: m.role === "assistant" ? "assistant" : "user",
-            content: String(m.content || ""),
-          }))
-        : []),
-      { role: "user", content: message },
+      ...conversation,
     ];
 
+    // 1. Получаем текстовый ответ-дизайн от модели
     const completion = await client.chat.completions.create({
       model: "gpt-4.1-mini",
-      messages,
+      messages: messagesForModel,
       temperature: 0.4,
-      max_tokens: 700,
+      max_tokens: 900,
     });
 
-    const reply =
+    const replyText =
       completion.choices?.[0]?.message?.content?.trim() ||
-      "Извините, сейчас не удалось получить ответ. Попробуйте ещё раз.";
+      "Готов помочь с идеей дизайна и примерной стоимостью. Уточните, пожалуйста, размеры и стиль мебели.";
 
-    return res.status(200).json({ reply });
+    const wantsImage = !!imageRequest;
+
+    // 2. Если визуализация не запрошена — возвращаем обычный текст
+    if (!wantsImage) {
+      return res.status(200).json({ text: replyText });
+    }
+
+    // 3. Если запрошена визуализация — пробуем сгенерировать картинку
+    try {
+      const imagePrompt = `
+High quality interior furniture render, photorealistic, 3D visualization.
+Style and details:
+${replyText}
+
+Focus on perspective view, realistic materials and lighting.
+`;
+
+      const imageResult = await client.images.generate({
+        model: "gpt-image-1",
+        prompt: imagePrompt,
+        size: "1024x1024",
+      });
+
+      const imageUrl = imageResult.data?.[0]?.url;
+
+      if (imageUrl) {
+        // Удалось получить картинку
+        return res.status(200).json({
+          type: "image",
+          url: imageUrl,
+          text: replyText, // подпись под картинкой = подробное описание дизайна
+        });
+      }
+
+      // Если по какой-то причине URL нет — отдадим хотя бы текст
+      return res.status(200).json({ text: replyText });
+    } catch (imageErr) {
+      console.error("AI_IMAGE_ERROR:", imageErr);
+      // При ошибке генерации изображения просто вернём текстовый ответ
+      return res.status(200).json({ text: replyText });
+    }
   } catch (err) {
     console.error("AI_DESIGNER_ERROR:", err);
     return res.status(500).json({
