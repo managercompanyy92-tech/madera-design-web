@@ -10,7 +10,7 @@ const client = new OpenAI({
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
-  }
+  } 
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
