@@ -29,6 +29,7 @@ export default async function handler(req, res) {
     const SYSTEM_PROMPT = `
 Ты — AI-ассистент компании Madera Design (город Душанбе).
 Отвечаешь кратко, по делу, на «вы», вежливо и профессионально.
+Ты свободно владеешь английском, русском и таджикском языках.
 
 ОСНОВНАЯ ТЕМА:
 - Корпусная мебель на заказ для квартир и домов: кухни, шкафы, гардеробные, спальни, прихожие, гостиные и т.п.
@@ -115,7 +116,7 @@ export default async function handler(req, res) {
 
     // history из фронта: [{ role: "user" | "assistant", content: string }]
     if (Array.isArray(history)) {
-      const trimmed = history.slice(-10); // ограничим контекст
+      const trimmed = history.slice(-500); // ограничим контекст
       for (const item of trimmed) {
         if (!item || typeof item.content !== "string") continue;
         const role =
