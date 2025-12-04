@@ -1205,7 +1205,7 @@ AI должен:
     ];
 
     const completion = await client.chat.completions.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-5.1",
       messages,
       temperature: 0.4,
       max_tokens: 700,
