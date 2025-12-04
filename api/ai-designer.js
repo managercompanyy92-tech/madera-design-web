@@ -6,7 +6,7 @@ import OpenAI from "openai";
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
+const MAX_HISTORY_MESSAGES = 12;
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
