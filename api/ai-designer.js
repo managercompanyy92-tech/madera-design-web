@@ -58,7 +58,7 @@ ${historyText}
   model: "gpt-5.1",
   input: fullPrompt,
   temperature: 0.4,
-  max_completion_tokens: 700,
+  max_output_tokens: 700,
 });
 
     // Достаём текст
