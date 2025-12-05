@@ -2855,3 +2855,15 @@ section.page--home .hero__actions {
   background: #E97A00;
   border-color: #E97A00;
 }
+  /* === УБИЙСТВЕННОЕ ПОЗИЦИОНИРОВАНИЕ АВАТАРКИ === */
+.madera-chat-avatar-btn {
+  position: fixed !important;
+  right: 16px !important;
+  bottom: 5px !important; /* меняйте как хотите */
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 999999 !important; /* выше всех элементов */
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+}
