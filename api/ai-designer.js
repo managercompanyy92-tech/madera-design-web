@@ -5,11 +5,8 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// ваш длинный промт сюда
-const SYSTEM_PROMPT = `
-Ты AI-дизайнер и AI-менеджер компании Madera Design...
-(сюда вставьте весь тот текст, который мы уже отрабатывали)
-`;
+// ВСТАВЬТЕ СЮДА ВЕСЬ ВАШ БОЛЬШОЙ SYSTEM-ПРОМТ
+const SYSTEM_PROMPT = `Ты AI-ассистент. Отвечай кратко и вежливо.`;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -31,34 +28,38 @@ export default async function handler(req, res) {
   }
 
   try {
-    // собираем историю диалога
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...(Array.isArray(history)
-        ? history.map((m) => ({
-            role: m.role === "assistant" ? "assistant" : "user",
-            content: String(m.content ?? ""),
-          }))
-        : []),
-      { role: "user", content: message },
-    ];
+    // Собираем историю в один текстовый блок
+    const historyText = Array.isArray(history)
+      ? history
+          .map((m) => {
+            const role = m.role === "assistant" ? "AI" : "Клиент";
+            return `${role}: ${String(m.content ?? "")}`;
+          })
+          .join("\n")
+      : "";
 
-    // GPT-5.1 через Responses API
+    // Единая текстовая подсказка для Responses API
+    const fullPrompt = `
+СИСТЕМА (инструкции):
+${SYSTEM_PROMPT}
+
+ИСТОРИЯ ДИАЛОГА:
+${historyText}
+
+НОВЫЙ ВОПРОС КЛИЕНТА:
+Клиент: ${message}
+
+Ответь как AI-дизайнер и AI-менеджер Madera Design:
+`;
+
     const response = await client.responses.create({
       model: "gpt-5.1",
-      input: messages.map((m) => ({
-        role: m.role,
-        content: [
-          {
-            type: "text",
-            text: m.content,
-          },
-        ],
-      })),
+      input: fullPrompt,
       temperature: 0.4,
       max_output_tokens: 700,
     });
 
+    // Аккуратно достаём текст ответа
     let reply =
       "Извините, сейчас не удалось получить ответ от сервиса. Попробуйте ещё раз чуть позже.";
 
@@ -66,14 +67,13 @@ export default async function handler(req, res) {
       const firstOutput = response.output?.[0];
       const firstContent = firstOutput?.content?.[0];
 
-      if (firstContent?.type === "output_text" && firstContent.text) {
-        reply = firstContent.text;
+      if (firstContent?.type === "output_text") {
+        reply = firstContent.output_text?.text?.trim() || reply;
       }
     } catch (parseErr) {
       console.error("[Madera AI] PARSE_OPENAI_RESPONSE_ERROR", parseErr);
     }
 
-    // ВАЖНО: ключ именно reply
     return res.status(200).json({ reply });
   } catch (err) {
     console.error("[Madera AI] AI_DESIGNER_ERROR", err);
