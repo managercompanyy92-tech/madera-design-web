@@ -936,7 +936,7 @@ body .support-bubble {
 .madera-chat-avatar-btn {
   position: fixed;
   right: 16px;
-  bottom: 84px; /* над нижней навигацией */
+  bottom: 32px; /* над нижней навигацией */
   z-index: 70;
   border: none;
   padding: 0;
