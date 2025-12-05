@@ -5,8 +5,9 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// ВСТАВЬТЕ СЮДА ВЕСЬ ВАШ БОЛЬШОЙ SYSTEM-ПРОМТ
-const SYSTEM_PROMPT = `Ты AI-ассистент. Отвечай кратко и вежливо.`;
+// Пока короткий system-промт для проверки.
+// Потом сюда просто вставишь свой длинный промт.
+const SYSTEM_PROMPT = `Ты AI-ассистент Madera Design. Отвечай кратко, вежливо и по делу.`;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -21,58 +22,34 @@ export default async function handler(req, res) {
       .json({ error: "Invalid request: message is required" });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  if (!process.env.OPENAI_API_KEY) {
     console.error("[Madera AI] ERROR: OPENAI_API_KEY is not set");
     return res.status(500).json({ error: "Missing OpenAI API key" });
   }
 
   try {
-    // Собираем историю в один текстовый блок
-    const historyText = Array.isArray(history)
-      ? history
-          .map((m) => {
-            const role = m.role === "assistant" ? "AI" : "Клиент";
-            return `${role}: ${String(m.content ?? "")}`;
-          })
-          .join("\n")
-      : "";
+    // Собираем сообщения для Chat Completions
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...(Array.isArray(history)
+        ? history.map((m) => ({
+            role: m.role === "assistant" ? "assistant" : "user",
+            content: String(m.content ?? ""),
+          }))
+        : []),
+      { role: "user", content: message },
+    ];
 
-    // Единая текстовая подсказка для Responses API
-    const fullPrompt = `
-СИСТЕМА (инструкции):
-${SYSTEM_PROMPT}
-
-ИСТОРИЯ ДИАЛОГА:
-${historyText}
-
-НОВЫЙ ВОПРОС КЛИЕНТА:
-Клиент: ${message}
-
-Ответь как AI-дизайнер и AI-менеджер Madera Design:
-`;
-
-    const response = await client.responses.create({
+    const completion = await client.chat.completions.create({
       model: "gpt-5.1",
-      input: fullPrompt,
+      messages,
       temperature: 0.4,
-      max_output_tokens: 700,
+      max_tokens: 700,
     });
 
-    // Аккуратно достаём текст ответа
-    let reply =
+    const reply =
+      completion.choices?.[0]?.message?.content?.trim() ||
       "Извините, сейчас не удалось получить ответ от сервиса. Попробуйте ещё раз чуть позже.";
-
-    try {
-      const firstOutput = response.output?.[0];
-      const firstContent = firstOutput?.content?.[0];
-
-      if (firstContent?.type === "output_text") {
-        reply = firstContent.output_text?.text?.trim() || reply;
-      }
-    } catch (parseErr) {
-      console.error("[Madera AI] PARSE_OPENAI_RESPONSE_ERROR", parseErr);
-    }
 
     return res.status(200).json({ reply });
   } catch (err) {
