@@ -40,12 +40,12 @@ export default async function handler(req, res) {
       { role: "user", content: message },
     ];
 
-    const completion = await client.chat.completions.create({
-      model: "gpt-5.1",
-      messages,
-      temperature: 0.4,
-      max_tokens: 700,
-    });
+    const response = await client.responses.create({
+  model: "gpt-5.1",
+  input: fullPrompt,
+  temperature: 0.4,
+  max_completion_tokens: 700,
+});
 
     const reply =
       completion.choices?.[0]?.message?.content?.trim() ||
