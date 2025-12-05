@@ -937,7 +937,7 @@ body .support-bubble {
   position: fixed;
   right: 16px;
   bottom: 84px; /* над нижней навигацией */
-  z-index: 70;
+  z-index: 9999;
   border: none;
   padding: 0;
   background: transparent;
