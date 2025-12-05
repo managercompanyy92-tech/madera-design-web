@@ -2859,7 +2859,7 @@ section.page--home .hero__actions {
 .madera-chat-avatar-btn {
   position: fixed !important;
   right: 16px !important;
-  bottom: -30px !important; /* меняйте как хотите */
+  bottom: -300px !important; /* меняйте как хотите */
   margin: 0 !important;
   padding: 0 !important;
   z-index: 999999 !important; /* выше всех элементов */
