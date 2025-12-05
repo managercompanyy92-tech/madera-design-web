@@ -2855,3 +2855,98 @@ section.page--home .hero__actions {
   background: #E97A00;
   border-color: #E97A00;
 }
+/* Аватарка внизу справа */
+.madera-chat-avatar-btn {
+  position: fixed !important;
+  right: 16px !important;
+  bottom: 16px !important;
+  z-index: 99999 !important;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Панель чата: фиксированная, сама скроллится */
+.madera-chat-panel {
+  position: fixed !important;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  top: 12vh; /* сколько сверху оставить под шапку сайта */
+  max-width: 480px;
+  margin: 0 auto;
+  z-index: 100000 !important;
+
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #181818;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+
+  /* по умолчанию скрыт */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(16px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+/* когда открыт */
+.madera-chat-panel.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* тело чата — отдельный скролл */
+.madera-chat-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 16px 8px;
+}
+
+/* подвал — фиксирован внизу панели */
+.madera-chat-footer {
+  flex-shrink: 0;
+  padding: 8px 8px 10px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.4);
+}
+
+.madera-chat-suggestions {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.madera-chat-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.madera-chat-input {
+  flex: 1 1 auto;
+  border-radius: 999px;
+  border: none;
+  padding: 10px 14px;
+  font-size: 14px;
+  background: #262626;
+  color: #fff;
+}
+
+.madera-chat-send-btn {
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: none;
+  width: 40px;
+  height: 40px;
+}
+
+/* чтобы при открытом чате не скроллилась страница под ним */
+body.madera-chat-open {
+  overflow: hidden;
+}
