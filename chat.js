@@ -1,4 +1,4 @@
-// chat.js 
+  // chat.js
 // Фронтенд-логика AI-дизайнера Madera Design
 
 (function () {
@@ -117,6 +117,27 @@
     chatState.messages.push({ role, text });
   }
 
+  // Рендер карточки с изображением
+  function appendImageCard(url, promptText) {
+    const container = qs("[data-madera-chat-messages]");
+    if (!container) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("madera-chat__message", "madera-chat__message--bot");
+
+    const card = document.createElement("div");
+    card.classList.add("madera-image-card");
+    card.innerHTML = `
+      <div class="madera-image-card__title">Сгенерированная визуализация</div>
+      <img src="${url}" alt="AI render" class="madera-image-card__img" />
+      <div class="madera-image-card__prompt">${promptText}</div>
+    `;
+
+    wrapper.appendChild(card);
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+  }
+
   // -------- ЖЁСТКО УБИРАЕМ ПОВТОРНЫЕ ПРИВЕТСТВИЯ В ОТВЕТАХ --------
 
   function normalizeAssistantReply(text) {
@@ -226,52 +247,72 @@
     }
   }
 
-  // ---------------- ОБРАБОТЧИК ОТПРАВКИ ФОРМЫ В ЧАТЕ ---------------
+  // -------------------- AI IMAGE GENERATION LAYER ------------------
 
-  async function handleFormSubmit(event) {
-    event.preventDefault();
+  const AI_IMAGE_TRIGGER_WORDS = [
+    "визуализа",
+    "картин",
+    "изображен",
+    "3d",
+    "рендер",
+    "render",
+    "сгенерируй",
+    "покажи дизайн",
+    "покажи идею",
+    "interior",
+    "дизайн комнаты",
+    "композицию",
+    "интерьер",
+  ];
 
-    const input = qs("[data-madera-chat-input]");
-    if (!input) return;
+  function shouldGenerateImage(text) {
+    const t = text.toLowerCase();
+    return AI_IMAGE_TRIGGER_WORDS.some((w) => t.includes(w));
+  }
 
-    const raw = input.value || "";
-    const messageText = raw.trim();
-    if (!messageText) return;
-
-    appendMessage("user", messageText);
-    addToHistory("user", messageText);
-    input.value = "";
-
-    setStatus("Думаю над вашим запросом…");
-
-    const form = qs("[data-madera-chat-form]");
-    const sendBtn = form?.querySelector(".madera-chat__send");
-    const voiceBtn = form?.querySelector(".madera-chat__voice");
-
-    input.disabled = true;
-    if (sendBtn) sendBtn.disabled = true;
-    if (voiceBtn) voiceBtn.disabled = true;
-
-    try {
-      const rawReply = await sendMessageToServer(messageText);
-      const replyText = normalizeAssistantReply(rawReply);
-
-      appendMessage("assistant", replyText);
-      addToHistory("assistant", replyText);
-      setStatus("Готова помочь с вашим следующим вопросом.");
-    } catch (e) {
-      console.error("CHAT_FRONT_ERROR", e);
+  async function processAiRequest(userMessage) {
+    // Если похоже на запрос визуализации — идём в /api/ai-image
+    if (shouldGenerateImage(userMessage)) {
       appendMessage(
         "assistant",
-        "Произошла ошибка при обработке запроса. Попробуйте, пожалуйста, ещё раз."
+        "Готовим визуализацию по вашему описанию, пожалуйста, подождите…"
       );
-      setStatus("Возникла временная ошибка. Можно попробовать ещё раз.");
-    } finally {
-      input.disabled = false;
-      if (sendBtn) sendBtn.disabled = false;
-      if (voiceBtn) voiceBtn.disabled = false;
-      input.focus();
+
+      try {
+        const response = await fetch("/api/ai-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: userMessage }),
+        });
+
+        const data = await response.json();
+
+        if (data?.imageUrl) {
+          appendImageCard(data.imageUrl, userMessage);
+        } else {
+          appendMessage(
+            "assistant",
+            "Не удалось получить изображение. Попробуйте описать задачу чуть подробнее."
+          );
+        }
+      } catch (err) {
+        console.error("AI_IMAGE_FRONT_ERROR", err);
+        appendMessage(
+          "assistant",
+          "Ошибка генерации изображения. Попробуйте позже."
+        );
+      }
+
+      return;
     }
+
+    // Обычный текстовый запрос к AI-дизайнеру
+    setStatus("Думаем над вашим запросом…");
+    const rawReply = await sendMessageToServer(userMessage);
+    const replyText = normalizeAssistantReply(rawReply);
+    appendMessage("assistant", replyText);
+    addToHistory("assistant", replyText);
+    setStatus("Готова помочь с вашим следующим вопросом.");
   }
 
   // ------------------ ГОЛОСОВОЙ ВВОД (ПОКА ДЕМО) -------------------
@@ -284,6 +325,107 @@
       alert(
         "Голосовой ввод пока в демо-режиме. Позже здесь появится полноценная запись и распознавание речи."
       );
+    });
+  }
+
+  // ---------------- QUICK STYLE BUTTONS + SMART HINTS --------------
+
+  function initMaderaChatExtras() {
+    const form = qs("[data-madera-chat-form]");
+    if (!form || !form.parentElement) return;
+
+    // ---------- БЫСТРЫЙ ВЫБОР СТИЛЯ ----------
+    const styleBlock = document.createElement("div");
+    styleBlock.classList.add("madera-style-quick");
+    styleBlock.innerHTML = `
+      <div class="madera-style-quick__title">Быстрый выбор стиля</div>
+      <div class="madera-style-quick__row">
+        <button class="madera-style-btn" data-style="современный минимализм">Минимализм</button>
+        <button class="madera-style-btn" data-style="современный дизайн">Современный</button>
+        <button class="madera-style-btn" data-style="лофт стиль с текстурами">Лофт</button>
+        <button class="madera-style-btn" data-style="скандинавский тёплый интерьер">Сканди</button>
+        <button class="madera-style-btn" data-style="премиальный интерьер в стиле Madera Design">Премиум</button>
+      </div>
+    `;
+
+    // ---------- УМНЫЕ ПОДСКАЗКИ (HINTS) ----------
+    const hintsBlock = document.createElement("div");
+    hintsBlock.classList.add("madera-hints");
+    hintsBlock.innerHTML = `
+      <div class="madera-hints__title">Попробуйте спросить</div>
+      <div class="madera-hints__row">
+        <button class="madera-hint-btn" data-hint="Подбери идею кухни 4,5 метра под мой стиль и бюджет.">
+          Идея кухни 4,5 м
+        </button>
+        <button class="madera-hint-btn" data-hint="Оцени планировку моей будущей гардеробной и предложи улучшения.">
+          Гардеробная с улучшениями
+        </button>
+        <button class="madera-hint-btn" data-hint="Сделай концепцию гостиной в стиле премиум под наш бренд.">
+          Премиум гостиная
+        </button>
+      </div>
+    `;
+
+    // Вставляем блоки перед и сразу после формы
+    form.parentElement.insertBefore(styleBlock, form);
+    form.parentElement.insertBefore(hintsBlock, form.nextSibling);
+  }
+
+  async function handleQuickStyleClick(style) {
+    const userPhrase = "Хочу дизайн в стиле: " + style;
+
+    appendMessage("user", userPhrase);
+    addToHistory("user", userPhrase);
+    setStatus("Думаем над вариантом в этом стиле…");
+
+    const rawReply = await sendMessageToServer(
+      `Клиент хочет интерьер в стиле: ${style}.
+Сделай 3–5 конкретных идей: композиция мебели, материалы, цвета, фурнитура.
+Пиши кратко, структурированно, как профессиональный дизайнер и менеджер по продажам Madera Design.`
+    );
+
+    const replyText = normalizeAssistantReply(rawReply);
+    appendMessage("assistant", replyText);
+    addToHistory("assistant", replyText);
+    setStatus("Готова помочь с вашим следующим вопросом.");
+  }
+
+  async function handleHintClick(promptText) {
+    appendMessage("user", promptText);
+    addToHistory("user", promptText);
+    setStatus("Обрабатываем ваш запрос…");
+
+    const rawReply = await sendMessageToServer(
+      `${promptText}
+Учитывай фирменный стиль и политику компании Madera Design.
+Отвечай кратко, структурированно, с мягким подведением к заказу.`
+    );
+
+    const replyText = normalizeAssistantReply(rawReply);
+    appendMessage("assistant", replyText);
+    addToHistory("assistant", replyText);
+    setStatus("Готова помочь с вашим следующим вопросом.");
+  }
+
+  function setupExtrasClickHandlers() {
+    document.body.addEventListener("click", async (e) => {
+      const styleBtn = e.target.closest(".madera-style-btn");
+      if (styleBtn) {
+        const style = styleBtn.getAttribute("data-style");
+        if (style) {
+          await handleQuickStyleClick(style);
+        }
+        return;
+      }
+
+      const hintBtn = e.target.closest(".madera-hint-btn");
+      if (hintBtn) {
+        const hint = hintBtn.getAttribute("data-hint");
+        if (hint) {
+          await handleHintClick(hint);
+        }
+        return;
+      }
     });
   }
 
@@ -307,6 +449,7 @@
     const openBtn = qs("[data-madera-chat-open]");
     const closeBtn = qs("[data-madera-chat-close]");
     const form = qs("[data-madera-chat-form]");
+    const input = qs("[data-madera-chat-input]");
 
     if (openBtn) {
       openBtn.addEventListener("click", (e) => {
@@ -322,11 +465,26 @@
       });
     }
 
-    if (form) {
-      form.addEventListener("submit", handleFormSubmit);
+    if (form && input) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const text = input.value.trim();
+        if (!text) return;
+
+        appendMessage("user", text);
+        addToHistory("user", text);
+
+        input.value = "";
+        input.focus();
+
+        await processAiRequest(text);
+      });
     }
 
     setupVoicePlaceholder();
+    initMaderaChatExtras();
+    setupExtrasClickHandlers();
 
     setStatus(
       "Готова помочь. Напишите вопрос о дизайне мебели или интерьера."
@@ -335,223 +493,3 @@
 
   document.addEventListener("DOMContentLoaded", initChat);
 })();
-// -----------------------------------------------------------
-// AI IMAGE GENERATION MODULE (MADERA DESIGN PREMIUM ENGINE)
-// -----------------------------------------------------------
-
-const AI_IMAGE_TRIGGER_WORDS = [
-  "визуализа",
-  "картин",
-  "изображен",
-  "3d",
-  "рендер",
-  "render",
-  "сгенерируй",
-  "покажи дизайн",
-  "покажи идею",
-  "interior",
-  "дизайн комнаты",
-  "композицию",
-  "интерьер"
-];
-
-function shouldGenerateImage(text) {
-  const t = text.toLowerCase();
-  return AI_IMAGE_TRIGGER_WORDS.some((w) => t.includes(w));
-}
-
-// Рендер изображения в чат
-function appendImageCard(url, promptText) {
-  const container = document.querySelector("[data-madera-chat-messages]");
-  if (!container) return;
-
-  const wrapper = document.createElement("div");
-  wrapper.classList.add("madera-chat__message", "madera-chat__message--bot");
-
-  const card = document.createElement("div");
-  card.classList.add("madera-image-card");
-  card.innerHTML = `
-    <div class="madera-image-card__title">Сгенерированная визуализация</div>
-    <img src="${url}" alt="AI render" class="madera-image-card__img" />
-    <div class="madera-image-card__prompt">${promptText}</div>
-  `;
-
-  wrapper.appendChild(card);
-  container.appendChild(wrapper);
-  container.scrollTop = container.scrollHeight;
-}
-
-// Основная функция: куда отправлять запрос — текст или изображение
-async function processAiRequest(userMessage) {
-  // Если сообщение похоже на запрос о визуализации
-  if (shouldGenerateImage(userMessage)) {
-    appendMessage("assistant", "Готовлю визуализацию, пожалуйста подождите…");
-
-    try {
-      const response = await fetch("/api/ai-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: userMessage })
-      });
-
-      const data = await response.json();
-
-      if (data?.imageUrl) {
-        appendImageCard(data.imageUrl, userMessage);
-        return;
-      } else {
-        appendMessage(
-          "assistant",
-          "Не удалось получить изображение. Попробуйте описать задачу подробнее."
-        );
-      }
-    } catch (err) {
-      appendMessage(
-        "assistant",
-        "Ошибка генерации изображения. Попробуйте позже."
-      );
-    }
-
-    return;
-  }
-
-  // Иначе — отправляем как обычный текст на AI-дизайнера
-  const rawReply = await sendMessageToServer(userMessage);
-  const replyText = normalizeAssistantReply(rawReply);
-  appendMessage("assistant", replyText);
-  addToHistory("assistant", replyText);
-}
-
-// Перехватываем отправку формы
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("[data-madera-chat-form]");
-  const input = document.querySelector("[data-madera-chat-input]");
-
-  if (!form || !input) return;
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const text = input.value.trim();
-    if (!text) return;
-
-    appendMessage("user", text);
-    addToHistory("user", text);
-
-    input.value = "";
-    input.focus();
-
-    await processAiRequest(text);
-  });
-});
-
-// -----------------------------------------------------------
-// END IMAGE GENERATION LAYER
-// -----------------------------------------------------------
-// -----------------------------------------------------------
-// QUICK STYLE BUTTONS + SMART HINTS (MADERA PREMIUM UX)
-// -----------------------------------------------------------
-
-function initMaderaChatExtras() {
-  const form = document.querySelector("[data-madera-chat-form]");
-  if (!form) return;
-
-  // ---------- БЫСТРЫЙ ВЫБОР СТИЛЯ ----------
-  const styleBlock = document.createElement("div");
-  styleBlock.classList.add("madera-style-quick");
-  styleBlock.innerHTML = `
-    <div class="madera-style-quick__title">Быстрый выбор стиля</div>
-    <div class="madera-style-quick__row">
-      <button class="madera-style-btn" data-style="современный минимализм">Минимализм</button>
-      <button class="madera-style-btn" data-style="современный дизайн">Современный</button>
-      <button class="madera-style-btn" data-style="лофт стиль с текстурами">Лофт</button>
-      <button class="madera-style-btn" data-style="скандинавский тёплый интерьер">Сканди</button>
-      <button class="madera-style-btn" data-style="премиальный интерьер в стиле Madera Design">Премиум</button>
-    </div>
-  `;
-
-  // ---------- УМНЫЕ ПОДСКАЗКИ (HINTS) ----------
-  const hintsBlock = document.createElement("div");
-  hintsBlock.classList.add("madera-hints");
-  hintsBlock.innerHTML = `
-    <div class="madera-hints__title">Попробуйте спросить</div>
-    <div class="madera-hints__row">
-      <button class="madera-hint-btn" data-hint="Подбери идею кухни 4,5 метра под мой стиль и бюджет.">
-        Идея кухни 4,5 м
-      </button>
-      <button class="madera-hint-btn" data-hint="Оцени планировку моей будущей гардеробной и предложи улучшения.">
-        Гардеробная с улучшениями
-      </button>
-      <button class="мadera-hint-btn" data-hint="Сделай концепцию гостиной в стиле премиум под наш бренд.">
-        Премиум гостиная
-      </button>
-    </div>
-  `;
-
-  // Вставляем БЛОКИ ПЕРЕД формой
-  form.parentElement.insertBefore(styleBlock, form);
-  form.parentElement.insertBefore(hintsBlock, form.nextSibling);
-}
-
-// обработка клика по стилю
-async function handleQuickStyleClick(style) {
-  const userPhrase = "Хочу дизайн в стиле: " + style;
-
-  appendMessage("user", userPhrase);
-  addToHistory("user", userPhrase);
-  setStatus("Думаем над вариантом в этом стиле…");
-
-  const rawReply = await sendMessageToServer(
-    `Клиент хочет интерьер в стиле: ${style}.
-Сделай 3–5 конкретных идей: композиция мебели, материалы, цвета, фурнитура.
-Пиши кратко, структурированно, как профессиональный дизайнер и менеджер по продажам Madera Design.`
-  );
-
-  const replyText = normalizeAssistantReply(rawReply);
-  appendMessage("assistant", replyText);
-  addToHistory("assistant", replyText);
-  setStatus("Готова помочь с вашим следующим вопросом.");
-}
-
-// обработка клика по подсказке (hint)
-async function handleHintClick(promptText) {
-  appendMessage("user", promptText);
-  addToHistory("user", promptText);
-  setStatus("Обрабатываем ваш запрос…");
-
-  const rawReply = await sendMessageToServer(
-    `${promptText}
-Учитывай фирменный стиль и политику компании Madera Design.
-Отвечай кратко, структурированно, с мягким подведением к заказу.`
-  );
-
-  const replyText = normalizeAssistantReply(rawReply);
-  appendMessage("assistant", replyText);
-  addToHistory("assistant", replyText);
-  setStatus("Готова помочь с вашим следующим вопросом.");
-}
-
-// инициализация дополнительных элементов после загрузки
-document.addEventListener("DOMContentLoaded", () => {
-  initMaderaChatExtras();
-
-  document.body.addEventListener("click", async (e) => {
-    const styleBtn = e.target.closest(".madera-style-btn");
-    if (styleBtn) {
-      const style = styleBtn.getAttribute("data-style");
-      if (style) {
-        await handleQuickStyleClick(style);
-      }
-      return;
-    }
-
-    const hintBtn = e.target.closest(".madera-hint-btn");
-    if (hintBtn) {
-      const hint = hintBtn.getAttribute("data-hint");
-      if (hint) {
-        await handleHintClick(hint);
-      }
-      return;
-    }
-  });
-});
