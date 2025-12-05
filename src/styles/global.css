@@ -2855,3 +2855,20 @@ section.page--home .hero__actions {
   background: #E97A00;
   border-color: #E97A00;
 }
+  /* Снимаем перекрытие темного блока поверх аватара */
+.madera-chat-panel,
+footer,
+.bottom-bar {
+  z-index: 1 !important;
+}
+
+/* Аватарка всегда сверху */
+.madera-chat-avatar-btn {
+  z-index: 9999 !important;
+}
+  .madera-chat-avatar-btn {
+  position: fixed;
+  bottom: 120px; /* подними при необходимости */
+  right: 16px;
+  z-index: 9999 !important;
+  }
