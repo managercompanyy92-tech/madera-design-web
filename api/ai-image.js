@@ -1,95 +1,64 @@
-export const config = {
-  runtime: "edge",
-};
+// /api/ai-image.js
+import OpenAI from "openai";
 
-// Генератор изображений для AI-дизайнера Madera Design
-export default async function handler(req) {
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { prompt } = req.body || {};
+
+  if (!prompt || typeof prompt !== "string") {
+    return res.status(400).json({ error: "Prompt is required" });
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    console.error("[Madera AI IMAGE] ERROR: OPENAI_API_KEY is not set");
+    return res.status(500).json({ error: "Missing OpenAI API key" });
+  }
+
   try {
-    if (req.method !== "POST") {
-      return new Response(
-        JSON.stringify({ error: "Method not allowed" }),
-        { status: 405 }
-      );
+    // Немного усиливаем промт под интерьер
+    const fullPrompt = `
+Фотореалистичная визуализация интерьера.
+Премиальная корпусная мебель, аккуратный свет, реалистичные материалы.
+Сцена: ${prompt}
+`.trim();
+
+    const imageResponse = await client.images.generate({
+      model: "gpt-image-1",
+      prompt: fullPrompt,
+      size: "1024x1024",
+      n: 1,
+    });
+
+    const first = imageResponse.data?.[0];
+
+    // API может вернуть url или base64, обрабатываем оба случая
+    let imageUrl = first?.url || null;
+
+    if (!imageUrl && first?.b64_json) {
+      imageUrl = `data:image/png;base64,${first.b64_json}`;
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
-
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: "OPENAI_API_KEY not configured" }),
-        { status: 500 }
-      );
+    if (!imageUrl) {
+      console.error("[Madera AI IMAGE] NO_IMAGE_URL", imageResponse);
+      return res
+        .status(500)
+        .json({ error: "Не удалось получить изображение от сервиса." });
     }
 
-    const { prompt } = await req.json();
-
-    if (!prompt || prompt.trim().length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Prompt is empty" }),
-        { status: 400 }
-      );
-    }
-
-    // Формируем контекст для Madera Design
-    const stylePrompt = `
-Ты — старший интерьерный дизайнер компании Madera Design (г. Душанбе).
-Создай ультрареалистичный интерьер с учётом следующего запроса клиента.
-
-Требования к изображению:
-- Премиальное качество, фотореализм (8K детализация)
-- Мягкое тёплое освещение
-- Натуральные материалы: дерево, камень, стекло, металл
-- Цветовая гамма: фирменные тона Madera Design (графит, дерево, тёплый оранжевый)
-- Аккуратная композиция, перспективная камера
-- Без текста, людей, водяных знаков, логотипов
-- Современный минимализм в архитектуре и мебели
-- Атмосфера уюта и эстетики
-
-Клиент просит: ${prompt}.
-`;
-
-    // Запрос к OpenAI API
-    const openaiResponse = await fetch(
-      "https://api.openai.com/v1/images/generations",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-image-1",
-          prompt: stylePrompt,
-          size: "1024x1024",
-          quality: "hd",
-          n: 1,
-        }),
-      }
-    );
-
-    const data = await openaiResponse.json();
-
-    if (!data?.data?.[0]?.url) {
-      return new Response(
-        JSON.stringify({
-          error: "Image generation failed",
-          details: data,
-        }),
-        { status: 500 }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        imageUrl: data.data[0].url,
-      }),
-      { status: 200 }
-    );
+    return res.status(200).json({ imageUrl });
   } catch (err) {
-    console.error("AI_IMAGE_ERROR:", err);
-    return new Response(
-      JSON.stringify({ error: "Server error", detail: err.message }),
-      { status: 500 }
-    );
+    console.error("[Madera AI IMAGE] GENERATION_ERROR", err);
+    return res.status(500).json({
+      error:
+        "Извините, сервис генерации изображений временно недоступен. Попробуйте ещё раз чуть позже.",
+    });
   }
 }
