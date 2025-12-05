@@ -2712,3 +2712,42 @@ AI должен:
 
   document.addEventListener("DOMContentLoaded", initChat);
 })();
+(function () {
+  const avatarBtn = document.querySelector('[data-madera-chat-open]');
+  const chat = document.querySelector('[data-madera-chat]');
+  const closeBtn = chat?.querySelector('[data-madera-chat-close]');
+
+  if (!avatarBtn || !chat) return;
+
+  function adjustHeight() {
+    // подстраиваем максимальную высоту панели под реальное окно
+    const h = window.innerHeight;
+    chat.style.maxHeight = (h - h * 0.12 - 8) + 'px'; // 12vh сверху + 8px снизу
+  }
+
+  function openChat() {
+    chat.classList.add('is-open');
+    document.body.classList.add('madera-chat-open');
+    adjustHeight();
+  }
+
+  function closeChat() {
+    chat.classList.remove('is-open');
+    document.body.classList.remove('madera-chat-open');
+  }
+
+  avatarBtn.addEventListener('click', () => {
+    if (chat.classList.contains('is-open')) closeChat();
+    else openChat();
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeChat);
+  }
+
+  window.addEventListener('resize', adjustHeight);
+  window.addEventListener('orientationchange', adjustHeight);
+
+  // на старте чуть подстроить
+  adjustHeight();
+})();
