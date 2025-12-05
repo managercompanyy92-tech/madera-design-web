@@ -1204,16 +1204,37 @@ AI должен:
       { role: "user", content: message },
     ];
 
-    const completion = await client.chat.completions.create({
-      model: "gpt-5.1",
-      messages,
-      temperature: 0.4,
-      max_tokens: 700,
-    });
+    // messages у нас уже есть: массив { role, content: string }
 
-    const reply =
-      completion.choices?.[0]?.message?.content?.trim() ||
-      "Извините, сейчас не удалось получить ответ. Попробуйте ещё раз.";
+const response = await client.responses.create({
+  model: "gpt-5.1",
+  input: messages.map((m) => ({
+    role: m.role,
+    content: [
+      {
+        type: "text",
+        text: String(m.content ?? ""),
+      },
+    ],
+  })),
+  temperature: 0.4,
+  max_output_tokens: 700,
+});
+
+let reply = "Извините, сейчас не удалось получить ответ от сервиса.";
+
+try {
+  const firstOutput = response.output?.[0];
+  const firstContent = firstOutput?.content?.[0];
+
+  if (firstContent?.type === "output_text") {
+    reply = firstContent.text;
+  }
+} catch (e) {
+  console.error("PARSE_OPENAI_RESPONSE_ERROR", e);
+}
+
+return res.status(200).json({ reply });
 
     return res.status(200).json({ reply });
   } catch (err) {
