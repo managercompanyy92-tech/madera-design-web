@@ -5,8 +5,9 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// здесь потом вставишь свой длинный system-промпт
-const SYSTEM_PROMPT = `Ты AI-ассистент. Отвечай кратко и вежливо.`;
+// сюда потом вставишь свой длинный системный промпт
+const SYSTEM_PROMPT = `Ты AI-ассистент-дизайнер и менеджер студии Madera Design.
+Отвечай вежливо, по делу и коротко, если пользователь не просит подробности.`;
 
 export default async function handler(req, res) {
   // Разрешаем только POST
@@ -16,6 +17,7 @@ export default async function handler(req, res) {
 
   const { message, history } = req.body || {};
 
+  // Валидация сообщения
   if (!message || typeof message !== "string") {
     return res
       .status(400)
@@ -29,7 +31,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Собираем историю
+    // Собираем историю в текст (опционально)
     const historyText = Array.isArray(history)
       ? history
           .map((m) => {
@@ -39,29 +41,30 @@ export default async function handler(req, res) {
           .join("\n")
       : "";
 
-    // Полный промпт
+    // Один большой промпт строкой — для простоты
     const fullPrompt = `
-СИСТЕМА (инструкции):
+СИСТЕМА:
 ${SYSTEM_PROMPT}
 
-ИСТОРИЯ ДИАЛОГА:
-${historyText}
+КОНТЕКСТ (предыдущие сообщения):
+${historyText || "— нет предыдущих сообщений —"}
 
-НОВЫЙ ВОПРОС КЛИЕНТА:
+НОВЫЙ ВОПРОС:
 Клиент: ${message}
 
-Ответь как AI-дизайнер и AI-менеджер Madera Design:
-`.trim();
+Ответь как AI-дизайнер и менеджер Madera Design.
+Дай понятный, полезный и короткий ответ на русском языке.
+`;
 
-    // Вызов Responses API
+    // ВАЖНО: используем Responses API с параметром max_output_tokens
     const response = await client.responses.create({
-  model: "gpt-5.1",
-  input: fullPrompt,
-  temperature: 0.4,
-  max_output_tokens: 700,
-});
+      model: "gpt-5.1",
+      input: fullPrompt, // простая строка — тип автоматически input_text
+      temperature: 0.4,
+      max_output_tokens: 700,
+    });
 
-    // Достаём текст
+    // Базовое сообщение на случай, если парсинг не удастся
     let reply =
       "Извините, сейчас не удалось получить ответ от сервиса. Попробуйте ещё раз чуть позже.";
 
@@ -70,12 +73,16 @@ ${historyText}
       const firstContent = firstOutput?.content?.[0];
 
       if (firstContent?.type === "output_text") {
-        reply = firstContent.output_text?.text?.trim() || reply;
+        const text = firstContent.output_text?.text;
+        if (typeof text === "string" && text.trim()) {
+          reply = text.trim();
+        }
       }
     } catch (parseErr) {
       console.error("[Madera AI] PARSE_OPENAI_RESPONSE_ERROR", parseErr);
     }
 
+    // Успешный ответ бэкенда
     return res.status(200).json({ reply });
   } catch (err) {
     console.error("[Madera AI] AI_DESIGNER_ERROR", err);
