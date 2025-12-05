@@ -5,84 +5,95 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// сюда потом вставишь свой длинный системный промпт
-const SYSTEM_PROMPT = `Ты AI-ассистент-дизайнер и менеджер студии Madera Design.
-Отвечай вежливо, по делу и коротко, если пользователь не просит подробности.`;
+const FALLBACK_REPLY =
+  "Извините, сейчас не удалось получить ответ от сервиса. Попробуйте ещё раз чуть позже.";
+
+const DEFAULT_SYSTEM_PROMPT =
+  "Ты AI-ассистент по дизайну мебели. Отвечай кратко и вежливо.";
 
 export default async function handler(req, res) {
-  // Разрешаем только POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { message, history } = req.body || {};
+  const { message, history, systemPrompt } = req.body || {};
 
-  // Валидация сообщения
   if (!message || typeof message !== "string") {
     return res
       .status(400)
       .json({ error: "Invalid request: message is required" });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  if (!process.env.OPENAI_API_KEY) {
     console.error("[Madera AI] ERROR: OPENAI_API_KEY is not set");
     return res.status(500).json({ error: "Missing OpenAI API key" });
   }
 
   try {
-    // Собираем историю в текст (опционально)
+    // Собираем историю в один текстовый блок
     const historyText = Array.isArray(history)
       ? history
           .map((m) => {
             const role = m.role === "assistant" ? "AI" : "Клиент";
-            return `${role}: ${String(m.content ?? "")}`;
+            const text = String(m.text ?? m.content ?? "");
+            return `${role}: ${text}`;
           })
           .join("\n")
       : "";
 
-    // Один большой промпт строкой — для простоты
+    const system =
+      typeof systemPrompt === "string" && systemPrompt.trim()
+        ? systemPrompt.trim()
+        : DEFAULT_SYSTEM_PROMPT;
+
     const fullPrompt = `
-СИСТЕМА:
-${SYSTEM_PROMPT}
+СИСТЕМА (инструкции):
+${system}
 
-КОНТЕКСТ (предыдущие сообщения):
-${historyText || "— нет предыдущих сообщений —"}
+ИСТОРИЯ ДИАЛОГА:
+${historyText}
 
-НОВЫЙ ВОПРОС:
+НОВЫЙ ВОПРОС КЛИЕНТА:
 Клиент: ${message}
 
-Ответь как AI-дизайнер и менеджер Madera Design.
-Дай понятный, полезный и короткий ответ на русском языке.
-`;
+Ответь как AI-дизайнер и AI-менеджер Madera Design:
+`.trim();
 
-    // ВАЖНО: используем Responses API с параметром max_output_tokens
     const response = await client.responses.create({
       model: "gpt-5.1",
-      input: fullPrompt, // простая строка — тип автоматически input_text
+      input: fullPrompt,
       temperature: 0.4,
       max_output_tokens: 700,
     });
 
-    // Базовое сообщение на случай, если парсинг не удастся
-    let reply =
-      "Извините, сейчас не удалось получить ответ от сервиса. Попробуйте ещё раз чуть позже.";
+    let reply = FALLBACK_REPLY;
 
     try {
-      const firstOutput = response.output?.[0];
-      const firstContent = firstOutput?.content?.[0];
+      // Правильное извлечение текста из Responses API
+      const firstMessage = response.output?.[0];
+      const firstTextPart = firstMessage?.content?.find(
+        (part) => part.type === "output_text"
+      );
 
-      if (firstContent?.type === "output_text") {
-        const text = firstContent.output_text?.text;
-        if (typeof text === "string" && text.trim()) {
-          reply = text.trim();
-        }
+      if (
+        firstTextPart &&
+        typeof firstTextPart.text === "string" &&
+        firstTextPart.text.trim().length
+      ) {
+        reply = firstTextPart.text.trim();
+      }
+
+      // На всякий случай лог, если структура поменяется
+      if (!firstTextPart) {
+        console.warn(
+          "[Madera AI] Unexpected responses.output structure:",
+          JSON.stringify(response.output, null, 2)
+        );
       }
     } catch (parseErr) {
       console.error("[Madera AI] PARSE_OPENAI_RESPONSE_ERROR", parseErr);
     }
 
-    // Успешный ответ бэкенда
     return res.status(200).json({ reply });
   } catch (err) {
     console.error("[Madera AI] AI_DESIGNER_ERROR", err);
