@@ -21,21 +21,75 @@
     <div id="app"></div>
 
     <!-- AI-менеджер и AI-дизайнер MADERA! (круглый портрет) -->
-    <button
-      class="madera-chat-avatar-btn"
-      type="button"
-      data-madera-chat-open
-      aria-label="Открыть AI-менеджер и AI-дизайнер MADERA!"
-    >
-      <div class="madera-chat-avatar">
+    <!-- Кнопка-аватар (внизу справа) -->
+<button class="madera-chat-avatar-btn" type="button" data-madera-chat-open>
+  <div class="madera-chat-avatar">
+    <img
+      src="public/assistant/assistant-avatar.png"
+      alt="AI-менеджер и AI-дизайнер MADERA"
+      class="madera-chat-avatar__img"
+    />
+  </div>
+</button>
+
+<!-- Панель чата -->
+<div class="madera-chat-panel" data-madera-chat-panel hidden>
+  <div class="madera-chat-window">
+    <!-- Шапка -->
+    <header class="madera-chat-header">
+      <div class="madera-chat-header__avatar">
         <img
-          src="public/assistant/assistant.jpg"
-          alt="AI-менеджер и AI-дизайнер MADERA!"
-          class="madera-chat-avatar__img"
+          src="public/assistant/assistant-avatar.png"
+          alt="AI-менеджер и AI-дизайнер MADERA"
         />
-        <div class="madera-chat-avatar__mic"></div>
       </div>
-    </button>
+      <div class="madera-chat-header__text">
+        <div class="madera-chat-header__title">
+          AI-менеджер и AI-дизайнер MADERA!
+        </div>
+        <div class="madera-chat-header__subtitle">
+          Ваш персональный эксперт 24/7!
+        </div>
+      </div>
+      <button class="madera-chat-header__close" type="button" data-madera-chat-close>
+        ×
+      </button>
+    </header>
+
+    <!-- Тело чата (сообщения) -->
+    <div class="madera-chat-body" id="madera-chat-body">
+      <!-- сюда твой скрипт будет рендерить сообщения -->
+    </div>
+
+    <!-- Нижняя панель: быстрый выбор + поле ввода -->
+    <footer class="madera-chat-footer">
+      <div class="madera-chat-quick">
+        <span class="madera-chat-quick__title">Быстрый выбор стиля</span>
+        <div class="madera-chat-quick__tags">
+          <button type="button" class="madera-chat-tag">Минимализм</button>
+          <button type="button" class="madera-chat-tag">Современный</button>
+          <button type="button" class="madera-chat-tag">Лофт</button>
+          <button type="button" class="madera-chat-tag">Сканди</button>
+          <button type="button" class="madera-chat-tag">Премиум</button>
+        </div>
+      </div>
+
+      <form class="madera-chat-input" id="madera-chat-form">
+        <input
+          type="text"
+          class="madera-chat-input__field"
+          placeholder="Напишите или скажите ваш вопрос..."
+        />
+        <button type="button" class="madera-chat-input__voice">
+          🎤
+        </button>
+        <button type="submit" class="madera-chat-input__send">
+          ➤
+        </button>
+      </form>
+    </footer>
+  </div>
+</div>
 
     <!-- Панель AI-чата (микро-чат, если он используется) -->
     <div class="madera-chat" data-madera-chat>
