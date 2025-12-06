@@ -794,16 +794,29 @@ function renderMore() {
       <div class="order-layout" style="margin-top: 18px;">
         <div>
           <!-- Оплата и рассрочка -->
-          <div class="order-info__card">
-            <div class="order-info__badge">Оплата и рассрочка</div>
-            <h2 class="order-info__title">Как можно оплатить заказ</h2>
-            <ul class="order-info__list">
-              <li>Частичная предоплата для запуска в производство.</li>
-              <li>Окончательный расчёт после монтажа и приёмки мебели.</li>
-              <li>Возможность оплаты по безналичному расчёту.</li>
-              <li>Возможна рассрочка и кредит через партнёрские организации (по согласованию).</li>
-            </ul>
-          </div>
+<div class="order-info__card">
+  <div class="order-info__badge">Оплата и рассрочка</div>
+  <h2 class="order-info__title">Как можно оплатить заказ</h2>
+
+  <ul class="order-info__list">
+    <li>Оплата только <strong>по безналичному расчёту</strong> — через банковские сервисы или электронные кошельки.</li>
+    <li>После оплаты вы получаете чек и персональный номер заказа.</li>
+  </ul>
+
+  <h3 class="order-info__subtitle">Запуск в производство</h3>
+  <ul class="order-info__list">
+    <li>Изготовление начинается <strong>после 100% оплаты</strong> утверждённой сметы.</li>
+    <li>Частичная оплата и расчёт после монтажа не предусмотрены — это гарантирует точные сроки и стабильную работу производства.</li>
+  </ul>
+
+  <h3 class="order-info__subtitle">Рассрочка / кредит</h3>
+  <ul class="order-info__list">
+    <li>Доступны партнёрские программы:</li>
+    <li>— до <strong>6 месяцев</strong> — переплата <strong>10%</strong></li>
+    <li>— до <strong>12 месяцев</strong> — переплата <strong>20%</strong></li>
+    <li>— до <strong>18 месяцев</strong> — переплата <strong>30%</strong></li>
+  </ul>
+</div>
 
           <!-- Гарантия и сервис -->
           <div class="order-info__card">
