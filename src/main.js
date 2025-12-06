@@ -228,9 +228,6 @@ function renderHome() {
     Рассчитать и оформить заказ
   </button>
 </div>
-          Рассчитать и оформить заказ
-        </button>
-
         <button
           class="hero-face-btn hero-face-btn--secondary"
           type="button"
