@@ -199,7 +199,6 @@ function renderHome() {
         .hero-photo {
         margin-top: 4px !important;  /* уменьшаем вертикальный отступ сверху */
       }
-      }
     </style>
 
     <section class="page page--home">
