@@ -508,9 +508,6 @@ data-route="order">
     .join("");
 
   return `
-  </section>
-`;
-}
     <section class="page page--catalog">
       <button class="catalog-back" data-action="catalog-back">
         ← Все категории
