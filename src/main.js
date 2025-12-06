@@ -16,8 +16,6 @@ let selectedCatalogCategoryId = null;
 
 function renderHome() {
   return `
-  function renderHome() {
-  return `
     <style>
       .highlights__item--accent {
         border: 1px solid rgba(255, 140, 0, 0.5);
