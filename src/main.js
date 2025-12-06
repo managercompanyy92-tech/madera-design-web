@@ -726,6 +726,12 @@ function renderMore() {
 Здесь вы найдёте ответы на самые частые вопросы:
 
 из чего мы делаем мебель, какие реальные сроки, как формируется стоимость, какие гарантии мы предоставляем и как работает сервис после монтажа.      </p>
+<style>
+  .order-info__card .order-info__text {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+</style>
 
     <section class="highlights">
 
