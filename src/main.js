@@ -1,4 +1,4 @@
-// src/main.js 
+6// src/main.js 
 
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
@@ -197,7 +197,8 @@ function renderHome() {
           transform: scale(1);
         }
         .hero-photo {
-        margin-top: 0px !important;  /* уменьшаем вертикальный отступ сверху */
+        margin-top: -24px !important; /* подтягиваем блок с фото вверх */
+      }
       }
     </style>
 
