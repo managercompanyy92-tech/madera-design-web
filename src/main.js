@@ -938,7 +938,6 @@ function renderMore() {
   border-radius: 20px;
   box-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
   padding: 20px;
-}
   }
 </style>
     <section class="page page--more">
