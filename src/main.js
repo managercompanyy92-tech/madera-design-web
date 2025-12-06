@@ -8,7 +8,84 @@ const BASE_RATES = {
   standard: 4000,
   premium: 5000,
 };
+// =======================
+//   TELEGRAM ЗАЯВКИ
+// =======================
 
+// 1) ВСТАВЬ СВОЙ НОВЫЙ ТОКЕН БОТА
+const TG_BOT_TOKEN =
+  '7246110807:AAEDQq0PpjW6IAno7iJUHYFh4OUWluvCQBE';
+
+// 2) ВСТАВЬ СВОЙ user id из @userinfobot
+const TG_CHAT_ID = 7889419635;
+
+// Универсальная отправка одной заявки в Telegram
+async function sendOrderToTelegram(formElement) {
+  const TG_API_URL = `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`;
+
+  // Собираем все поля формы
+  const fd = new FormData(formElement);
+  const lines = [];
+
+  fd.forEach((value, key) => {
+    const v = String(value || '').trim();
+    if (!v) return;
+    lines.push(`<b>${key}</b>: ${v}`);
+  });
+
+  const text =
+    '<b>Новая заявка с сайта Madera Design</b>\n\n' +
+    lines.join('\n');
+
+  const payload = {
+    chat_id: TG_CHAT_ID,
+    text,
+    parse_mode: 'HTML',
+  };
+
+  const res = await fetch(TG_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Telegram error ${res.status}: ${errText}`);
+  }
+}
+
+// Глобальная функция для кнопки
+function handleOrderSubmit() {
+  const form = document.querySelector('.order-form');
+
+  if (!form) {
+    alert('Форма заявки не найдена');
+    return;
+  }
+
+  sendOrderToTelegram(form)
+    .then(() => {
+      const resultEl = document.querySelector('.order-form__result');
+
+      if (resultEl) {
+        resultEl.textContent =
+          'Заявка отправлена. Мы свяжемся с вами в ближайшее время.';
+      } else {
+        alert(
+          'Заявка отправлена. Мы свяжемся с вами в ближайшее время.'
+        );
+      }
+
+      form.reset();
+    })
+    .catch((err) => {
+      console.error('Ошибка отправки заявки в Telegram:', err);
+      alert(
+        'Не удалось отправить заявку. Попробуйте ещё раз или напишите нам в WhatsApp.'
+      );
+    });
+}
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
 
