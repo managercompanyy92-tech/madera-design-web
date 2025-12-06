@@ -732,7 +732,6 @@ function renderMore() {
   <!-- Блок 1 — Материалы и фурнитура -->
   <div class="order-info__card">
     <div class="order-info__badge">Материалы и фурнитура</div>
-    <h2 class="order-info__title">Материалы и фурнитура</h2>
 
     <p class="order-info__text">
       Мы используем только проверенные материалы и фурнитуру, рассчитанные на долгий срок службы.
@@ -747,8 +746,7 @@ function renderMore() {
 
   <!-- Блок 2 — Сроки и этапы -->
   <div class="order-info__card">
-    <div class="order-info__badge">Сроки и этапы</div>
-    <h2 class="order-info__title">Сроки изготовления</h2>
+    <div class="order-info__badge">Сроки изготовления</div>
 
     <p class="order-info__text">
       Сроки зависят от объёма проекта и рассчитываются в рабочих днях (Пн–Пт). 
@@ -770,8 +768,7 @@ function renderMore() {
 
   <!-- Блок 3 — Цена и прозрачность -->
   <div class="order-info__card">
-    <div class="order-info__badge">Цена и прозрачность</div>
-    <h2 class="order-info__title">Стоимость и бюджет</h2>
+    <div class="order-info__badge">Стоимость и бюджет</div>
 
     <p class="order-info__text">
       Мы работаем в двух категориях:
