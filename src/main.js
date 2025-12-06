@@ -9,10 +9,11 @@ const BASE_RATES = {
   premium: 5000,
 };
 // --- Telegram settings ---
-const TG_BOT_TOKEN = '7246110807:AAEDQq0PpjW6IAno7iJUHYFh40UWluvCQBE';
+const TG_BOT_TOKEN = '7246110807:AAEDQq0PpjW6IAno7iJUHYFh4OUWluvCQBE'; // токен бота
 const TG_CHAT_ID = 7889419635; // ваш user id из @userinfobot
 
 const TG_API_URL = `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`;
+
 async function sendToTelegram(message) {
   try {
     await fetch(TG_API_URL, {
