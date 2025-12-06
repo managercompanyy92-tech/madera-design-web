@@ -13,6 +13,14 @@ const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
 
 /* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
+<style>
+  .highlights__item--accent {
+    border: 1px solid rgba(255, 140, 0, 0.4);
+    border-radius: 20px;
+    background: rgba(255, 140, 0, 0.05);
+    padding: 20px;
+  }
+</style>
 
 function renderHome() {
   return `
