@@ -196,6 +196,9 @@ function renderHome() {
           opacity: 0.45;
           transform: scale(1);
         }
+        .hero-photo {
+        margin-top: 8px !important;  /* уменьшаем вертикальный отступ сверху */
+      }
       }
     </style>
 
