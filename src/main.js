@@ -803,12 +803,14 @@ function renderMore() {
     <li>После оплаты вы получаете чек и персональный номер заказа.</li>
   </ul>
 
+      <div style="margin-top: 5px;"></div>
   <h3 class="order-info__subtitle">Запуск в производство</h3>
   <ul class="order-info__list">
     <li>Изготовление начинается <strong>после 100% оплаты</strong> утверждённой сметы.</li>
     <li>Частичная оплата и расчёт после монтажа не предусмотрены — это гарантирует точные сроки и стабильную работу производства.</li>
   </ul>
 
+      <div style="margin-top: 5px;"></div>
   <h3 class="order-info__subtitle">Рассрочка / кредит</h3>
   <ul class="order-info__list">
     <li>Доступны партнёрские программы:</li>
