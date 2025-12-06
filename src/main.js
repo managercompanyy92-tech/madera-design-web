@@ -17,6 +17,31 @@ let selectedCatalogCategoryId = null;
 function renderHome() {
   return `
     <style>
+    .hero-face-btn-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.hero-face-btn-wrapper::before {
+  content: "";
+  position: absolute;
+  top: -6px;      /* регулирует расстояние сверху */
+  bottom: -6px;   /* регулирует расстояние снизу */
+  left: -12px;    /* увеличь это значение – появится обводка слева */
+  right: -12px;   /* увеличь это значение – появится обводка справа */
+
+  border-radius: 80px; 
+  border: 2px solid rgba(255,140,0,0.6);
+  box-shadow: 0 0 18px rgba(255,140,0,0.8);
+  pointer-events: none; 
+  animation: heroBtnOutlinePulse 2.2s infinite ease-in-out;
+}
+
+@keyframes heroBtnOutlinePulse {
+  0%   { transform: scale(1); opacity: 0.8; }
+  50%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
 /* Уменьшение кнопки — основной регулятор */
 .hero-face-btn {
   padding: 6px 12px !important;   /* было 16–22px → уменьшили */
@@ -194,11 +219,15 @@ function renderHome() {
       </p>
 
       <div class="hero-face-actions">
-        <button
-          class="hero-face-btn hero-face-btn--primary"
-          type="button"
-          data-nav="order"
-        >
+        <div class="hero-face-btn-wrapper">
+  <button 
+    class="hero-face-btn hero-face-btn--primary"
+    type="button"
+    data-nav="order"
+  >
+    Рассчитать и оформить заказ
+  </button>
+</div>
           Рассчитать и оформить заказ
         </button>
 
