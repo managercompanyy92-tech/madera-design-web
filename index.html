@@ -14,6 +14,82 @@
 
     <!-- Глобальные стили приложения -->
     <link rel="stylesheet" href="src/styles/global.css" />
+
+    <!-- Локальные фиксы расположения аватарки и чата -->
+    <style>
+      /* Кнопка-аватарка в правом нижнем углу, над нижней навигацией */
+      .madera-chat-avatar-btn {
+        position: fixed;
+        right: 16px;
+        bottom: 90px; /* чуть выше нижней навигации */
+        z-index: 90;
+        border: none;
+        padding: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      /* На всякий случай отключаем обводку по умолчанию у картинки */
+      .madera-chat-avatar {
+        position: relative;
+        width: 64px;
+        height: 64px;
+      }
+
+      /* Панель чата — фиксируется над нижней навигацией */
+      .madera-chat[data-madera-chat] {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        bottom: 80px; /* над нижним меню */
+        max-width: 480px;
+        margin: 0 auto;
+        z-index: 85;
+        box-sizing: border-box;
+
+        /* ничего не говорим про display/opacity —
+           этим управляет твой существующий CSS/JS */
+      }
+
+      /* Тело чата: вертикальный флекс, чтобы поле ввода не убегало вверх */
+      .madera-chat__body {
+        display: flex;
+        flex-direction: column;
+        max-height: 60vh; /* чтобы чат не перекрывал весь экран */
+        overflow: hidden;
+      }
+
+      /* Область с сообщениями: именно она скроллится */
+      .madera-chat__messages {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Статус под сообщениями */
+      .madera-chat__status {
+        flex-shrink: 0;
+      }
+
+      /* Форма ввода: всегда внизу, в одну линию */
+      .madera-chat__form {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .madera-chat__input {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .madera-chat__voice,
+      .madera-chat__send {
+        flex-shrink: 0;
+      }
+    </style>
   </head>
 
   <body>
@@ -37,7 +113,7 @@
       </div>
     </button>
 
-    <!-- Панель AI-чата (микро-чат, если он используется) -->
+    <!-- Панель AI-чата -->
     <div class="madera-chat" data-madera-chat>
       <div class="madera-chat__header">
         <div class="madera-chat__header-main">
@@ -49,7 +125,9 @@
             />
           </div>
           <div>
-            <div class="madera-chat__title">AI-менеджер и AI-дизайнер MADERA!</div>
+            <div class="madera-chat__title">
+              AI-менеджер и AI-дизайнер MADERA!
+            </div>
             <div class="madera-chat__subtitle">
               Ваш персональный эксперт 24/7!
             </div>
@@ -72,9 +150,12 @@
         >
           <div class="madera-chat__message madera-chat__message--bot">
             <div class="madera-chat__bubble">
-              Здравствуйте! Я AI-менеджер и AI-дизайнер MADERA. Помогу рассчитать стоимость кухни, гардеробной, спальни или другой мебели по вашим размерам, предложу стиль, материалы, идеи планировки и визуализацию.
-              Напишите задачу или прикрепите фото/план комнаты — предложу лучшее решение под ваш интерьер!
-              Напишите вопрос или нажмите на 🎤 и скажите голосом.
+              Здравствуйте! Я AI-менеджер и AI-дизайнер MADERA. Помогу рассчитать
+              стоимость кухни, гардеробной, спальни или другой мебели по вашим
+              размерам, предложу стиль, материалы, идеи планировки и
+              визуализацию. Напишите задачу или прикрепите фото/план комнаты —
+              предложу лучшее решение под ваш интерьер! Напишите вопрос или
+              нажмите на 🎤 и скажите голосом.
             </div>
           </div>
         </div>
@@ -128,179 +209,3 @@
     <script src="chat.js" defer></script>
   </body>
 </html>
-<script>
-  (function () {
-    // Ищем существующие элементы чата
-    const avatarBtn = document.querySelector('.madera-chat-avatar-btn');
-    const panel = document.querySelector('.madera-chat-panel');
-
-    if (!avatarBtn || !panel) {
-      console.warn('[Madera chat] Не найден avatarBtn или panel');
-      return;
-    }
-
-    // Если внутри панели ещё нет обёртки, создаём структуру, чтобы работал новый layout.
-    // Предполагается, что твои сообщения лежат внутри .madera-chat-panel__messages.
-    // Если у тебя другая разметка – просто перенеси сообщения внутрь этого блока в HTML.
-    let inner = panel.querySelector('.madera-chat-panel__inner');
-    if (!inner) {
-      const oldContent = Array.from(panel.childNodes);
-
-      inner = document.createElement('div');
-      inner.className = 'madera-chat-panel__inner';
-
-      const header = document.createElement('div');
-      header.className = 'madera-chat-panel__header';
-      header.innerHTML = `
-        <div class="madera-chat-avatar" style="width:32px;height:32px;padding:1px;">
-          <img src="public/assistant/assistant-avatar.jpg"
-               alt="AI-менеджер и AI-дизайнер MADERA"
-               class="madera-chat-avatar__img">
-        </div>
-        <div>
-          <div class="madera-chat-panel__title">AI-менеджер и AI-дизайнер MADERA!</div>
-          <div class="madera-chat-panel__subtitle">Ваш персональный эксперт 24/7</div>
-        </div>
-        <button class="madera-chat-panel__close-btn" type="button" aria-label="Закрыть чат">×</button>
-      `;
-
-      const body = document.createElement('div');
-      body.className = 'madera-chat-panel__body';
-
-      const messages = document.createElement('div');
-      messages.className = 'madera-chat-panel__messages';
-
-      // Переносим старое содержимое панели внутрь блока сообщений
-      oldContent.forEach(node => {
-        if (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE) {
-          messages.appendChild(node);
-        }
-      });
-
-      const helper = document.createElement('div');
-      helper.className = 'madera-chat-panel__helper';
-      helper.textContent = 'Готова помочь. Напишите вопрос о дизайне мебели или интерьера.';
-
-      const quick = document.querySelector('.madera-chat-quick') || null;
-      if (quick) {
-        quick.classList.add('madera-chat-panel__quick');
-        body.appendChild(messages);
-        body.appendChild(helper);
-        body.appendChild(quick);
-      } else {
-        body.appendChild(messages);
-        body.appendChild(helper);
-      }
-
-      const footer = document.createElement('div');
-      footer.className = 'madera-chat-panel__footer';
-      footer.innerHTML = `
-        <form class="madera-chat-form" data-madera-chat-form>
-          <input
-            type="text"
-            class="madera-chat-input"
-            placeholder="Напишите или скажите ваш вопрос..."
-            autocomplete="off"
-          />
-          <button type="submit" class="madera-chat-send-btn">➤</button>
-        </form>
-      `;
-
-      inner.appendChild(header);
-      inner.appendChild(body);
-      inner.appendChild(footer);
-
-      panel.textContent = '';
-      panel.appendChild(inner);
-    }
-
-    const closeBtn = panel.querySelector('.madera-chat-panel__close-btn');
-    const messagesBox = panel.querySelector('.madera-chat-panel__messages');
-    const form = panel.querySelector('[data-madera-chat-form]');
-    const input = form ? form.querySelector('.madera-chat-input') : null;
-
-    function openPanel() {
-      panel.classList.add('is-open');
-      document.body.style.overflow = 'hidden';
-      setTimeout(scrollToBottom, 30);
-    }
-
-    function closePanel() {
-      panel.classList.remove('is-open');
-      document.body.style.overflow = '';
-    }
-
-    function scrollToBottom() {
-      if (!messagesBox) return;
-      messagesBox.parentElement.scrollTop = messagesBox.parentElement.scrollHeight;
-    }
-
-    avatarBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      openPanel();
-    });
-
-    if (closeBtn) {
-      closeBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        closePanel();
-      });
-    }
-
-    // Автопрокрутка при фокусе в поле ввода (когда поднимается клавиатура на телефоне)
-    if (input) {
-      input.addEventListener('focus', function () {
-        setTimeout(scrollToBottom, 100);
-      });
-    }
-
-    // Если у тебя уже есть свой JS для отправки сообщений – ОН ОСТАЁТСЯ.
-    // Этот обработчик – только запасной вариант: он добавляет своё сообщение в DOM
-    // и триггерит кастомное событие, которое может подхватить твой существующий код.
-    if (form && input && messagesBox) {
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const text = input.value.trim();
-        if (!text) return;
-
-        // Добавляем пузырь пользователя
-        const bubble = document.createElement('div');
-        bubble.className = 'madera-chat-bubble madera-chat-bubble--user';
-        bubble.textContent = text;
-        messagesBox.appendChild(bubble);
-        input.value = '';
-        scrollToBottom();
-
-        // Дальше можно слушать событие 'madera-chat-send' в твоём старом коде,
-        // чтобы реально отправлять запрос в OpenAI / бэкенд.
-        const ev = new CustomEvent('madera-chat-send', { detail: { text } });
-        window.dispatchEvent(ev);
-      });
-    }
-
-    // Немного стилей для пузырей (чтобы не лезть в CSS снова)
-    const style = document.createElement('style');
-    style.textContent = `
-      .madera-chat-bubble {
-        display: inline-block;
-        max-width: 80%;
-        padding: 8px 10px;
-        border-radius: 14px;
-        font-size: 13px;
-        line-height: 1.35;
-        margin-bottom: 4px;
-      }
-      .madera-chat-bubble--user {
-        margin-left: auto;
-        background: #ff7b00;
-        color: #111;
-      }
-      .madera-chat-bubble--ai {
-        margin-right: auto;
-        background: #2d2d2d;
-        color: #fff;
-      }
-    `;
-    document.head.appendChild(style);
-  })();
-</script>
