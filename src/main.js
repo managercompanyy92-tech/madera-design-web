@@ -86,6 +86,7 @@ function handleOrderSubmit() {
       );
     });
 }
+window.handleOrderSubmit = handleOrderSubmit;
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
 
