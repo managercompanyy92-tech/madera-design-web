@@ -199,7 +199,6 @@ function renderHome() {
         .hero-photo {
         margin-top: -24px !important; /* подтягиваем блок с фото вверх */
       }
-      }
     </style>
 
     <section class="page page--home">
