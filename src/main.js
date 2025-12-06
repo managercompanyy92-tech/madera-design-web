@@ -17,6 +17,24 @@ let selectedCatalogCategoryId = null;
 function renderHome() {
   return `
     <style>
+    <style>
+/* Уменьшение кнопки — основной регулятор */
+.hero-face-btn {
+  padding: 10px 18px !important;   /* было 16–22px → уменьшили */
+  font-size: 14px !important;       /* было 16px → уменьшили */
+  border-radius: 18px !important;   /* было ~26px → уменьшили */
+  min-width: 200px !important;      /* если стоит фикс, уменьшаем */
+}
+
+/* Уменьшаем светящуюся обводку */
+.hero-face-btn::before {
+  transform: scale(0.88) !important;   /* уменьшает glowing-ring */
+}
+
+.hero-face-btn::after {
+  transform: scale(0.92) !important;
+}
+</style>
     /* Базовый масштаб кнопки */
 :root {
   --hero-btn-scale: 0.82;  /* УМЕНЬШАЙ ИЛИ УВЕЛИЧИВАЙ ТОЛЬКО ЭТО ЗНАЧЕНИЕ */
