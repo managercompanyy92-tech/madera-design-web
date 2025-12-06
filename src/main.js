@@ -928,16 +928,6 @@ function renderMore() {
     font-size: 16px !important;
     line-height: 1.45;
   }
-
-  .order-info__card .order-info__list li {
-    font-size: 15.5px !important;
-    line-height: 1.45;
-    /* Оранжевая фирменная обводка для всех блоков раздела */
-.info-section {
-  border: 1px solid rgba(255, 140, 0, 0.7);
-  border-radius: 20px;
-  box-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
-  padding: 20px;
   }
 </style>
     <section class="page page--more">
