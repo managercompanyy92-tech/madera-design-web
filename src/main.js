@@ -17,30 +17,59 @@ let selectedCatalogCategoryId = null;
 function renderHome() {
   return `
     <style>
+      /* Обводка и фон для трёх нижних блоков */
       .highlights__item--accent {
-        border: 1px solid rgba(255, 140, 0, 0.5);
+        border: 1px solid rgba(255, 140, 0, 0.7);
         border-radius: 20px;
-        background: rgba(255, 140, 0, 0.05);
+        background: rgba(255, 140, 0, 0.04);
         padding: 20px;
       }
 
-      /* --- ВАЖНАЯ КНОПКА: сияние + лёгкий зум --- */
+      /* Супер-кнопка: премиальный градиент + сияние + 3D-эффект */
       .hero-face-btn.hero-face-btn--primary {
-        background: linear-gradient(135deg, #ffb45c, #ff8c00) !important;
-        box-shadow: 0 0 12px rgba(255, 140, 0, 0.55) !important;
-        animation: pulseGlow 2.8s infinite ease-in-out;
-        transition: 0.3s ease;
+        background: linear-gradient(135deg, #ff8c00 0%, #ffb347 50%, #ff8c00 100%) !important;
+        color: #2b1a00 !important;
+        font-weight: 600;
+
+        box-shadow:
+          0 0 18px rgba(255, 140, 0, 0.65),
+          0 6px 12px rgba(0, 0, 0, 0.35);
+
+        border: none !important;
+        transform: translateY(0);
+        transition: 0.25s ease;
+
+        animation: brightPulse 2.4s infinite ease-in-out;
       }
 
+      /* Эффект при наведении */
       .hero-face-btn.hero-face-btn--primary:hover {
-        transform: scale(1.03);
-        box-shadow: 0 0 22px rgba(255, 140, 0, 0.9) !important;
+        transform: translateY(-2px) scale(1.03);
+        box-shadow:
+          0 0 26px rgba(255, 140, 0, 0.95),
+          0 8px 18px rgba(0, 0, 0, 0.45);
       }
 
-      @keyframes pulseGlow {
-        0%   { box-shadow: 0 0 8px  rgba(255,140,0,0.4); transform: scale(1); }
-        50%  { box-shadow: 0 0 16px rgba(255,140,0,0.7); transform: scale(1.015); }
-        100% { box-shadow: 0 0 8px  rgba(255,140,0,0.4); transform: scale(1); }
+      /* Усиленный пульс — заметный, но премиальный */
+      @keyframes brightPulse {
+        0% {
+          box-shadow:
+            0 0 16px rgba(255, 140, 0, 0.55),
+            0 6px 12px rgba(0, 0, 0, 0.35);
+          transform: scale(1);
+        }
+        50% {
+          box-shadow:
+            0 0 32px rgba(255, 140, 0, 0.9),
+            0 6px 12px rgba(0, 0, 0, 0.35);
+          transform: scale(1.03);
+        }
+        100% {
+          box-shadow:
+            0 0 16px rgba(255, 140, 0, 0.55),
+            0 6px 12px rgba(0, 0, 0, 0.35);
+          transform: scale(1);
+        }
       }
     </style>
 
