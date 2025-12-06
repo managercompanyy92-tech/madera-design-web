@@ -20,8 +20,8 @@ function renderHome() {
 /* Уменьшение кнопки — основной регулятор */
 .hero-face-btn {
   padding: 6px 12px !important;   /* было 16–22px → уменьшили */
-  font-size: 12px !important;       /* было 16px → уменьшили */
-  border-radius: 14px !important;   /* было ~26px → уменьшили */
+  font-size: 13px !important;       /* было 16px → уменьшили */
+  border-radius: 16px !important;   /* было ~26px → уменьшили */
   min-width: 150px !important;      /* если стоит фикс, уменьшаем */
 }
 
@@ -31,7 +31,7 @@ function renderHome() {
 }
 
 .hero-face-btn::after {
-  transform: scale(0.92) !important;
+  transform: scale(0.85) !important;
 }
     /* Базовый масштаб кнопки */
 :root {
