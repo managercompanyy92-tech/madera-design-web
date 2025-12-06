@@ -609,6 +609,13 @@ function renderOrder() {
 
 function renderProfile() {
   return `
+  <style>
+  .order-info__card--accent {
+    border: 1px solid rgba(255, 153, 0, 0.35);
+    box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.25);
+    border-radius: 18px;
+  }
+</style>
     <section class="page page--profile">
       <h1 class="page__title">Личный кабинет</h1>
       <p class="page__subtitle">
@@ -620,7 +627,7 @@ function renderProfile() {
         <!-- Левая колонка: заказы + профиль -->
         <div>
           <!-- Мои заказы -->
-          <div class="order-form" style="margin-top: 0;">
+          <div class="order-form order-info__card--accent"> style="margin-top: 0;">
             <div class="order-form__header">
               <div class="order-form__title">Мои заказы</div>
               <div class="order-form__subtitle">
@@ -638,7 +645,7 @@ function renderProfile() {
           </div>
 
           <!-- Профиль клиента -->
-          <div class="order-form">
+          <div class="order-form order-info__card--accent">
             <div class="order-form__header">
               <div class="order-form__title">Профиль клиента</div>
               <div class="order-form__subtitle">
@@ -691,7 +698,7 @@ function renderProfile() {
         </div>
 
         <!-- Правая колонка: партнёрка + план развития -->
-        <div class="order-info">
+        <div class="order-form order-info__card--accent">
           <!-- Партнёрская программа -->
           <div class="order-info__card">
             <div class="order-info__badge">Партнёрская программа</div>
