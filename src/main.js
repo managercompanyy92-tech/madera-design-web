@@ -717,6 +717,12 @@ function renderProfile() {
 function renderMore() {
   return `
   <style>
+  .order-info__badge {
+    font-size: 15px !important; /* сделает крупнее */
+    letter-spacing: 2px;         /* красивый фирменный стиль */
+  }
+</style>
+  <style>
   .order-info__card .order-info__list,
   .order-info__card .order-info__subtitle,
   .order-info__card .order-info__title {
