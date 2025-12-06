@@ -508,6 +508,22 @@ data-route="order">
     .join("");
 
   return `
+  <style>
+  /* Обводка для любых карточек каталога */
+  [class*="catalog-category-card"],
+  [class*="catalog-item-card"] {
+    border: 2px solid rgba(255,140,0,0.8) !important;
+    border-radius: 28px !important;
+    box-shadow: 0 0 18px rgba(255,140,0,0.5) !important;
+    overflow: hidden !important;
+  }
+
+  /* Обводка для всех изображений в каталоге */
+  [class*="catalog"] img {
+    border: 2px solid rgba(255,140,0,0.9) !important;
+    border-radius: 28px !important;
+  }
+</style>
     <section class="page page--catalog">
       <button class="catalog-back" data-action="catalog-back">
         ← Все категории
