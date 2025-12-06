@@ -197,8 +197,7 @@ function renderHome() {
           transform: scale(1);
         }
         .page.page--home {
-      margin-top: -24px;
-     }
+      margin-top: -54px;
       }
     </style>
 
