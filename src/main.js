@@ -508,8 +508,6 @@ data-route="order">
     .join("");
 
   return `
-  <section class="page page--catalog">
-    ...
   </section>
 `;
 }
