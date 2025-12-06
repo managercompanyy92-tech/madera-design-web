@@ -17,7 +17,6 @@ let selectedCatalogCategoryId = null;
 function renderHome() {
   return `
     <style>
-    <style>
 /* Уменьшение кнопки — основной регулятор */
 .hero-face-btn {
   padding: 10px 18px !important;   /* было 16–22px → уменьшили */
