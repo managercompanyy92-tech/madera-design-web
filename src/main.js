@@ -716,6 +716,19 @@ function renderProfile() {
 
 function renderMore() {
   return `
+  <style>
+  .order-info__card .order-info__list,
+  .order-info__card .order-info__subtitle,
+  .order-info__card .order-info__title {
+    font-size: 16px !important;
+    line-height: 1.45;
+  }
+
+  .order-info__card .order-info__list li {
+    font-size: 15.5px !important;
+    line-height: 1.45;
+  }
+</style>
     <section class="page page--more">
       <h1 class="page__title">Информация о сервисе Madera Design</h1>
       <p class="page__subtitle">
