@@ -196,8 +196,9 @@ function renderHome() {
           opacity: 0.45;
           transform: scale(1);
         }
-        .hero-photo {
-  transform: translateY(-56px);
+        .page.page--home {
+      margin-top: -24px;
+     }
       }
     </style>
 
