@@ -508,17 +508,6 @@ data-route="order">
     .join("");
 
   return `
-  const itemCards = items
-  .map(
-    (item) => `
-      <div class="catalog-item-card">
-        ...
-      </div>
-    `,
-  )
-  .join("");
-
-return `
   <section class="page page--catalog">
     ...
   </section>
