@@ -197,7 +197,7 @@ function renderHome() {
           transform: scale(1);
         }
         .hero-photo {
-  transform: translateY(-26px);
+  transform: translateY(-56px);
       }
     </style>
 
