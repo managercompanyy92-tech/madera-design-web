@@ -50,6 +50,37 @@ function renderHome() {
         /* лёгкий пульс всей кнопки */
         animation: brightPulse 2.2s infinite ease-in-out;
       }
+      /* Уменьшаем кнопку и всё содержимое */
+.hero-face-btn.hero-face-btn--primary {
+  transform: scale(0.88);         /* уменьшение кнопки */
+  transform-origin: center center; 
+}
+
+/* Но во время пульса — тоже уменьшаем */
+@keyframes brightPulse {
+  0% {
+    transform: scale(0.88);
+  }
+  50% {
+    transform: scale(0.93);       /* лёгкое увеличение, но аккуратное */
+  }
+  100% {
+    transform: scale(0.88);
+  }
+}
+
+/* Анимация обводки — тоже уменьшаем */
+@keyframes borderGlow {
+  0% {
+    transform: scale(0.88);
+  }
+  50% {
+    transform: scale(0.95);        /* чуть увеличивается, но аккуратно */
+  }
+  100% {
+    transform: scale(0.88);
+  }
+}
 
       /* Светящаяся обводка вокруг кнопки */
       .hero-face-btn.hero-face-btn--primary::before {
