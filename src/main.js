@@ -916,6 +916,15 @@ function renderProfile() {
 function renderMore() {
   return `
   <style>
+  /* Оранжевая обводка для всех блоков в разделе Ещё */
+  .info-section {
+    border: 1px solid rgba(255, 140, 0, 0.7);
+    border-radius: 20px;
+    box-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
+    padding: 20px;
+  }
+</style>
+  <style>
   .order-info__badge {
     font-size: 15px !important; /* сделает крупнее */
     letter-spacing: 2px;         /* красивый фирменный стиль */
@@ -1173,16 +1182,7 @@ function renderMore() {
     </li>
   </ul>
 </div>
-<style>
-  /* Оранжевая обводка для всех блоков в разделе Ещё */
-  .info-section {
-    border: 1px solid rgba(255, 140, 0, 0.7);
-    border-radius: 20px;
-    box-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
-    padding: 20px;
-  }
-</style>
-    </section>
+   </section>
   `;
 }
 /* --------------------------- AI-ДИЗАЙНЕР (CHAT) --------------------------- */
