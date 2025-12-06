@@ -197,7 +197,7 @@ function renderHome() {
           transform: scale(1);
         }
         .hero-photo {
-        margin-top: 4px !important;  /* уменьшаем вертикальный отступ сверху */
+        margin-top: 0px !important;  /* уменьшаем вертикальный отступ сверху */
       }
     </style>
 
