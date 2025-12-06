@@ -197,7 +197,7 @@ function renderHome() {
           transform: scale(1);
         }
         .hero-photo {
-        margin-top: -24px !important; /* подтягиваем блок с фото вверх */
+        margin-top: -64px !important; /* подтягиваем блок с фото вверх */
       }
     </style>
 
