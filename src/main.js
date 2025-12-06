@@ -360,6 +360,13 @@ data-route="order">
 
 function renderOrder() {
   return `
+  <style>
+  .order-form--accent {
+    border: 1px solid rgba(255, 153, 0, 0.35);
+    box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.25);
+    border-radius: 18px;
+  }
+</style>
     <section class="page page--order">
       <h1 class="page__title">Онлайн-калькулятор и заказ мебели</h1>
       <p class="page__subtitle">
@@ -451,7 +458,7 @@ function renderOrder() {
           </div>
 
           <!-- Форма заявки, связанная с калькулятором -->
-          <div class="order-form">
+          <div class="order-form order-form--accent">
             <div class="order-form__header">
               <div class="order-form__title">Заявка на замер и расчёт</div>
               <div class="order-form__subtitle">
@@ -572,7 +579,7 @@ function renderOrder() {
         </div>
 
         <!-- Правая колонка: маркетинг + следующий шаг -->
-        <div class="order-info">
+        <div class="order-form order-form--accent">
           <div class="order-info__card">
             <div class="order-info__badge">Маркетинг & доверие</div>
             <h2 class="order-info__title">Почему клиенты выбирают Madera Design</h2>
