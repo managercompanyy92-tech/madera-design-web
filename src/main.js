@@ -31,11 +31,11 @@ function renderHome() {
 }
 
 .hero-face-btn::after {
-  transform: scale(0.85) !important;
+  transform: scale(0.92) !important;
 }
     /* Базовый масштаб кнопки */
 :root {
-  --hero-btn-scale: 0.82;  /* УМЕНЬШАЙ ИЛИ УВЕЛИЧИВАЙ ТОЛЬКО ЭТО ЗНАЧЕНИЕ */
+  --hero-btn-scale: 0.99;  /* УМЕНЬШАЙ ИЛИ УВЕЛИЧИВАЙ ТОЛЬКО ЭТО ЗНАЧЕНИЕ */
 }
       /* Обводка и фон для трёх нижних блоков на главной */
       .highlights__item--accent {
