@@ -16,31 +16,36 @@ let selectedCatalogCategoryId = null;
 
 function renderHome() {
   return `
-  <style>
-  .highlights__item--accent {
-    border: 1px solid rgba(255, 140, 0, 0.4);
-    border-radius: 20px;
-    background: rgba(255, 140, 0, 0.05);
-    padding: 20px;
-  }
-  .btn--primary {
-  background: linear-gradient(135deg, #ffb45c, #ff8c00);
-  box-shadow: 0 0 12px rgba(255, 140, 0, 0.5);
-  animation: pulseGlow 2.8s infinite ease-in-out;
-  transition: 0.3s ease;
-}
+  function renderHome() {
+  return `
+    <style>
+      .highlights__item--accent {
+        border: 1px solid rgba(255, 140, 0, 0.5);
+        border-radius: 20px;
+        background: rgba(255, 140, 0, 0.05);
+        padding: 20px;
+      }
 
-@keyframes pulseGlow {
-  0% { box-shadow: 0 0 8px rgba(255,140,0,0.4); transform: scale(1); }
-  50% { box-shadow: 0 0 16px rgba(255,140,0,0.7); transform: scale(1.015); }
-  100% { box-shadow: 0 0 8px rgba(255,140,0,0.4); transform: scale(1); }
-}
+      /* --- ВАЖНАЯ КНОПКА: сияние + лёгкий зум --- */
+      .hero-face-btn.hero-face-btn--primary {
+        background: linear-gradient(135deg, #ffb45c, #ff8c00) !important;
+        box-shadow: 0 0 12px rgba(255, 140, 0, 0.55) !important;
+        animation: pulseGlow 2.8s infinite ease-in-out;
+        transition: 0.3s ease;
+      }
 
-.btn--primary:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 20px rgba(255, 140, 0, 0.85);
-}
-</style>
+      .hero-face-btn.hero-face-btn--primary:hover {
+        transform: scale(1.03);
+        box-shadow: 0 0 22px rgba(255, 140, 0, 0.9) !important;
+      }
+
+      @keyframes pulseGlow {
+        0%   { box-shadow: 0 0 8px  rgba(255,140,0,0.4); transform: scale(1); }
+        50%  { box-shadow: 0 0 16px rgba(255,140,0,0.7); transform: scale(1.015); }
+        100% { box-shadow: 0 0 8px  rgba(255,140,0,0.4); transform: scale(1); }
+      }
+    </style>
+
     <section class="page page--home">
  <div class="hero-photo">
   <div class="hero-photo__inner hero-face-card">
