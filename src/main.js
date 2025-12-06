@@ -17,6 +17,10 @@ let selectedCatalogCategoryId = null;
 function renderHome() {
   return `
     <style>
+    /* Базовый масштаб кнопки */
+:root {
+  --hero-btn-scale: 0.82;  /* УМЕНЬШАЙ ИЛИ УВЕЛИЧИВАЙ ТОЛЬКО ЭТО ЗНАЧЕНИЕ */
+}
       /* Обводка и фон для трёх нижних блоков на главной */
       .highlights__item--accent {
         border: 1px solid rgba(255, 140, 0, 0.7);
@@ -51,9 +55,17 @@ function renderHome() {
         animation: brightPulse 2.2s infinite ease-in-out;
       }
       /* Уменьшаем кнопку и всё содержимое */
-.hero-face-btn.hero-face-btn--primary {
-  transform: scale(0.88);         /* уменьшение кнопки */
-  transform-origin: center center; 
+      .hero-face-btn.hero-face-btn--primary {
+  position: relative;
+  background: #ff8c00;
+  color: #000;
+  font-weight: 600;
+  border-radius: 40px;
+  padding: 14px 22px;
+  border: none;
+  transform: scale(var(--hero-btn-scale));
+  transform-origin: center;
+  animation: brightPulse 2.4s infinite ease-in-out;
 }
 
 /* Но во время пульса — тоже уменьшаем */
