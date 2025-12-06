@@ -13,7 +13,10 @@ const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
 
 /* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
-<style>
+
+function renderHome() {
+  return `
+  <style>
   .highlights__item--accent {
     border: 1px solid rgba(255, 140, 0, 0.4);
     border-radius: 20px;
@@ -21,9 +24,6 @@ let selectedCatalogCategoryId = null;
     padding: 20px;
   }
 </style>
-
-function renderHome() {
-  return `
     <section class="page page--home">
  <div class="hero-photo">
   <div class="hero-photo__inner hero-face-card">
