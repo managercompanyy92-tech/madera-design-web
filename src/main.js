@@ -18,7 +18,7 @@ function renderHome() {
   return `
     <style>
     .hero-face-btn {
-  padding: 10px 20px !important;  /* ← УМЕНЬШАЕТ ФОН */
+  padding: 6px 15px !important;  /* ← УМЕНЬШАЕТ ФОН */
   font-size: 15px !important;     /* чуть меньше текст, если нужно */
 }
 /* Уменьшение кнопки — основной регулятор */
