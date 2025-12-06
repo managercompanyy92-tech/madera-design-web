@@ -627,7 +627,7 @@ function renderProfile() {
         <!-- Левая колонка: заказы + профиль -->
         <div>
           <!-- Мои заказы -->
-          <div class="order-form order-info__card--accent"> style="margin-top: 0;">
+          <div class="order-form order-info__card--accent"> 
             <div class="order-form__header">
               <div class="order-form__title">Мои заказы</div>
               <div class="order-form__subtitle">
