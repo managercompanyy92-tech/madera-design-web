@@ -19,10 +19,10 @@ function renderHome() {
     <style>
 /* Уменьшение кнопки — основной регулятор */
 .hero-face-btn {
-  padding: 8px 2px !important;   /* было 16–22px → уменьшили */
+  padding: 6px 4px !important;   /* было 16–22px → уменьшили */
   font-size: 14px !important;       /* было 16px → уменьшили */
-  border-radius: 18px !important;   /* было ~26px → уменьшили */
-  min-width: 200px !important;      /* если стоит фикс, уменьшаем */
+  border-radius: 14px !important;   /* было ~26px → уменьшили */
+  min-width: 150px !important;      /* если стоит фикс, уменьшаем */
 }
 
 /* Уменьшаем светящуюся обводку */
