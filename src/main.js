@@ -33,7 +33,6 @@ function renderHome() {
 .hero-face-btn::after {
   transform: scale(0.92) !important;
 }
-</style>
     /* Базовый масштаб кнопки */
 :root {
   --hero-btn-scale: 0.82;  /* УМЕНЬШАЙ ИЛИ УВЕЛИЧИВАЙ ТОЛЬКО ЭТО ЗНАЧЕНИЕ */
