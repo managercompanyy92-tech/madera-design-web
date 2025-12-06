@@ -789,14 +789,18 @@ function renderOrder() {
             </div>
 
             <div class="order-form__footer">
-              <button class="btn btn--primary" data-action="submit-order">
-                Отправить заявку на расчёт
-              </button>
-              <div class="order-form__note">
-                Нажимая на кнопку, вы отправляете заявку менеджеру Madera Design. Мы не передаём данные третьим лицам.
-              </div>
-              <div class="order-form__result" data-order-result></div>
-            </div>
+  <button
+    class="btn btn--primary"
+    type="button"
+    onclick="handleOrderSubmit()"
+  >
+    Отправить заявку на расчёт
+  </button>
+  <div class="order-form__note">
+    Нажимая на кнопку, вы отправляете …
+  </div>
+  <div class="order-form__result" data-role="order-result"></div>
+</div>
           </div>
         </div>
 
@@ -826,7 +830,31 @@ function renderOrder() {
     </section>
   `;
 }
+function handleOrderSubmit() {
+  const form = document.querySelector(".order-form");
+  if (!form) {
+    alert("Форма заказа не найдена");
+    return;
+  }
 
+  const formData = new FormData(form);
+
+  // Собираем текст заявки
+  let message = "<b>Новая заявка с сайта</b>\n";
+  for (const [key, value] of formData.entries()) {
+    if (!value) continue;
+    message += `${key}: ${value}\n`;
+  }
+
+  // Отправляем в Telegram
+  sendToTelegram(message);
+
+  // Покажем пользователю, что всё ок
+  const resultEl = document.querySelector('[data-role="order-result"]');
+  if (resultEl) {
+    resultEl.textContent = "Заявка отправлена. Мы свяжемся с вами в ближайшее время.";
+  }
+}
 /* -------------------------- ЛИЧНЫЙ КАБИНЕТ -------------------------- */
 
 function renderProfile() {
