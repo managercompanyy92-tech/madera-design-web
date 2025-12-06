@@ -508,15 +508,22 @@ data-route="order">
     .join("");
 
   return `
-  <style>
-    /* Оранжевая обводка для всех картинок каталога */
-    .catalog-category-card__image,
-    .catalog-item-card__image {
-      border: 1px solid rgba(255, 140, 0, 0.6);
-      border-radius: 24px;
-      box-shadow: 0 0 14px rgba(255, 140, 0, 0.4);
-    }
-  </style>
+  const itemCards = items
+  .map(
+    (item) => `
+      <div class="catalog-item-card">
+        ...
+      </div>
+    `,
+  )
+  .join("");
+
+return `
+  <section class="page page--catalog">
+    ...
+  </section>
+`;
+}
     <section class="page page--catalog">
       <button class="catalog-back" data-action="catalog-back">
         ← Все категории
