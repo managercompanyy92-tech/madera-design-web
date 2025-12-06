@@ -99,7 +99,7 @@ function renderHome() {
         </div>
       </div>
 
-      <section class="highlights" style="margin-top: 15px;">
+      <section class="highlights" style="margin-top: 11px;">
         <div class="highlights__item
         highlights__item--accent">
           <div class="highlights__title">Премиальный сервис, дизайн с поддержкой искусственного интеллекта,
