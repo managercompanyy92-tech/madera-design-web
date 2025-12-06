@@ -916,11 +916,10 @@ function renderProfile() {
 function renderMore() {
   return `
   <style>
-  /* Оранжевая обводка для всех блоков в разделе Ещё */
-  .info-section {
-    border: 1px solid rgba(255, 140, 0, 0.7);
+  .order-info__card {
+    border: 1px solid rgba(255, 140, 0, 0.4);
     border-radius: 20px;
-    box-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
+    box-shadow: 0 0 12px rgba(255, 140, 0, 0.2);
     padding: 20px;
   }
 </style>
