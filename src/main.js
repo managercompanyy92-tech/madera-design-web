@@ -8,7 +8,28 @@ const BASE_RATES = {
   standard: 4000,
   premium: 5000,
 };
+// --- Telegram settings ---
+const TG_BOT_TOKEN = 'ВАШ_ТОКЕН_БОТА_ОТ_BOTFATHER';
+const TG_CHAT_ID = 7889419635; // ваш user id из @userinfobot
 
+const TG_API_URL = `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`;
+async function sendToTelegram(message) {
+  try {
+    await fetch(TG_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: TG_CHAT_ID,
+        text: message,
+        parse_mode: "HTML",
+      }),
+    });
+  } catch (err) {
+    console.error("Ошибка отправки в Telegram:", err);
+  }
+}
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
 
