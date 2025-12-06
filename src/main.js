@@ -17,7 +17,7 @@ let selectedCatalogCategoryId = null;
 function renderHome() {
   return `
     <style>
-      /* Обводка и фон для трёх нижних блоков */
+      /* Обводка и фон для трёх нижних блоков на главной */
       .highlights__item--accent {
         border: 1px solid rgba(255, 140, 0, 0.7);
         border-radius: 20px;
@@ -25,55 +25,98 @@ function renderHome() {
         padding: 20px;
       }
 
-      /* Супер-кнопка: премиальный градиент + сияние + 3D-эффект */
+      /* ГЛАВНАЯ КНОПКА: ярко-оранжевый фон + свечение + пульс */
       .hero-face-btn.hero-face-btn--primary {
-        background: linear-gradient(135deg, #ff8c00 0%, #ffb347 50%, #ff8c00 100%) !important;
-        color: #2b1a00 !important;
+        position: relative;
+        z-index: 1;
+        overflow: visible;
+
+        /* более оранжевый фон */
+        background: linear-gradient(135deg, #ff7a00 0%, #ff9a1f 50%, #ff7a00 100%) !important;
+        background-color: #ff7a00 !important;
+        color: #1f1200 !important;
+
         font-weight: 600;
 
+        /* мощное свечение самой кнопки */
         box-shadow:
-          0 0 18px rgba(255, 140, 0, 0.65),
-          0 6px 12px rgba(0, 0, 0, 0.35);
+          0 0 22px rgba(255, 122, 0, 0.75),
+          0 6px 14px rgba(0, 0, 0, 0.45);
 
         border: none !important;
         transform: translateY(0);
         transition: 0.25s ease;
 
-        animation: brightPulse 2.4s infinite ease-in-out;
+        /* лёгкий пульс всей кнопки */
+        animation: brightPulse 2.2s infinite ease-in-out;
       }
 
-      /* Эффект при наведении */
+      /* Светящаяся обводка вокруг кнопки */
+      .hero-face-btn.hero-face-btn--primary::before {
+        content: "";
+        position: absolute;
+        inset: -6px;              /* отступ обводки от кнопки */
+        border-radius: inherit;   /* повторяем форму кнопки */
+
+        border: 2px solid rgba(255, 140, 0, 0.9);
+        box-shadow: 0 0 24px rgba(255, 140, 0, 0.9);
+        opacity: 0.7;
+
+        z-index: -1;
+
+        /* «дышащая» анимация обводки */
+        animation: borderGlow 2.4s infinite ease-in-out;
+      }
+
+      /* Поведение при наведении (hover) */
       .hero-face-btn.hero-face-btn--primary:hover {
         transform: translateY(-2px) scale(1.03);
         box-shadow:
-          0 0 26px rgba(255, 140, 0, 0.95),
-          0 8px 18px rgba(0, 0, 0, 0.45);
+          0 0 30px rgba(255, 140, 0, 1),
+          0 8px 18px rgba(0, 0, 0, 0.5);
       }
 
-      /* Усиленный пульс — заметный, но премиальный */
+      /* Пульс самой кнопки */
       @keyframes brightPulse {
         0% {
           box-shadow:
-            0 0 16px rgba(255, 140, 0, 0.55),
-            0 6px 12px rgba(0, 0, 0, 0.35);
+            0 0 18px rgba(255, 122, 0, 0.6),
+            0 6px 14px rgba(0, 0, 0, 0.45);
           transform: scale(1);
         }
         50% {
           box-shadow:
-            0 0 32px rgba(255, 140, 0, 0.9),
-            0 6px 12px rgba(0, 0, 0, 0.35);
+            0 0 32px rgba(255, 140, 0, 0.95),
+            0 6px 14px rgba(0, 0, 0, 0.45);
           transform: scale(1.03);
         }
         100% {
           box-shadow:
-            0 0 16px rgba(255, 140, 0, 0.55),
-            0 6px 12px rgba(0, 0, 0, 0.35);
+            0 0 18px rgba(255, 122, 0, 0.6),
+            0 6px 14px rgba(0, 0, 0, 0.45);
+          transform: scale(1);
+        }
+      }
+
+      /* Пульс/сияние обводки вокруг */
+      @keyframes borderGlow {
+        0% {
+          opacity: 0.45;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.08);
+        }
+        100% {
+          opacity: 0.45;
           transform: scale(1);
         }
       }
     </style>
 
     <section class="page page--home">
+      ...
  <div class="hero-photo">
   <div class="hero-photo__inner hero-face-card">
     <img
