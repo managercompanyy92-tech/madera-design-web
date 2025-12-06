@@ -806,6 +806,7 @@ function renderMore() {
       <div style="margin-top: 5px;"></div>
   <h3 class="order-info__subtitle">Запуск в производство</h3>
   <ul class="order-info__list">
+      <div style="margin-top: 5px;"></div>
     <li>Изготовление начинается <strong>после 100% оплаты</strong> утверждённой сметы.</li>
     <li>Частичная оплата и расчёт после монтажа не предусмотрены — это гарантирует точные сроки и стабильную работу производства.</li>
   </ul>
@@ -813,6 +814,7 @@ function renderMore() {
       <div style="margin-top: 5px;"></div>
   <h3 class="order-info__subtitle">Рассрочка / кредит</h3>
   <ul class="order-info__list">
+      <div style="margin-top: 5px;"></div>
     <li>Доступны партнёрские программы:</li>
     <li>— до <strong>6 месяцев</strong> — переплата <strong>10%</strong></li>
     <li>— до <strong>12 месяцев</strong> — переплата <strong>20%</strong></li>
@@ -831,15 +833,21 @@ function renderMore() {
     <li>Гарантия не распространяется на механические повреждения, воздействие воды/огня/химии и вмешательство сторонних мастеров.</li>
   </ul>
 
+      <div style="margin-top: 5px;"></div>
   <h3 class="order-info__subtitle">Сервис и сопровождение</h3>
   <ul class="order-info__list">
+  
+      <div style="margin-top: 5px;"></div>
     <li>Работаем официально: договор, смета, чертежи, акт приёмки-передачи, гарантийный талон.</li>
     <li>При гарантийном случае мастер выезжает, проводит диагностику и устраняет проблему.</li>
     <li>После окончания гарантии можем консультировать и помогать: настройка фасадов, замена фурнитуры, мелкий сервис.</li>
   </ul>
 
+      <div style="margin-top: 5px;"></div>
   <h3 class="order-info__subtitle">Путь клиента</h3>
   <ul class="order-info__list">
+  
+      <div style="margin-top: 5px;"></div>
     <li>Замер → дизайн-проект → договор → производство → монтаж → гарантийное сопровождение.</li>
   </ul>
 </div>
