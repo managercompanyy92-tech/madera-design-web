@@ -738,46 +738,97 @@ function renderOrder() {
                 />
               </div>
 
-              <div class="order-form__row order-form__row--full">
-                <label class="order-form__label">Кратко опишите проект</label>
-                <textarea
-                  class="order-form__textarea"
-                  rows="3"
-                  placeholder="Кухня в современной квартире, примерно 4.5 м, нужен встроенный холодильник и духовой шкаф..."
-                  data-order-comment
-                ></textarea>
-              </div>
+              <div class="order-form__row">
+        <label class="order-form__label">
+          <textarea
+            class="order-form__textarea"
+            rows="3"
+            placeholder="Кратко опишите проект: размер, стиль, важные детали..."
+            data-order-comment
+          ></textarea>
+        </label>
+      </div>
 
-              <div class="order-form__row order-form__row--full">
-                <label class="order-form__label">Насколько вы настроены на заказ? (отбор «наших» клиентов)</label>
-                <select class="order-form__select" data-order-readiness>
-                  <option value="soon">Готов(а) заказать в ближайший месяц</option>
-                  <option value="thinking">Пока изучаю варианты и цены</option>
-                  <option value="just-looking">Просто смотрю идеи на будущее</option>
-                </select>
-              </div>
-
-              <div class="order-form__row order-form__row--full order-form__row--checkbox">
-                <label class="order-form__checkbox">
-                  <input type="checkbox" data-order-minagree />
-                  <span>Я понимаю, что минимальный объём заказа — 3 погонных метра и согласен(на) с этим условием</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="order-form__footer">
-              <button class="btn btn--primary" data-action="submit-order">
-                Отправить заявку на расчёт
-              </button>
-              <div class="order-form__note">
-                Нажимая на кнопку, вы отправляете заявку менеджеру Madera Design. Мы не передаём данные третьим лицам.
-              </div>
-              <div class="order-form__result" data-order-result></div>
-            </div>
+      <!-- Блок оплаты выездного замера -->
+      <div class="order-form__row order-form__row--payment">
+        <div class="order-form__payment">
+          <div class="order-form__payment-header">
+            Оплата выездного замера — <strong>100&nbsp;сомони</strong>
           </div>
+          <div class="order-form__payment-text">
+            Для подтверждения заявки на выездной замер
+            переведите <strong>100&nbsp;сомони</strong> по безналичному расчёту
+            на карту <strong>Dushanbe City</strong> по номеру
+            <strong>+992&nbsp;XXX&nbsp;XX-XX-XX</strong>.
+            После оплаты прикрепите чек ниже.
+            Без прикреплённого чека кнопка
+            «Отправить заявку на расчёт» будет недоступна.
+          </div>
+
+          <label class="order-form__payment-upload">
+            <span class="order-form__payment-upload-label">
+              Загрузите чек об оплате
+              <span class="order-form__required">*</span>
+            </span>
+            <input
+              type="file"
+              class="order-form__input order-form__input--file"
+              accept="image/*,.pdf"
+              data-order-payment-check
+              required
+            />
+            <span class="order-form__payment-upload-hint">
+              Подойдут фото или скан чека (JPG, PNG, HEIC) либо PDF-файл.
+            </span>
+            <span
+              class="order-form__payment-error"
+              data-order-payment-error
+              aria-live="polite"
+            ></span>
+          </label>
         </div>
+      </div>
+
+      <div class="order-form__row">
+        <label class="order-form__label">
+          <select class="order-form__select" data-order-ready>
+            <option value="soon">Готов(а) заказать в ближайший месяц</option>
+            <option value="thinking">Пока изучаю варианты и цены</option>
+            <option value="just-looking">Просто смотрю идеи на будущее</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="order-form__row">
+        <label class="order-form__label order-form__label--checkbox">
+          <input
+            type="checkbox"
+            class="order-form__checkbox"
+            data-order-minimal
+          />
+          <span>
+            Я понимаю, что минимальный объём заказа — 3 погонных метра
+            и согласен(на) с этим условием
+          </span>
+        </label>
+      </div>
+
+      <div class="order-form__footer">
+        <button class="btn btn--primary" type="submit">
+          Отправить заявку на расчёт
+        </button>
+      </div>
+
+      <div class="order-form__note">
+        Нажимая на кнопку, вы отправляете заявку менеджеру
+        Madera Design. Мы не передаём данные третьим лицам.
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
-  /* Полное скрытие служебного текста "Тёплый лид" */
+  /* Полное скрытие служебного текста "ТЁПЛЫЙ/ХОЛОДНЫЙ ЛИД" */
   .lead-hidden,
   .lead-hidden * {
     display: none !important;
@@ -787,8 +838,132 @@ function renderOrder() {
     margin: 0 !important;
     padding: 0 !important;
   }
+
+  /* Оплата выездного замера */
+  .order-form__row--payment {
+    margin-top: 12px;
+  }
+
+  .order-form__payment {
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #062417, #04140e);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
+  .order-form__payment-header {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #ffb347;
+    margin-bottom: 6px;
+  }
+
+  .order-form__payment-text {
+    font-size: 13px;
+    line-height: 1.45;
+    color: #f4f4f4;
+    margin-bottom: 10px;
+  }
+
+  .order-form__payment-upload-label {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: inline-block;
+  }
+
+  .order-form__required {
+    color: #ff6b6b;
+    margin-left: 2px;
+  }
+
+  .order-form__input--file {
+    display: block;
+    width: 100%;
+    font-size: 13px;
+    padding: 6px 0;
+    color: #f4f4f4;
+  }
+
+  .order-form__payment-upload-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  .order-form__payment-error {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #ff6b6b;
+  }
+
+  .btn--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 </style>
 
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1) Скрываем служебный текст "ТЁПЛЫЙ/ХОЛОДНЫЙ ЛИД" в зелёной карточке
+    try {
+      const elements = [
+        ...document.querySelectorAll(".order-form__result-ai *"),
+      ];
+      const target = elements.find(
+        (el) =>
+          el.textContent &&
+          el.textContent.toLowerCase().includes("лид")
+      );
+      if (target) {
+        const parent = target.closest("div.order-form__result-ai");
+        if (parent) parent.classList.add("lead-hidden");
+      }
+    } catch (e) {
+      console.warn("Lead hide error:", e);
+    }
+
+    // 2) Логика оплаты замера:
+    // пока чек не загружен, кнопка отправки отключена
+    const orderForm = document.querySelector(".order-form--calc");
+    if (orderForm) {
+      const paymentInput = orderForm.querySelector(
+        "[data-order-payment-check]"
+      );
+      const paymentError = orderForm.querySelector(
+        "[data-order-payment-error]"
+      );
+      const submitButton = orderForm.querySelector(".btn.btn--primary");
+
+      if (paymentInput && submitButton) {
+        const updateState = () => {
+          const hasFile =
+            paymentInput.files && paymentInput.files.length > 0;
+
+          submitButton.disabled = !hasFile;
+          submitButton.classList.toggle("btn--disabled", !hasFile);
+
+          if (hasFile && paymentError) {
+            paymentError.textContent = "";
+          } else if (!hasFile && paymentError) {
+            paymentError.textContent =
+              "Оплатите замер и прикрепите чек, чтобы отправить заявку.";
+          }
+        };
+
+        // Начальное состояние (после открытия страницы)
+        updateState();
+
+        // При выборе файла пересчитываем состояние
+        paymentInput.addEventListener("change", updateState);
+      }
+    }
+  });
+</script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     // Ищем элемент по тексту "ТЁПЛЫЙ ЛИД" (работает независимо от регистра)
