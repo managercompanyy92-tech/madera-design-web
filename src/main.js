@@ -1,4 +1,4 @@
-// src/main.js 
+// src/main.js  
 
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
