@@ -889,12 +889,9 @@ body .support-bubble {
   font-size: 12px;
 }
 
-/* Блок ИИ-подсказки по лидам */
-
+/* Блок ИИ-подсказки по лидам — скрываем от клиента */
 .order-form__result-ai {
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+  display: none !important;
 }
 
 .order-form__result-ai-label {
