@@ -1028,8 +1028,1095 @@ function renderOrder() {
     </section>
   `;
 }
-https://madera-design-web.vercel.app/#more
+/* ----------------------------- ЛИЧНЫЙ КАБИНЕТ ----------------------------- */
 
+function renderProfile() {
+  return `
+<style>
+  /* ===== ОСНОВНОЕ ОФОРМЛЕНИЕ СТРАНИЦЫ ПРОФИЛЯ ===== */
+
+  .page--profile {
+    padding-bottom: 80px;
+  }
+
+  .page--profile .page__title {
+    margin-bottom: 10px;
+  }
+
+  .page--profile .page__subtitle {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.72);
+    max-width: 640px;
+  }
+
+  .profile-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .profile-layout__left,
+  .profile-layout__right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .profile-card {
+    border-radius: 18px;
+    border: 1px solid rgba(255, 153, 0, 0.45);
+    background:
+      radial-gradient(circle at top left, rgba(255, 153, 0, 0.15), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(0, 0, 0, 0.95), #000);
+    padding: 18px 18px 20px;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.75),
+      0 22px 60px rgba(0, 0, 0, 0.9);
+  }
+
+  .profile-card--accent {
+    border-color: rgba(255, 191, 73, 0.9);
+    background:
+      radial-gradient(circle at top left, rgba(255, 191, 73, 0.22), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(10, 10, 10, 0.96), #050505);
+  }
+
+  .profile-card__title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  .profile-card__subtitle {
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 14px;
+  }
+
+  .profile-card__section-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #ffb347;
+    margin-bottom: 8px;
+  }
+
+  .profile-card__muted {
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  .profile-microcopy {
+    font-size: 11px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 10px;
+  }
+
+  /* ===== ПЕРВЫЙ ЭКРАН: РЕГИСТРАЦИЯ / ВХОД ===== */
+
+  #profile-unauth {
+    margin-top: 20px;
+  }
+
+  .profile-auth__tabs {
+    display: inline-flex;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 191, 73, 0.5);
+    padding: 2px;
+    background: rgba(0, 0, 0, 0.7);
+    margin-bottom: 14px;
+  }
+
+  .profile-auth__tab {
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+
+  .profile-auth__tab.is-active {
+    background: linear-gradient(135deg, #ffb347, #ff8c2b);
+    color: #201308;
+  }
+
+  .profile-auth__forms {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 2px;
+  }
+
+  .profile-auth__panel.is-hidden {
+    display: none;
+  }
+
+  .profile-auth__row {
+    margin-bottom: 8px;
+  }
+
+  .profile-auth__label {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.72);
+    margin-bottom: 3px;
+  }
+
+  .profile-input {
+    width: 100%;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(12, 12, 12, 0.96);
+    padding: 9px 14px;
+    font-size: 13px;
+    color: #ffffff;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  .profile-input::placeholder {
+    color: rgba(255, 255, 255, 0.36);
+  }
+
+  .profile-input:focus {
+    border-color: rgba(255, 191, 73, 0.95);
+    box-shadow: 0 0 0 1px rgba(255, 191, 73, 0.7);
+    background: rgba(18, 18, 18, 1);
+  }
+
+  .profile-auth__submit {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .profile-auth__hint {
+    font-size: 11px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 8px;
+  }
+
+  .profile-auth__error {
+    font-size: 11px;
+    color: #ff6b6b;
+    margin-top: 6px;
+    display: none;
+  }
+
+  .profile-auth__divider {
+    margin: 12px 0 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.16);
+  }
+
+  /* ===== ЭКРАН ПОСЛЕ ВХОДА (ДЭШБОРД) ===== */
+
+  #profile-authenticated {
+    display: none;
+    margin-top: 22px;
+  }
+
+  .profile-greeting {
+    margin-bottom: 16px;
+  }
+
+  .profile-greeting__title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .profile-greeting__subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.76);
+  }
+
+  .profile-header-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .profile-logout {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    cursor: pointer;
+  }
+
+  /* ===== ФОРМЫ ПРОФИЛЯ ===== */
+
+  .profile-form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px 14px;
+    margin-top: 8px;
+  }
+
+  .profile-form__row label {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 3px;
+  }
+
+  .profile-form__input,
+  .profile-form__textarea,
+  .profile-form__select {
+    width: 100%;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(8, 8, 8, 0.96);
+    padding: 9px 14px;
+    font-size: 13px;
+    color: #ffffff;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  .profile-form__textarea {
+    border-radius: 14px;
+    min-height: 72px;
+    resize: vertical;
+  }
+
+  .profile-form__select {
+    border-radius: 999px;
+  }
+
+  .profile-form__input::placeholder,
+  .profile-form__textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .profile-form__input:focus,
+  .profile-form__textarea:focus,
+  .profile-form__select:focus {
+    border-color: rgba(255, 191, 73, 0.95);
+    box-shadow: 0 0 0 1px rgba(255, 191, 73, 0.7);
+    background: rgba(18, 18, 18, 1);
+  }
+
+  /* ===== МОИ ЗАКАЗЫ (КАРТОЧКИ) ===== */
+
+  .profile-orders__intro-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .profile-orders__intro-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.76);
+    margin-bottom: 12px;
+  }
+
+  .orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .order-card {
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(10, 10, 10, 0.94);
+    padding: 10px 12px 12px;
+  }
+
+  .order-card__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .order-card__name {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .order-card__tariff {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .order-card__status {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .order-card__status-label {
+    font-weight: 700;
+  }
+
+  .order-card__progress {
+    margin: 4px 0 6px;
+  }
+
+  .order-card__progress-bar {
+    position: relative;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+
+  .order-card__progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 40%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #ffb347, #ff8626);
+  }
+
+  .order-card__progress-fill--20 {
+    width: 20%;
+  }
+
+  .order-card__progress-text {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 2px;
+  }
+
+  .order-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .order-card__btn {
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(18, 18, 18, 0.96);
+    font-size: 11px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+
+  /* ===== СТАТУС ЗАКАЗА (СПИСОК ЭТАПОВ) ===== */
+
+  .profile-status__list {
+    margin-top: 8px;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .profile-status__list li + li {
+    margin-top: 2px;
+  }
+
+  .profile-status__badge {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #ffb347;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 179, 71, 0.6);
+    padding: 6px 10px;
+    background: rgba(255, 179, 71, 0.08);
+  }
+
+  /* ===== ПАРТНЁРСКАЯ ПРОГРАММА ===== */
+
+  .partner-list {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .partner-list ul {
+    padding-left: 18px;
+    margin: 6px 0 10px;
+  }
+
+  .partner-list li + li {
+    margin-top: 2px;
+  }
+
+  .partner-form {
+    margin-top: 10px;
+  }
+
+  .partner-form__row {
+    margin-bottom: 8px;
+  }
+
+  .partner-form__label {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 3px;
+  }
+
+  .partner-form__input,
+  .partner-form__select,
+  .partner-form__textarea {
+    width: 100%;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(8, 8, 8, 0.96);
+    padding: 9px 14px;
+    font-size: 13px;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  .partner-form__textarea {
+    border-radius: 14px;
+    min-height: 70px;
+    resize: vertical;
+  }
+
+  .partner-form__input::placeholder,
+  .partner-form__textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .partner-form__input:focus,
+  .partner-form__select:focus,
+  .partner-form__textarea:focus {
+    border-color: rgba(255, 191, 73, 0.95);
+    box-shadow: 0 0 0 1px rgba(255, 191, 73, 0.7);
+    background: rgba(18, 18, 18, 1);
+  }
+
+  .partner-form__submit {
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .partner-form__note {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 8px;
+  }
+
+  /* ===== АДАПТИВНЫЙ ЛЕЙАУТ ===== */
+
+  @media (min-width: 900px) {
+    .profile-layout {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .profile-layout__left {
+      flex: 1.1;
+    }
+
+    .profile-layout__right {
+      flex: 0.9;
+    }
+  }
+</style>
+
+<section class="page page--profile">
+  <h1 class="page__title">Личный кабинет</h1>
+  <p class="page__subtitle">
+    Ваше пространство Madera Design для управления заказами, профилем, бонусами и партнёрской программой.
+  </p>
+
+  <!-- ЭКРАН 1: ЛЁГКАЯ РЕГИСТРАЦИЯ / ВХОД -->
+  <div id="profile-unauth">
+    <div class="profile-card profile-card--accent">
+      <div class="profile-card__title">Создайте личный кабинет Madera Design</div>
+      <div class="profile-card__subtitle">
+        Лёгкая регистрация по номеру WhatsApp. После входа вы увидите статусы заказов, промокоды и связь с менеджером.
+      </div>
+
+      <div class="profile-auth__tabs">
+        <button type="button" class="profile-auth__tab is-active" data-auth-tab="register">
+          Регистрация
+        </button>
+        <button type="button" class="profile-auth__tab" data-auth-tab="login">
+          Вход
+        </button>
+      </div>
+
+      <div class="profile-auth__forms">
+        <!-- Форма регистрации -->
+        <form class="profile-auth__panel" data-auth-panel="register" data-auth-register>
+          <div class="profile-auth__row">
+            <label class="profile-auth__label">Имя</label>
+            <input
+              type="text"
+              name="reg-name"
+              class="profile-input"
+              placeholder="Как к вам обращаться?"
+              autocomplete="name"
+              required
+            />
+          </div>
+          <div class="profile-auth__row">
+            <label class="profile-auth__label">Телефон / WhatsApp (основной ключ авторизации)</label>
+            <input
+              type="tel"
+              name="reg-phone"
+              class="profile-input"
+              placeholder="+992 ..."
+              autocomplete="tel"
+              required
+            />
+          </div>
+          <div class="profile-auth__row">
+            <label class="profile-auth__label">Пароль</label>
+            <input
+              type="password"
+              name="reg-pass"
+              class="profile-input"
+              placeholder="Придумайте пароль"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn--primary profile-auth__submit">
+            Создать аккаунт
+          </button>
+
+          <div class="profile-auth__hint">
+            Создавая аккаунт, вы принимаете условия обработки данных и соглашение сервиса.
+          </div>
+        </form>
+
+        <!-- Форма входа -->
+        <form class="profile-auth__panel is-hidden" data-auth-panel="login" data-auth-login>
+          <div class="profile-auth__row">
+            <label class="profile-auth__label">Телефон / WhatsApp</label>
+            <input
+              type="tel"
+              name="login-phone"
+              class="profile-input"
+              placeholder="+992 ..."
+              autocomplete="tel"
+              required
+            />
+          </div>
+          <div class="profile-auth__row">
+            <label class="profile-auth__label">Пароль</label>
+            <input
+              type="password"
+              name="login-pass"
+              class="profile-input"
+              placeholder="Ваш пароль"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn--primary profile-auth__submit">
+            Войти
+          </button>
+
+          <div class="profile-auth__error" data-auth-error></div>
+          <div class="profile-auth__hint">
+            Ещё нет аккаунта? Переключитесь на вкладку «Регистрация».
+          </div>
+        </form>
+      </div>
+
+      <div class="profile-auth__divider"></div>
+      <div class="profile-microcopy">
+        После регистрации вы сможете увидеть историю заказов, статусы по этапам, промокоды и запросы в партнёрскую программу.
+      </div>
+    </div>
+  </div>
+
+  <!-- ЭКРАН 2: ПОСЛЕ РЕГИСТРАЦИИ / ВХОДА -->
+  <div id="profile-authenticated">
+    <div class="profile-greeting">
+      <div class="profile-greeting__title">
+        Привет, <span data-profile-greeting-name>клиент</span>.
+      </div>
+      <div class="profile-greeting__subtitle">
+        Добро пожаловать в ваш личный кабинет Madera Design. Здесь вы управляете заказами, стилевыми предпочтениями и партнёрской программой.
+      </div>
+      <div class="profile-header-actions">
+        <span class="profile-logout" data-profile-logout>Выйти из аккаунта</span>
+      </div>
+    </div>
+
+    <!-- ПАРТНЁРСКАЯ ПРОГРАММА (как на скрине) -->
+    <div class="profile-card">
+      <div class="profile-card__section-title">Партнёрская программа</div>
+      <div class="profile-card__title">Зарабатывайте вместе с Madera Design</div>
+      <div class="profile-card__subtitle">
+        Рекомендуйте наши услуги клиентам и получайте 5% от каждого оплаченного заказа по вашему промокоду.
+        Все выплаты — на ваш кошелёк Душанбе Сити DC.
+      </div>
+
+      <div class="partner-list">
+        <div class="profile-card__section-title">Преимущества</div>
+        <ul>
+          <li>5% партнёру, клиенту по промокоду — скидка 10%.</li>
+          <li>Прозрачная статистика заказов и история выплат.</li>
+          <li>Уведомления о каждом заказе, оформленном по вашему промокоду.</li>
+        </ul>
+
+        <div class="profile-card__section-title">Кто может стать партнёром</div>
+        <p>
+          Дизайнеры, блогеры, мастера, прорабы, владельцы студий, риелторы и любой человек, который
+          рекомендует наши услуги реальным клиентам.
+        </p>
+
+        <div class="profile-card__section-title">Как это работает</div>
+        <ul>
+          <li>Вы получаете персональный промокод.</li>
+          <li>Клиент вводит код при оформлении заказа.</li>
+          <li>Система автоматически закрепляет заказ за вами.</li>
+          <li>После 100% оплаты вы получаете вознаграждение на DC.</li>
+        </ul>
+      </div>
+
+      <div class="profile-card__section-title">Стать партнёром</div>
+      <div class="profile-card__subtitle" style="margin-bottom: 10px;">
+        Заполните короткую форму — менеджер активирует ваш промокод в течение 1 рабочего дня.
+      </div>
+
+      <form class="partner-form" data-partner-form>
+        <div class="partner-form__row">
+          <label class="partner-form__label">Имя</label>
+          <input
+            type="text"
+            name="partner-name"
+            class="partner-form__input"
+            placeholder="Как к вам обращаться?"
+            required
+          />
+        </div>
+
+        <div class="partner-form__row">
+          <label class="partner-form__label">Телефон / WhatsApp</label>
+          <input
+            type="tel"
+            name="partner-phone"
+            class="partner-form__input"
+            placeholder="+992 ..."
+            required
+          />
+        </div>
+
+        <div class="partner-form__row">
+          <label class="partner-form__label">Профессиональная деятельность</label>
+          <select name="partner-role" class="partner-form__select" required>
+            <option value="">Выберите вариант</option>
+            <option value="designer">Дизайнер интерьеров</option>
+            <option value="blogger">Блогер / автор</option>
+            <option value="master">Мастер / прораб</option>
+            <option value="studio">Владелец студии</option>
+            <option value="realtor">Риелтор</option>
+            <option value="other">Другое</option>
+          </select>
+        </div>
+
+        <div class="partner-form__row">
+          <label class="partner-form__label">Ссылка на профиль (Instagram и т. д.)</label>
+          <input
+            type="url"
+            name="partner-link"
+            class="partner-form__input"
+            placeholder="Например, instagram.com/..."
+          />
+        </div>
+
+        <div class="partner-form__row">
+          <label class="partner-form__label">Кратко об аудитории</label>
+          <textarea
+            name="partner-audience"
+            class="partner-form__textarea"
+            placeholder="Опишите, с какой аудиторией вы работаете и чем вы можете быть полезны."
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn btn--primary partner-form__submit">
+          Отправить заявку на партнёрство
+        </button>
+
+        <div class="partner-form__note">
+          После подтверждения вам будет выдан персональный промокод и инструкции по работе с программой.
+        </div>
+      </form>
+    </div>
+
+    <!-- ОСНОВНОЙ ЛЕЙАУТ: ПРОФИЛЬ + МОИ ЗАКАЗЫ + СТАТУС -->
+    <div class="profile-layout">
+      <!-- Левая колонка: профиль клиента -->
+      <div class="profile-layout__left">
+        <div class="profile-card profile-card--accent">
+          <div class="profile-card__section-title">Профиль клиента</div>
+          <div class="profile-card__title">Ваши данные</div>
+          <div class="profile-card__subtitle">
+            Основные данные, чтобы менеджеру и системе было проще готовить рекомендации и общаться с вами.
+          </div>
+
+          <div class="profile-form-grid">
+            <div class="profile-form__row">
+              <label>Имя</label>
+              <input
+                type="text"
+                class="profile-form__input"
+                data-profile-name-output
+                placeholder="(подтянется из первой заявки)"
+              />
+            </div>
+
+            <div class="profile-form__row">
+              <label>Телефон / WhatsApp</label>
+              <input
+                type="tel"
+                class="profile-form__input"
+                data-profile-phone-output
+                placeholder="(подтянется из первой заявки)"
+              />
+            </div>
+
+            <div class="profile-form__row">
+              <label>Предпочтительный стиль интерьера</label>
+              <select class="profile-form__select">
+                <option value="">Выберите стиль</option>
+                <option value="modern">Современный</option>
+                <option value="minimal">Минимализм</option>
+                <option value="loft">Лофт</option>
+                <option value="classic">Классика</option>
+                <option value="mix">Смешанный</option>
+              </select>
+            </div>
+
+            <div class="profile-form__row">
+              <label>Город</label>
+              <input
+                type="text"
+                class="profile-form__input"
+                placeholder="Например, Душанбе"
+              />
+            </div>
+
+            <div class="profile-form__row">
+              <label>Адрес (подтягивается из первой заявки)</label>
+              <input
+                type="text"
+                class="profile-form__input"
+                placeholder="Улица, дом, подъезд, этаж, квартира"
+              />
+            </div>
+
+            <div class="profile-form__row">
+              <label>Ориентир</label>
+              <input
+                type="text"
+                class="profile-form__input"
+                placeholder="Например, рядом с торговым центром ..."
+              />
+            </div>
+
+            <div class="profile-form__row">
+              <label>Email (не обязательно)</label>
+              <input
+                type="email"
+                class="profile-form__input"
+                placeholder="Для отправки чертежей и спецификаций"
+              />
+            </div>
+
+            <div class="profile-form__row">
+              <label>Комментарий</label>
+              <textarea
+                class="profile-form__textarea"
+                placeholder="Здесь можно указать любимые материалы, бренды фурнитуры и важные пожелания."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="profile-microcopy">
+            После обновления данных система подбирает решения и материалы под ваш стиль и бюджет.
+          </div>
+        </div>
+      </div>
+
+      <!-- Правая колонка: Мои заказы + Статус заказа -->
+      <div class="profile-layout__right">
+        <!-- Блок «Мои заказы» -->
+        <div class="profile-card">
+          <div class="profile-card__section-title">Мои заказы</div>
+          <div class="profile-orders__intro-title">Статусы и этапы ваших проектов</div>
+          <div class="profile-orders__intro-subtitle">
+            Отслеживайте этапы, статус выполнения, даты готовности и взаимодействуйте с менеджером в режиме реального времени.
+          </div>
+
+          <div class="orders-list">
+            <!-- Карточка заказа 1 -->
+            <div class="order-card">
+              <div class="order-card__top">
+                <div>
+                  <div class="order-card__name">Заказ №MD-001 — кухня 4,5 м</div>
+                  <div class="order-card__tariff">Тариф «Премиум»</div>
+                </div>
+              </div>
+              <div class="order-card__status">
+                Статус: <span class="order-card__status-label">В производстве</span>
+              </div>
+              <div class="order-card__progress">
+                <div class="order-card__progress-bar">
+                  <div class="order-card__progress-fill"></div>
+                </div>
+                <div class="order-card__progress-text">Прогресс: 40%</div>
+              </div>
+              <div class="order-card__actions">
+                <button type="button" class="order-card__btn" data-order-details>
+                  Открыть детали
+                </button>
+                <button type="button" class="order-card__btn" data-order-chat>
+                  Чат с менеджером
+                </button>
+              </div>
+            </div>
+
+            <!-- Карточка заказа 2 -->
+            <div class="order-card">
+              <div class="order-card__top">
+                <div>
+                  <div class="order-card__name">Заказ №MD-002 — гардеробная 3 м</div>
+                  <div class="order-card__tariff">Тариф «Стандарт»</div>
+                </div>
+              </div>
+              <div class="order-card__status">
+                Статус: <span class="order-card__status-label">Ожидает замера</span>
+              </div>
+              <div class="order-card__progress">
+                <div class="order-card__progress-bar">
+                  <div class="order-card__progress-fill order-card__progress-fill--20"></div>
+                </div>
+                <div class="order-card__progress-text">Прогресс: 20%</div>
+              </div>
+              <div class="order-card__actions">
+                <button type="button" class="order-card__btn" data-order-details>
+                  Открыть детали
+                </button>
+                <button type="button" class="order-card__btn" data-order-ready-measure>
+                  Сообщить готовность к замеру
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-microcopy">
+            В реальной версии здесь появится список всех ваших заказов с реальными датами, суммами, этапами и быстрым переходом в чат по каждому проекту.
+          </div>
+        </div>
+
+        <!-- Блок «Статус заказа: подробное объяснение» -->
+        <div class="profile-card">
+          <div class="profile-card__section-title">Статус заказа</div>
+          <div class="profile-card__title">Как отслеживать свой заказ</div>
+          <div class="profile-card__subtitle">
+            Статус заказа показывает текущий этап вашего проекта — от заявки до монтажа и сдачи.
+          </div>
+
+          <ul class="profile-status__list">
+            <li>1. Заявка получена</li>
+            <li>2. Замер</li>
+            <li>3. Дизайн-проект в разработке</li>
+            <li>4. Дизайн-проект согласован</li>
+            <li>5. Счёт выставлен / Ожидание оплаты</li>
+            <li>6. Оплачено / Запуск в производство</li>
+            <li>7. В производстве</li>
+            <li>8. Готово к монтажу</li>
+            <li>9. В монтаже</li>
+            <li>10. Завершено / Сдано</li>
+          </ul>
+
+          <div class="profile-status__badge">
+            На шаге «Счёт выставлен / Ожидание оплаты» система ждёт 100% безналичной оплаты через кошелёк Душанбе Сити DC.
+            После подтверждённого платежа статус автоматически меняется на «Оплачено / Запуск в производство».
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function initMaderaProfile() {
+    const unauth = document.getElementById("profile-unauth");
+    const authd = document.getElementById("profile-authenticated");
+    if (!unauth || !authd) return;
+
+    const AUTH_FLAG_KEY = "madera_profile_auth";
+    const NAME_KEY = "madera_profile_name";
+    const PHONE_KEY = "madera_profile_phone";
+    const PASS_KEY = "madera_profile_pass";
+
+    function fillFromStorage() {
+      const name = localStorage.getItem(NAME_KEY) || "";
+      const phone = localStorage.getItem(PHONE_KEY) || "";
+
+      const greetName = document.querySelector("[data-profile-greeting-name]");
+      const nameOutput = document.querySelector("[data-profile-name-output]");
+      const phoneOutput = document.querySelector("[data-profile-phone-output]");
+
+      if (greetName) {
+        greetName.textContent = name || "клиент";
+      }
+      if (nameOutput) {
+        nameOutput.value = name || "";
+      }
+      if (phoneOutput) {
+        phoneOutput.value = phone || "";
+      }
+    }
+
+    function showAuthenticated() {
+      unauth.style.display = "none";
+      authd.style.display = "";
+      fillFromStorage();
+    }
+
+    function showUnauth() {
+      unauth.style.display = "";
+      authd.style.display = "none";
+    }
+
+    // начальное состояние
+    if (localStorage.getItem(AUTH_FLAG_KEY) === "1") {
+      showAuthenticated();
+    } else {
+      showUnauth();
+    }
+
+    // переключатель «Регистрация / Вход»
+    const tabButtons = unauth.querySelectorAll("[data-auth-tab]");
+    const tabPanels = unauth.querySelectorAll("[data-auth-panel]");
+
+    tabButtons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const mode = btn.dataset.authTab;
+        tabButtons.forEach(function (b) {
+          b.classList.toggle("is-active", b === btn);
+        });
+        tabPanels.forEach(function (panel) {
+          const isCurrent = panel.dataset.authPanel === mode;
+          panel.classList.toggle("is-hidden", !isCurrent);
+        });
+      });
+    });
+
+    // регистрация
+    const regForm = unauth.querySelector("[data-auth-register]");
+    if (regForm) {
+      regForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const name = regForm.querySelector('input[name="reg-name"]').value.trim();
+        const phone = regForm.querySelector('input[name="reg-phone"]').value.trim();
+        const pass = regForm.querySelector('input[name="reg-pass"]').value.trim();
+
+        if (!name || !phone || !pass) {
+          return;
+        }
+
+        localStorage.setItem(NAME_KEY, name);
+        localStorage.setItem(PHONE_KEY, phone);
+        localStorage.setItem(PASS_KEY, pass);
+        localStorage.setItem(AUTH_FLAG_KEY, "1");
+
+        showAuthenticated();
+      });
+    }
+
+    // вход
+    const loginForm = unauth.querySelector("[data-auth-login]");
+    if (loginForm) {
+      loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const phone = loginForm.querySelector('input[name="login-phone"]').value.trim();
+        const pass = loginForm.querySelector('input[name="login-pass"]').value.trim();
+        const errorBox = loginForm.querySelector("[data-auth-error]");
+
+        const savedPhone = localStorage.getItem(PHONE_KEY);
+        const savedPass = localStorage.getItem(PASS_KEY);
+
+        if (savedPhone && savedPass && phone === savedPhone && pass === savedPass) {
+          localStorage.setItem(AUTH_FLAG_KEY, "1");
+          if (errorBox) {
+            errorBox.style.display = "none";
+            errorBox.textContent = "";
+          }
+          showAuthenticated();
+        } else {
+          if (errorBox) {
+            errorBox.textContent = "Проверьте номер телефона и пароль.";
+            errorBox.style.display = "block";
+          }
+        }
+      });
+    }
+
+    // выход
+    const logoutBtn = document.querySelector("[data-profile-logout]");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function () {
+        localStorage.removeItem(AUTH_FLAG_KEY);
+        showUnauth();
+      });
+    }
+
+    // заглушки для кнопок в карточках заказов
+    document.querySelectorAll("[data-order-details]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        alert("В реальной версии здесь откроются детали заказа.");
+      });
+    });
+
+    document.querySelectorAll("[data-order-chat]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        alert("В реальной версии здесь откроется чат с менеджером.");
+      });
+    });
+
+    document.querySelectorAll("[data-order-ready-measure]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        alert("Запрос на готовность к замеру будет отправлен менеджеру.");
+      });
+    });
+
+    // форма партнёрской программы
+    const partnerForm = document.querySelector("[data-partner-form]");
+    if (partnerForm) {
+      partnerForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const name = partnerForm.querySelector('input[name="partner-name"]').value.trim();
+        const phone = partnerForm.querySelector('input[name="partner-phone"]').value.trim();
+        const role = partnerForm.querySelector('select[name="partner-role"]').value.trim();
+
+        if (!name || !phone || !role) {
+          alert("Пожалуйста, заполните обязательные поля: имя, телефон и деятельность.");
+          return;
+        }
+
+        alert("Заявка на партнёрство отправлена. Менеджер свяжется с вами в течение 1 рабочего дня.");
+        partnerForm.reset();
+      });
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", initMaderaProfile);
+</script>
+`;
+}
 /* ------------------------- РАЗДЕЛ «ЕЩЁ» / ИНФО ------------------------- */
 
 function renderMore() {
