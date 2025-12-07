@@ -685,7 +685,29 @@ function renderOrder() {
                   data-order-phone
                 />
               </div>
+<div class="order-form__row order-form__row--full">
+    <label class="order-form__label">
+      Адрес объекта
+      <input
+        type="text"
+        class="order-form__input"
+        placeholder="Например, Душанбе, ул. Рудаки 15, кв. 23"
+        data-order-address
+      />
+    </label>
+  </div>
 
+  <div class="order-form__row order-form__row--full">
+    <label class="order-form__label">
+      Ориентир
+      <input
+        type="text"
+        class="order-form__input"
+        placeholder="Например, рядом с ТЦ &laquo;Садбарг&raquo;"
+        data-order-landmark
+      />
+    </label>
+  </div>
               <div class="order-form__row">
                 <label class="order-form__label">Предпочтительный способ связи</label>
                 <select class="order-form__select" data-order-contact-method>
