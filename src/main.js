@@ -661,8 +661,8 @@ function renderOrder() {
             <div class="order-form__header">
               <div class="order-form__title">Заявка на замер и расчёт</div>
               <div class="order-form__subtitle">
-                Заполните контактные данные — менеджер свяжется с вами, уточнит детали и сделает точный расчёт.
-              </div>
+  Замер после подтверждения менеджером выполняется в течение трёх рабочих дней.
+</div>
             </div>
 
             <div class="order-form__grid">
