@@ -1217,27 +1217,43 @@ function renderMore() {
   <ul class="order-info__list">
 
     <li>
-      <strong>Телефон / WhatsApp / Telegram:</strong><br>
-      +992&nbsp;012-90-03-03
+      <strong>Телефон:</strong><br>
+      <a href="tel:+992012900303">+992 012-90-03-03</a>
+    </li>
+
+    <li>
+      <strong>WhatsApp:</strong><br>
+      <a href="https://wa.me/992012900303" target="_blank">Написать в WhatsApp</a>
+    </li>
+
+    <li>
+      <strong>Telegram:</strong><br>
+      <a href="https://t.me/+992012900303" target="_blank">Написать в Telegram</a>
     </li>
 
     <li>
       <strong>E-mail:</strong><br>
-      management.maderadesign@gmail.com
+      <a href="mailto:management.maderadesign@gmail.com">
+        management.maderadesign@gmail.com
+      </a>
     </li>
 
     <li>
       <strong>Instagram:</strong><br>
-      modera_design_tjk
+      <a href="https://instagram.com/modera_design_tjk" target="_blank">
+        @modera_design_tjk
+      </a>
     </li>
 
     <li>
       <strong>Facebook:</strong><br>
-      facebook.com/share/1BiHjxikKD/
+      <a href="https://www.facebook.com/share/1BiHjxikKD/" target="_blank">
+        facebook.com/share/1BiHjxikKD/
+      </a>
     </li>
 
     <li>
-      Если требуется расчёт, мы подскажем, какие данные подготовить: размеры, фото помещения, планировку и примеры интерьеров.
+      Для точного расчёта мы подскажем, какие данные подготовить: размеры, фото помещения, планировку и примеры интерьеров.
     </li>
 
   </ul>
