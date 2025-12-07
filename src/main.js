@@ -929,14 +929,65 @@ function renderProfile() {
 
 function renderMore() {
   return `
-  <style>
-  .order-info__card {
-    border: 1px solid rgba(255, 140, 0, 0.4);
-    border-radius: 20px;
-    box-shadow: 0 0 12px rgba(255, 140, 0, 0.2);
-    padding: 20px;
-  }
-</style>
+  function renderMore() {
+  return `
+    <style>
+      /* Карточка раздела «Ещё» — внешний вид такой же, как был */
+      .order-info__card {
+        border: 1px solid rgba(255, 140, 0, 0.8);
+        border-radius: 20px;
+        box-shadow: 0 0 12px rgba(255, 140, 0, 0.4);
+        padding: 16px 20px;
+        margin-bottom: 16px;
+        position: relative;
+        background: #050505;
+        overflow: hidden;
+      }
+
+      /* Стрелка справа, показывает открыт блок или нет */
+      .order-info__card::after {
+        content: "▶";
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        font-size: 14px;
+        color: rgba(255, 153, 51, 0.9);
+        transition: transform 0.2s ease;
+      }
+
+      .order-info__card.order-info__card--open::after {
+        transform: rotate(90deg);
+      }
+
+      /* Делаем заголовки кликабельными по ощущению */
+      .order-info__badge,
+      .order-info__title {
+        cursor: pointer;
+      }
+
+      /* Чтобы текст заголовка не наезжал на стрелку */
+      .order-info__title {
+        padding-right: 32px;
+      }
+
+      /* Тело карточки (список, текст) по умолчанию скрыто */
+      .order-info__card .order-info__list,
+      .order-info__card .order-info__text {
+        margin-top: 12px;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.25s ease, opacity 0.25s ease;
+      }
+
+      /* Открытая карточка — показываем содержимое */
+      .order-info__card.order-info__card--open .order-info__list,
+      .order-info__card.order-info__card--open .order-info__text {
+        max-height: 2000px; /* с запасом под любой текст */
+        opacity: 1;
+      }
+    </style>
+    ...
   <style>
   .order-info__badge {
     font-size: 15px !important; /* сделает крупнее */
