@@ -985,7 +985,6 @@ function renderMore() {
         opacity: 1;
       }
     </style>
-    ...
   <style>
   .order-info__badge {
     font-size: 15px !important; /* сделает крупнее */
