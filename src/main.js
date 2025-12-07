@@ -1209,6 +1209,39 @@ function renderMore() {
 
   </ul>
 </div>
+<!-- Контакты -->
+<div class="order-info__card">
+  <div class="order-info__badge">Контакты</div>
+  <h2 class="order-info__title">Как связаться с Madera Design</h2>
+
+  <ul class="order-info__list">
+
+    <li>
+      <strong>Телефон / WhatsApp / Telegram:</strong><br>
+      +992&nbsp;012-90-03-03
+    </li>
+
+    <li>
+      <strong>E-mail:</strong><br>
+      management.maderadesign@gmail.com
+    </li>
+
+    <li>
+      <strong>Instagram:</strong><br>
+      modera_design_tjk
+    </li>
+
+    <li>
+      <strong>Facebook:</strong><br>
+      facebook.com/share/1BiHjxikKD/
+    </li>
+
+    <li>
+      Если требуется расчёт, мы подскажем, какие данные подготовить: размеры, фото помещения, планировку и примеры интерьеров.
+    </li>
+
+  </ul>
+</div>
           <!-- Частые вопросы (FAQ) -->
 <div class="order-info__card">
   <div class="order-info__badge">Частые вопросы (FAQ)</div>
