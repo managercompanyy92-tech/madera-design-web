@@ -31,9 +31,6 @@ document.addEventListener('click', (event) => {
 function renderHome() {
   return `
     <style>
-    function renderHome() {
-  return `
-    <style>
       /* ===== ЗИМНЯЯ АНИМАЦИЯ ДЛЯ ВЕРХНЕГО БЛОКА (MADERA DESIGN) ===== */
 
       /* Контейнер верхнего блока (там, где логотип и кнопка "Оформить заказ") */
