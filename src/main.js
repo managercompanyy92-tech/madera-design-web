@@ -31,35 +31,27 @@ document.addEventListener('click', (event) => {
 function renderHome() {
   return `
     <style>
-      /* ===== ЗИМНЯЯ АНИМАЦИЯ ДЛЯ ВЕРХНЕГО БЛОКА (MADERA DESIGN) ===== */
-
-      /* Контейнер верхнего блока (там, где логотип и кнопка "Оформить заказ") */
       .hero-face {
-        position: relative;   /* создаём контекст для псевдоэлемента */
-        overflow: hidden;     /* чтобы снег не выходил за границы блока */
+        position: relative;
+        overflow: hidden;
       }
 
-      /* Снег как полупрозрачный слой поверх фона, но под текстом */
       .hero-face::before {
         content: "";
         position: absolute;
-        inset: -20%;          /* чуть шире блока, чтобы не было видно краёв */
-        pointer-events: none; /* не мешаем кликам по кнопкам */
-
-        /* Три слоя «снежинок» разного масштаба */
+        inset: -20%;
+        pointer-events: none;
         background-image:
           radial-gradient(#ffffff 0 2px, transparent 3px),
           radial-gradient(#ffffff 0 2px, transparent 3px),
           radial-gradient(#ffffff 0 3px, transparent 4px);
         background-size: 120px 120px, 180px 180px, 240px 240px;
         background-position: 0 -200px, 60px -260px, 120px -300px;
-
-        opacity: 0.35;        /* мягкий, ненавязчивый снег */
+        opacity: 0.35;
         filter: blur(0.2px);
         animation: snow-fall 18s linear infinite;
       }
 
-      /* Плавное падение снега сверху вниз */
       @keyframes snow-fall {
         0% {
           background-position: 0 -200px, 60px -260px, 120px -300px;
@@ -69,19 +61,19 @@ function renderHome() {
         }
       }
 
-      /* Если у пользователя в системе отключены анимации — уважаем это */
       @media (prefers-reduced-motion: reduce) {
         .hero-face::before {
           animation: none;
           opacity: 0.25;
         }
       }
+    </style>
 
-      /* ===== ДАЛЬШЕ ОСТАВЛЯЕШЬ ТВОИ СУЩЕСТВУЮЩИЕ СТИЛИ renderHome() ===== */
-      /* тут уже идут твои правила, которые были раньше:
-         .hero-face-btn-wrapper { ... }
-         ...и т.д...
-      */
+    <section class="page page--home">
+      <div class="hero-face">
+        <!-- тут оставляешь твой текущий HTML верхнего блока -->
+  `;
+        }
     .hero-face-btn-wrapper {
   position: relative;
   display: inline-block;
