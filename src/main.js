@@ -776,7 +776,36 @@ function renderOrder() {
             </div>
           </div>
         </div>
+<style>
+  /* Полное скрытие служебного текста "Тёплый лид" */
+  .lead-hidden,
+  .lead-hidden * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+</style>
 
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Ищем элемент по тексту "ТЁПЛЫЙ ЛИД" (работает независимо от регистра)
+    const elements = [...document.querySelectorAll("*")];
+
+    const target = elements.find(el =>
+      el.textContent &&
+      el.textContent.toLowerCase().includes("тёплый лид")
+    );
+
+    if (target) {
+      // Скрываем весь родительский блок (зелёный контейнер)
+      const parent = target.closest("div");
+      if (parent) parent.classList.add("lead-hidden");
+    }
+  });
+</script>
         <!-- Правая колонка: маркетинг + следующий шаг -->
         <div class="order-form order-form--accent">
           <div class="order-info__card">
