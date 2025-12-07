@@ -899,25 +899,22 @@ body .support-bubble {
   font-size: 12px;
 }
 
-/* Блок ИИ-подсказки по лидам */
+/* Полное отключение AI-блока лида */
 
-.order-form__result-ai {
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.2);
-}
-
-.order-form__result-ai-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #ffb347;
-  margin-bottom: 2px;
-}
-
-.order-form__result-ai-text {
-  font-size: 11px;
-  opacity: 0.85;
+.order-form__result-ai,
+.order-form__result-ai *,
+.order-form__result-ai-label,
+.order-form__result-ai-label *,
+.order-form__result-ai-text,
+.order-form__result-ai-text * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    pointer-events: none !important;
 }
 
 /* Адаптив для формы заявки */
