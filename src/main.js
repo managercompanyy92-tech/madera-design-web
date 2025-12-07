@@ -11,6 +11,20 @@ const BASE_RATES = {
 
 const appRoot = document.getElementById("app");
 let selectedCatalogCategoryId = null;
+// ===== Аккордеон для раздела «Ещё» (универсальный) =====
+document.addEventListener('click', (event) => {
+  // Ищем ближайшую карточку раздела «Ещё»
+  const card = event.target.closest('.order-info__card');
+  if (!card) return;
+
+  // Если кликнули по ссылке внутри — даём открыть ссылку, не трогаем карточку
+  if (event.target.closest('a')) {
+    return;
+  }
+
+  // Переключаем класс "открыто / закрыто"
+  card.classList.toggle('order-info__card--open');
+});
 
 /* ------------------------------ VIEW-ФУНКЦИИ ------------------------------ */
 
