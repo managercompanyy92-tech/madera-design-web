@@ -975,7 +975,7 @@ function renderMore() {
       .order-info__card .order-info__text {
         margin-top: 12px;
         max-height: 0;
-        overflow: hidden;
+        overflow: hidden; 
         opacity: 0;
         transition: max-height 0.25s ease, opacity 0.25s ease;
       }
