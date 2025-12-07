@@ -929,8 +929,6 @@ function renderProfile() {
 
 function renderMore() {
   return `
-  function renderMore() {
-  return `
     <style>
       /* Карточка раздела «Ещё» — внешний вид такой же, как был */
       .order-info__card {
