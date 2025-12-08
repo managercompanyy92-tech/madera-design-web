@@ -3984,6 +3984,156 @@ function openAiDesignerFromQuiz(desc) {
 
   // и небольшой таймер после старта
   setTimeout(applyNavSpacer, 1000);
+  // ===== ПРОСТАЯ ЛОГИКА РЕГИСТРАЦИИ И ВХОДА В ЛК Madera =====
+
+(function setupSimpleProfileAuth() {
+  const STORAGE_KEY = 'madera-simple-profile';
+
+  function getEls() {
+    return {
+      unauth: document.getElementById('profile-unauth'),
+      auth: document.getElementById('profile-authenticated'),
+      greetingName: document.querySelector('[data-profile-greeting-name]'),
+      loginForm: document.querySelector('form[data-auth-panel="login"]'),
+      regForm: document.querySelector('form[data-auth-panel="register"]'),
+      errorBox: document.querySelector('.profile-auth__error')
+    };
+  }
+
+  function showError(msg, els) {
+    if (!els.errorBox) return;
+    els.errorBox.textContent = msg;
+    els.errorBox.style.display = 'block';
+  }
+
+  function clearError(els) {
+    if (!els.errorBox) return;
+    els.errorBox.textContent = '';
+    els.errorBox.style.display = 'none';
+  }
+
+  // Переключение вкладок на "Вход"
+  function switchToLoginTab() {
+    const tabs = document.querySelectorAll('[data-auth-tab]');
+    const panels = document.querySelectorAll('[data-auth-panel]');
+
+    tabs.forEach((tab) => {
+      const isLogin = tab.dataset.authTab === 'login';
+      tab.classList.toggle('is-active', isLogin);
+    });
+
+    panels.forEach((panel) => {
+      const isLogin = panel.dataset.authPanel === 'login';
+      panel.classList.toggle('is-hidden', !isLogin);
+    });
+  }
+
+  function saveProfile(profile) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+    } catch (e) {
+      console.warn('Cannot save profile', e);
+    }
+  }
+
+  function loadProfile() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn('Cannot load profile', e);
+      return null;
+    }
+  }
+
+  // Показ личного кабинета
+  function showDashboard(profile, els) {
+    if (els.unauth) els.unauth.style.display = 'none';
+    if (els.auth) els.auth.style.display = 'block';
+
+    if (els.greetingName) {
+      els.greetingName.textContent = profile.name || 'Клиент';
+    }
+  }
+
+  // Глобальный обработчик отправки форм профиля
+  document.addEventListener('submit', function (event) {
+    const form = event.target;
+    const els = getEls();
+
+    // ----- Регистрация -----
+    if (form.matches('form[data-auth-panel="register"]')) {
+      event.preventDefault();
+      clearError(els);
+
+      const name = form.elements['reg-name']?.value.trim();
+      const phone = form.elements['reg-phone']?.value.trim();
+      const pass = form.elements['reg-pass']?.value;
+
+      if (!name || !phone || !pass) {
+        showError('Заполните все поля регистрации.', els);
+        return;
+      }
+
+      const profile = { name, phone, pass };
+      saveProfile(profile);
+
+      // Автозаполнение формы входа
+      if (els.loginForm) {
+        if (els.loginForm.elements['login-phone']) {
+          els.loginForm.elements['login-phone'].value = phone;
+        }
+        if (els.loginForm.elements['login-pass']) {
+          els.loginForm.elements['login-pass'].value = pass;
+        }
+      }
+
+      // Автоматически переключаем на вкладку "Вход"
+      switchToLoginTab();
+      return;
+    }
+
+    // ----- Вход -----
+    if (form.matches('form[data-auth-panel="login"]')) {
+      event.preventDefault();
+      clearError(els);
+
+      const phone = form.elements['login-phone']?.value.trim();
+      const pass = form.elements['login-pass']?.value;
+
+      if (!phone || !pass) {
+        showError('Введите номер телефона и пароль.', els);
+        return;
+      }
+
+      const stored = loadProfile();
+
+      if (!stored) {
+        showError('Аккаунт ещё не создан. Сначала зарегистрируйтесь.', els);
+        return;
+      }
+
+      if (stored.phone !== phone || stored.pass !== pass) {
+        showError('Неверный номер телефона или пароль.', els);
+        return;
+      }
+
+      // Успешный вход — показываем личный кабинет
+      showDashboard(stored, els);
+    }
+  });
+
+  // При загрузке, если профиль уже сохранён — сразу показываем кабинет
+  document.addEventListener('DOMContentLoaded', () => {
+    const els = getEls();
+    const profile = loadProfile();
+
+    if (profile && els.unauth && els.auth) {
+      showDashboard(profile, els);
+    }
+  });
+})();
 })();
 // Автоинициализация страницы профиля
 const profileInitObserver = new MutationObserver(() => {
