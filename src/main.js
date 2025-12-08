@@ -2302,36 +2302,36 @@ function initProfilePage() {
   }
 
   // ----- Вход -----
+if (loginForm) {
+  loginForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    clearError();
 
-  if (loginForm) {
-    loginForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      clearError();
+    const phone = loginForm.elements['login-phone'].value.trim();
+    const pass = loginForm.elements['login-pass'].value;
 
-      const phone = loginForm.elements['login-phone']?.value.trim() || '';
-      const pass = loginForm.elements['login-pass']?.value.trim() || '';
+    const stored = loadMaderaProfile();
 
-      const stored = loadMaderaProfile();
+    if (!stored) {
+      showError('Аккаунт ещё не создан. Пожалуйста, зарегистрируйтесь.');
+      switchAuthTab('register');
+      return;
+    }
 
-      if (!stored) {
-        showError('Аккаунт ещё не создан. Пожалуйста, зарегистрируйтесь.');
-        switchAuthTab('register');
-        return;
-      }
+    if (!phone || !pass) {
+      showError('Введите номер телефона и пароль.');
+      return;
+    }
 
-      if (!phone || !pass) {
-        showError('Введите номер телефона и пароль.');
-        return;
-      }
+    if (stored.phone !== phone || stored.password !== pass) {
+      showError('Неверный номер телефона или пароль.');
+      return;
+    }
 
-      if (stored.phone !== phone || stored.pass !== pass) {
-        showError('Неверный номер телефона или пароль.');
-        return;
-      }
-
-      showDashboard(stored);
-    });
-  }
+    // ВАЖНО — именно эта строка открывает личный кабинет
+    showDashboard(stored);
+  });
+}
 
   // ----- Выход -----
 
