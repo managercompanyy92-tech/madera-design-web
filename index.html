@@ -207,5 +207,233 @@
 
     <!-- Логика плавающего чата / аватарки -->
     <script src="chat.js" defer></script>
+    <script type="module">
+  // ====== НАСТРОЙКИ API ======
+  const API_BASE = 'https://madera-api.onrender.com/api/auth';
+  const STORAGE_KEY = 'maderaAuth';
+
+  // ====== РАБОТА С localStorage ======
+  function loadUser() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.error('Ошибка чтения пользователя из localStorage', e);
+      return null;
+    }
+  }
+
+  function saveUser(user) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    } catch (e) {
+      console.error('Ошибка записи пользователя в localStorage', e);
+    }
+  }
+
+  function clearUser() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error('Ошибка удаления пользователя из localStorage', e);
+    }
+  }
+
+  // ====== БАЗОВЫЙ ЗАПРОС К API ======
+  async function apiRequest(path, method = 'GET', body) {
+    const url = API_BASE + path;
+
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    const user = loadUser();
+    if (user && user.token) {
+      headers['Authorization'] = `Bearer ${user.token}`;
+    }
+
+    const options = {
+      method,
+      headers,
+    };
+
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+
+    const res = await fetch(url, options);
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (_) {
+      // если сервер вернул пустой ответ, просто оставляем {}
+    }
+
+    // Сервер у тебя везде возвращает ok: true/false
+    if (!res.ok || data.ok === false) {
+      const msg =
+        (data && (data.error || data.message)) ||
+        `Ошибка ${res.status}`;
+      throw new Error(msg);
+    }
+
+    return data;
+  }
+
+  // ====== ЗАПОЛНЕНИЕ ПРОФИЛЯ ИЗ localStorage ======
+  function applyProfileData(root = document) {
+    const user = loadUser();
+    if (!user) return;
+
+    // Любой элемент с data-profile-field="name" / "phone"
+    const nodes = root.querySelectorAll('[data-profile-field]');
+    nodes.forEach((el) => {
+      const field = el.dataset.profileField;
+      if (!field) return;
+
+      const value = user[field] ?? '';
+
+      if (
+        el.tagName === 'INPUT' ||
+        el.tagName === 'TEXTAREA' ||
+        el.tagName === 'SELECT'
+      ) {
+        el.value = value;
+        // если у тебя были disabled – можешь включить/выключить здесь
+        // el.disabled = true;
+      } else {
+        el.textContent = value;
+      }
+    });
+  }
+
+  // ====== ОБНОВЛЕНИЕ СОСТОЯНИЯ UI (ВХОД / ВЫХОД) ======
+  function updateAuthUI() {
+    const user = loadUser();
+    const hasUser = !!(user && user.token);
+
+    // Класс на <html>, чтобы по CSS можно было прятать/показывать блоки
+    const root = document.documentElement;
+    if (hasUser) {
+      root.classList.add('is-auth');
+    } else {
+      root.classList.remove('is-auth');
+    }
+
+    // Обновляем данные в профиле
+    applyProfileData();
+
+    // Элементы, которые должны показываться только когда пользователь залогинен
+    document.querySelectorAll('[data-auth-visible="logged-in"]').forEach((el) => {
+      el.style.display = hasUser ? '' : 'none';
+    });
+
+    // Элементы, которые должны показываться только когда пользователь НЕ залогинен
+    document.querySelectorAll('[data-auth-visible="logged-out"]').forEach((el) => {
+      el.style.display = hasUser ? 'none' : '';
+    });
+  }
+
+  // ====== ОБРАБОТКА ФОРМ РЕГИСТРАЦИИ / ЛОГИНА ======
+  async function handleAuthFormSubmit(form, type) {
+    const formData = new FormData(form);
+    const name = formData.get('name')?.toString().trim();
+    const phone = formData.get('phone')?.toString().trim();
+    const password = formData.get('password')?.toString().trim();
+
+    try {
+      if (type === 'register') {
+        if (!name || !phone || !password) {
+          alert('Заполните имя, телефон и пароль');
+          return;
+        }
+
+        const data = await apiRequest('/register', 'POST', {
+          name,
+          phone,
+          password,
+        });
+
+        // Сохраняем пользователя без токена (токена нет в ответе)
+        const user = {
+          name,
+          phone,
+          userId: data.userId || null,
+          token: null,
+        };
+        saveUser(user);
+        updateAuthUI();
+        alert('Регистрация прошла успешно');
+      }
+
+      if (type === 'login') {
+        if (!phone || !password) {
+          alert('Заполните телефон и пароль');
+          return;
+        }
+
+        const data = await apiRequest('/login', 'POST', {
+          phone,
+          password,
+        });
+
+        // Берём уже сохранённое имя, если оно было
+        const existing = loadUser() || {};
+        const user = {
+          ...existing,
+          phone,
+          token: data.token,
+        };
+        saveUser(user);
+        updateAuthUI();
+        alert('Вход выполнен успешно');
+      }
+    } catch (e) {
+      console.error(e);
+      alert(e.message || 'Произошла ошибка при обращении к API');
+    }
+  }
+
+  // ====== ЛОГАУТ ======
+  function handleLogout() {
+    clearUser();
+    updateAuthUI();
+    alert('Вы вышли из аккаунта');
+  }
+
+  // ====== ГЛАВНАЯ ИНИЦИАЛИЗАЦИЯ ======
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. При загрузке страницы поднимаем состояние авторизации
+    updateAuthUI();
+
+    // 2. Делегирование submit-событий для форм авторизации
+    // Форма регистрации:  data-auth-form="register"
+    // Форма входа:       data-auth-form="login"
+    document.addEventListener('submit', (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement)) return;
+
+      const type = form.dataset.authForm;
+      if (!type) return; // это не наша форма
+
+      if (type !== 'register' && type !== 'login') return;
+
+      event.preventDefault();
+      handleAuthFormSubmit(form, type);
+    });
+
+    // 3. Кнопка выхода: data-auth-action="logout"
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      if (target.dataset.authAction === 'logout') {
+        event.preventDefault();
+        handleLogout();
+      }
+    });
+  });
+    </script>
   </body>
 </html>
