@@ -2332,7 +2332,102 @@ if (loginForm) {
     showDashboard(stored);
   });
 }
+// ----- ЖЁСТКАЯ ИНИЦИАЛИЗАЦИЯ РЕГИСТРАЦИИ И ВХОДА -----
+  (function setupStrongAuth() {
+    // Ищем именно формы регистрации и входа по атрибуту data-auth-panel
+    const regFormEl = document.querySelector('form[data-auth-panel="register"]');
+    const loginFormEl = document.querySelector('form[data-auth-panel="login"]');
 
+    if (!regFormEl || !loginFormEl) {
+      // Если форм нет на странице — тихо выходим
+      return;
+    }
+
+    // Регистрация
+    regFormEl.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearError && clearError();
+
+      const name  = regFormEl.elements['reg-name']?.value.trim()  || '';
+      const phone = regFormEl.elements['reg-phone']?.value.trim() || '';
+      const pass  = regFormEl.elements['reg-pass']?.value || '';
+
+      if (!phone || !pass) {
+        showError && showError('Введите номер телефона и пароль.');
+        return;
+      }
+
+      const profile = {
+        name: name || 'Клиент',
+        phone,
+        password: pass,
+      };
+
+      // Сохраняем профиль в локальное хранилище
+      if (typeof saveMaderaProfile === 'function') {
+        saveMaderaProfile(profile);
+      }
+
+      // Сразу переключаемся на вкладку "Вход"
+      if (typeof switchAuthTab === 'function') {
+        switchAuthTab('login');
+      }
+
+      // Подставляем номер и пароль в форму входа
+      if (loginFormEl.elements['login-phone']) {
+        loginFormEl.elements['login-phone'].value = phone;
+      }
+      if (loginFormEl.elements['login-pass']) {
+        loginFormEl.elements['login-pass'].value = pass;
+      }
+    });
+
+    // Вход
+    loginFormEl.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearError && clearError();
+
+      const phone = loginFormEl.elements['login-phone']?.value.trim() || '';
+      const pass  = loginFormEl.elements['login-pass']?.value || '';
+
+      if (!phone || !pass) {
+        showError && showError('Введите номер телефона и пароль.');
+        return;
+      }
+
+      let stored = null;
+      if (typeof loadMaderaProfile === 'function') {
+        stored = loadMaderaProfile();
+      }
+
+      if (!stored) {
+        showError && showError('Аккаунт ещё не создан. Пожалуйста, зарегистрируйтесь.');
+        if (typeof switchAuthTab === 'function') {
+          switchAuthTab('register');
+        }
+        return;
+      }
+
+      if (stored.phone !== phone || stored.password !== pass) {
+        showError && showError('Неверный номер телефона или пароль.');
+        return;
+      }
+
+      // Успешный вход — открываем личный кабинет
+      if (typeof showDashboard === 'function') {
+        showDashboard(stored);
+      } else {
+        // Резервный вариант, если по какой-то причине showDashboard не сработает
+        const unauthBlock = document.getElementById('profile-unauth');
+        const authBlock   = document.getElementById('profile-authenticated');
+        const greeting    = document.querySelector('[data-profile-greeting-name]');
+
+        if (unauthBlock) unauthBlock.style.display = 'none';
+        if (authBlock)   authBlock.style.display   = 'block';
+        if (greeting)    greeting.textContent      = stored.name || 'Клиент';
+      }
+    });
+  })();
   // ----- Выход -----
 
   if (logoutBtn) {
