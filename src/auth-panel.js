@@ -1,345 +1,427 @@
 // src/auth-panel.js
-// ЕДИНЫЙ ФАЙЛ ДЛЯ РЕГИСТРАЦИИ/ЛОГИНА ЧЕРЕЗ ВАШ API
+// Панель регистрации/логина для backend https://madera-api.onrender.com
 
-const MADERA_API_BASE = 'https://madera-api.onrender.com/api/auth';
+const API_BASE = "https://madera-api.onrender.com/api/auth";
+const STORAGE_KEY_USER = "madera_auth_user";
+const STORAGE_KEY_TOKEN = "madera_auth_token";
 
-// ====== ХРАНЕНИЕ JWT-ТОКЕНА В localStorage ======
-
-const TOKEN_KEY = 'madera_jwt_token';
-
-function saveToken(token) {
+function loadUser() {
   try {
-    localStorage.setItem(TOKEN_KEY, token);
+    const rawUser = localStorage.getItem(STORAGE_KEY_USER);
+    const rawToken = localStorage.getItem(STORAGE_KEY_TOKEN);
+    return {
+      user: rawUser ? JSON.parse(rawUser) : null,
+      token: rawToken || null,
+    };
   } catch (e) {
-    console.error('Не удалось сохранить токен', e);
+    console.error("Cannot load auth from localStorage", e);
+    return { user: null, token: null };
   }
 }
 
-function getToken() {
+function saveUser(user, token) {
   try {
-    return localStorage.getItem(TOKEN_KEY);
+    if (user) {
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(STORAGE_KEY_USER);
+    }
+
+    if (token) {
+      localStorage.setItem(STORAGE_KEY_TOKEN, token);
+    } else {
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
+    }
   } catch (e) {
-    console.error('Не удалось прочитать токен', e);
-    return null;
+    console.error("Cannot save auth to localStorage", e);
   }
 }
 
-function clearToken() {
-  try {
-    localStorage.removeItem(TOKEN_KEY);
-  } catch (e) {
-    console.error('Не удалось удалить токен', e);
-  }
-}
-
-// ====== УНИВЕРСАЛЬНЫЙ ЗАПРОС К API ======
-
-async function apiRequest(path, method = 'GET', body = null) {
-  const url = `${MADERA_API_BASE}${path}`;
-
+async function apiRequest(path, method = "GET", body = null, token = null) {
   const headers = {
-    'Accept': 'application/json'
+    "Content-Type": "application/json",
   };
 
-  const token = getToken();
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
-  let fetchOptions = { method, headers };
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
-  if (body !== null) {
-    headers['Content-Type'] = 'application/json';
-    fetchOptions.body = JSON.stringify(body);
-  }
-
-  const response = await fetch(url, fetchOptions);
-
-  let data = null;
+  const text = await res.text();
+  let data;
   try {
-    data = await response.json();
+    data = text ? JSON.parse(text) : {};
   } catch (e) {
-    data = null;
+    data = { ok: false, error: "Некорректный ответ сервера", raw: text };
   }
 
-  if (!response.ok || (data && data.ok === false)) {
-    const msg =
-      (data && (data.error || data.message)) ||
-      `Ошибка HTTP ${response.status}`;
-    throw new Error(msg);
+  if (!res.ok) {
+    throw new Error(data.error || data.message || `HTTP ${res.status}`);
   }
 
   return data;
 }
 
-// ====== ФУНКЦИИ ДЛЯ AUTH API ======
+// ====== РЕНДЕР ПАНЕЛИ ======
 
-async function apiRegister(name, phone, password) {
-  return apiRequest('/register', 'POST', { name, phone, password });
-}
+function createPanelRoot() {
+  const root = document.createElement("div");
+  root.id = "madera-auth-panel";
+  root.style.position = "fixed";
+  root.style.right = "16px";
+  root.style.bottom = "72px";
+  root.style.width = "360px";
+  root.style.maxHeight = "80vh";
+  root.style.background = "#111827";
+  root.style.color = "#F9FAFB";
+  root.style.borderRadius = "12px";
+  root.style.boxShadow = "0 20px 40px rgba(0,0,0,0.6)";
+  root.style.padding = "16px";
+  root.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  root.style.fontSize = "14px";
+  root.style.zIndex = "999999";
+  root.style.display = "none"; // ВАЖНО: по умолчанию спрятана
 
-async function apiLogin(phone, password) {
-  return apiRequest('/login', 'POST', { phone, password });
-}
-
-async function apiMe() {
-  return apiRequest('/me', 'GET');
-}
-
-// ====== UI-ПАНЕЛЬ ДЛЯ ТЕСТА АВТОРИЗАЦИИ ======
-
-function createAuthPanel() {
-  // Если панель уже есть — не создаём повторно
-  if (document.getElementById('madera-auth-panel')) return;
-
-  const panel = document.createElement('div');
-  panel.id = 'madera-auth-panel';
-
-  // Простые стили прямо в JS
-  panel.style.position = 'fixed';
-  panel.style.bottom = '16px';
-  panel.style.right = '16px';
-  panel.style.width = '320px';
-  panel.style.maxHeight = '80vh';
-  panel.style.overflow = 'auto';
-  panel.style.background = 'rgba(0,0,0,0.9)';
-  panel.style.color = '#fff';
-  panel.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
-  panel.style.fontSize = '13px';
-  panel.style.padding = '12px';
-  panel.style.borderRadius = '8px';
-  panel.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
-  panel.style.zIndex = '9999';
-
-  panel.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <strong style="font-size:14px;">Auth Debug Panel</strong>
-      <button id="madera-auth-toggle" style="
-        background:none;
-        border:none;
-        color:#aaa;
-        cursor:pointer;
-        font-size:16px;
-      ">−</button>
+  root.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div style="font-weight:600; font-size:14px;">Auth Debug Panel</div>
+      <button type="button" data-auth-role="close"
+        style="border:none; background:transparent; color:#9CA3AF; cursor:pointer; font-size:18px; line-height:1;">
+        ×
+      </button>
     </div>
 
-    <div id="madera-auth-body">
-      <div style="margin-bottom:8px;">
-        <div style="margin-bottom:4px;">Имя</div>
-        <input id="madera-auth-name" type="text" placeholder="Test User" style="
-          width:100%;
-          padding:4px 6px;
-          border-radius:4px;
-          border:1px solid #444;
-          background:#111;
-          color:#fff;
-        ">
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <button type="button" data-auth-tab="register"
+        style="flex:1; padding:6px 8px; border-radius:8px; border:none; cursor:pointer;
+               background:#1F2937; color:#E5E7EB; font-size:13px; font-weight:500;">
+        Регистрация
+      </button>
+      <button type="button" data-auth-tab="login"
+        style="flex:1; padding:6px 8px; border-radius:8px; border:none; cursor:pointer;
+               background:#111827; color:#9CA3AF; font-size:13px;">
+        Вход
+      </button>
+    </div>
+
+    <div data-auth-view="register">
+      <form data-auth-form="register" style="display:flex; flex-direction:column; gap:8px;">
+        <input name="name" placeholder="Имя" autocomplete="name"
+          style="padding:6px 8px; border-radius:8px; border:1px solid #374151; background:#111827; color:#F9FAFB;">
+        <input name="phone" placeholder="+998901112233" autocomplete="tel"
+          style="padding:6px 8px; border-radius:8px; border:1px solid #374151; background:#111827; color:#F9FAFB;">
+        <input name="password" type="password" placeholder="Пароль"
+          style="padding:6px 8px; border-radius:8px; border:1px solid #374151; background:#111827; color:#F9FAFB;">
+        <button type="submit"
+          style="margin-top:4px; padding:8px; border:none; border-radius:8px;
+                 background:#10B981; color:#022c22; font-weight:600; cursor:pointer;">
+          Зарегистрировать
+        </button>
+      </form>
+    </div>
+
+    <div data-auth-view="login" style="display:none;">
+      <form data-auth-form="login" style="display:flex; flex-direction:column; gap:8px;">
+        <input name="phone" placeholder="+998901112233" autocomplete="tel"
+          style="padding:6px 8px; border-radius:8px; border:1px solid #374151; background:#111827; color:#F9FAFB;">
+        <input name="password" type="password" placeholder="Пароль"
+          style="padding:6px 8px; border-radius:8px; border:1px solid #374151; background:#111827; color:#F9FAFB;">
+        <button type="submit"
+          style="margin-top:4px; padding:8px; border:none; border-radius:8px;
+                 background:#3B82F6; color:#EFF6FF; font-weight:600; cursor:pointer;">
+          Войти
+        </button>
+      </form>
+    </div>
+
+    <div style="margin-top:10px; padding:8px; border-radius:8px; background:#030712;">
+      <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:#6B7280; margin-bottom:4px;">
+        Текущий пользователь
       </div>
+      <pre data-auth-role="userInfo" style="white-space:pre-wrap; word-break:break-all; font-size:11px; margin:0; color:#D1D5DB;">
+нет данных
+      </pre>
+    </div>
 
-      <div style="margin-bottom:8px;">
-        <div style="margin-bottom:4px;">Телефон</div>
-        <input id="madera-auth-phone" type="text" placeholder="+998901112233" style="
-          width:100%;
-          padding:4px 6px;
-          border-radius:4px;
-          border:1px solid #444;
-          background:#111;
-          color:#fff;
-        ">
+    <div style="margin-top:8px; display:flex; gap:8px;">
+      <button type="button" data-auth-role="me"
+        style="flex:1; padding:6px 8px; border-radius:8px; border:1px solid #374151;
+               background:#111827; color:#E5E7EB; font-size:12px; cursor:pointer;">
+        Проверить /me
+      </button>
+      <button type="button" data-auth-role="logout"
+        style="flex:1; padding:6px 8px; border-radius:8px; border:1px solid #4B5563;
+               background:#111827; color:#FCA5A5; font-size:12px; cursor:pointer;">
+        Выйти
+      </button>
+    </div>
+
+    <div style="margin-top:8px;">
+      <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:#6B7280; margin-bottom:4px;">
+        Логи
       </div>
-
-      <div style="margin-bottom:8px;">
-        <div style="margin-bottom:4px;">Пароль</div>
-        <input id="madera-auth-password" type="password" placeholder="12345678" style="
-          width:100%;
-          padding:4px 6px;
-          border-radius:4px;
-          border:1px solid #444;
-          background:#111;
-          color:#fff;
-        ">
-      </div>
-
-      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
-        <button id="madera-auth-register" style="
-          flex:1;
-          padding:6px;
-          border-radius:4px;
-          border:none;
-          background:#2563eb;
-          color:#fff;
-          cursor:pointer;
-        ">Регистрация</button>
-
-        <button id="madera-auth-login" style="
-          flex:1;
-          padding:6px;
-          border-radius:4px;
-          border:none;
-          background:#16a34a;
-          color:#fff;
-          cursor:pointer;
-        ">Логин</button>
-      </div>
-
-      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
-        <button id="madera-auth-me" style="
-          flex:1;
-          padding:6px;
-          border-radius:4px;
-          border:none;
-          background:#4b5563;
-          color:#fff;
-          cursor:pointer;
-        ">Профиль /me</button>
-
-        <button id="madera-auth-logout" style="
-          flex:1;
-          padding:6px;
-          border-radius:4px;
-          border:none;
-          background:#b91c1c;
-          color:#fff;
-          cursor:pointer;
-        ">Выход</button>
-      </div>
-
-      <div style="font-size:11px;margin-bottom:4px;color:#9ca3af;">
-        Статус:
-      </div>
-      <pre id="madera-auth-status" style="
-        background:#020617;
-        border-radius:4px;
-        padding:6px;
-        white-space:pre-wrap;
-        word-break:break-word;
-        max-height:180px;
-        overflow:auto;
-        border:1px solid #1f2937;
-      "></pre>
+      <pre data-auth-role="log"
+        style="white-space:pre-wrap; word-break:break-all; font-size:11px; margin:0;
+               max-height:120px; overflow:auto; background:#030712; padding:6px; border-radius:6px; color:#D1D5DB;">
+панель загружена
+      </pre>
     </div>
   `;
 
-  document.body.appendChild(panel);
-
-  // Ссылки на элементы
-  const toggleBtn = document.getElementById('madera-auth-toggle');
-  const bodyEl = document.getElementById('madera-auth-body');
-  const nameInput = document.getElementById('madera-auth-name');
-  const phoneInput = document.getElementById('madera-auth-phone');
-  const passInput = document.getElementById('madera-auth-password');
-  const registerBtn = document.getElementById('madera-auth-register');
-  const loginBtn = document.getElementById('madera-auth-login');
-  const meBtn = document.getElementById('madera-auth-me');
-  const logoutBtn = document.getElementById('madera-auth-logout');
-  const statusPre = document.getElementById('madera-auth-status');
-
-  function setStatus(objOrText) {
-    if (typeof objOrText === 'string') {
-      statusPre.textContent = objOrText;
-    } else {
-      statusPre.textContent = JSON.stringify(objOrText, null, 2);
-    }
-  }
-
-  // Сворачивание панели
-  let collapsed = false;
-  toggleBtn.addEventListener('click', () => {
-    collapsed = !collapsed;
-    if (collapsed) {
-      bodyEl.style.display = 'none';
-      toggleBtn.textContent = '+';
-    } else {
-      bodyEl.style.display = 'block';
-      toggleBtn.textContent = '−';
-    }
-  });
-
-  // Если токен уже есть — показать, что пользователь «как бы залогинен»
-  if (getToken()) {
-    setStatus('Токен найден в localStorage. Нажмите "Профиль /me", чтобы получить данные.');
-  } else {
-    setStatus('Токен не найден. Сначала зарегистрируйтесь или залогиньтесь.');
-  }
-
-  // Обработчики кнопок
-  registerBtn.addEventListener('click', async () => {
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
-    const password = passInput.value;
-
-    if (!name || !phone || !password) {
-      setStatus('Заполните имя, телефон и пароль для регистрации.');
-      return;
-    }
-
-    setStatus('Отправляем запрос регистрации...');
-    try {
-      const data = await apiRegister(name, phone, password);
-      setStatus(data);
-    } catch (e) {
-      setStatus('Ошибка регистрации: ' + e.message);
-    }
-  });
-
-  loginBtn.addEventListener('click', async () => {
-    const phone = phoneInput.value.trim();
-    const password = passInput.value;
-
-    if (!phone || !password) {
-      setStatus('Заполните телефон и пароль для логина.');
-      return;
-    }
-
-    setStatus('Отправляем запрос логина...');
-    try {
-      const data = await apiLogin(phone, password);
-      if (data && data.token) {
-        saveToken(data.token);
-        setStatus({
-          message: 'Логин успешен. Токен сохранён в localStorage.',
-          response: data
-        });
-      } else {
-        setStatus(data || 'Логин без токена? Проверьте API.');
-      }
-    } catch (e) {
-      setStatus('Ошибка логина: ' + e.message);
-    }
-  });
-
-  meBtn.addEventListener('click', async () => {
-    if (!getToken()) {
-      setStatus('Токена нет. Сначала залогиньтесь.');
-      return;
-    }
-    setStatus('Запрашиваем /me...');
-    try {
-      const data = await apiMe();
-      setStatus(data);
-    } catch (e) {
-      setStatus('Ошибка /me: ' + e.message);
-    }
-  });
-
-  logoutBtn.addEventListener('click', () => {
-    clearToken();
-    setStatus('Токен удалён. Пользователь считается разлогиненным.');
-  });
-
-  // Делаем панель доступной из консоли для разработчика
-  window.MaderaAuth = {
-    apiRegister,
-    apiLogin,
-    apiMe,
-    saveToken,
-    getToken,
-    clearToken
-  };
-  console.log('%cMaderaAuth доступен в window.MaderaAuth', 'color: #22c55e;');
+  document.body.appendChild(root);
+  return root;
 }
 
-// Создаём панель после загрузки DOM
-document.addEventListener('DOMContentLoaded', () => {
-  createAuthPanel();
+function createFloatingButton() {
+  const btn = document.createElement("button");
+  btn.id = "madera-auth-toggle-btn";
+  btn.type = "button";
+  btn.textContent = "Auth";
+  btn.style.position = "fixed";
+  btn.style.right = "16px";
+  btn.style.bottom = "16px";
+  btn.style.width = "44px";
+  btn.style.height = "44px";
+  btn.style.borderRadius = "999px";
+  btn.style.border = "none";
+  btn.style.background = "#111827";
+  btn.style.color = "#F9FAFB";
+  btn.style.boxShadow = "0 10px 25px rgba(0,0,0,0.6)";
+  btn.style.cursor = "pointer";
+  btn.style.fontSize = "12px";
+  btn.style.fontWeight = "600";
+  btn.style.zIndex = "999998";
+  btn.style.opacity = "0.8";
+
+  btn.addEventListener("mouseenter", () => {
+    btn.style.opacity = "1";
+  });
+  btn.addEventListener("mouseleave", () => {
+    btn.style.opacity = "0.8";
+  });
+
+  document.body.appendChild(btn);
+  return btn;
+}
+
+// ====== ЛОГИКА ПАНЕЛИ ======
+
+function initAuthPanel() {
+  const { user, token } = loadUser();
+  const root = createPanelRoot();
+  const toggleBtn = createFloatingButton();
+
+  const views = {
+    register: root.querySelector('[data-auth-view="register"]'),
+    login: root.querySelector('[data-auth-view="login"]'),
+  };
+
+  const tabs = {
+    register: root.querySelector('[data-auth-tab="register"]'),
+    login: root.querySelector('[data-auth-tab="login"]'),
+  };
+
+  const forms = {
+    register: root.querySelector('[data-auth-form="register"]'),
+    login: root.querySelector('[data-auth-form="login"]'),
+  };
+
+  const elUserInfo = root.querySelector('[data-auth-role="userInfo"]');
+  const elLog = root.querySelector('[data-auth-role="log"]');
+  const btnClose = root.querySelector('[data-auth-role="close"]');
+  const btnMe = root.querySelector('[data-auth-role="me"]');
+  const btnLogout = root.querySelector('[data-auth-role="logout"]');
+
+  let currentUser = user;
+  let currentToken = token;
+
+  function log(message) {
+    const now = new Date().toISOString().substring(11, 19);
+    elLog.textContent = `[${now}] ${message}\n` + (elLog.textContent || "");
+  }
+
+  function renderUser() {
+    if (!currentUser && !currentToken) {
+      elUserInfo.textContent = "нет данных";
+      return;
+    }
+    elUserInfo.textContent = JSON.stringify(
+      {
+        user: currentUser || null,
+        token: currentToken || null,
+      },
+      null,
+      2
+    );
+  }
+
+  function setActiveTab(tab) {
+    if (!["register", "login"].includes(tab)) return;
+
+    Object.keys(views).forEach((key) => {
+      views[key].style.display = key === tab ? "block" : "none";
+    });
+
+    Object.keys(tabs).forEach((key) => {
+      if (key === tab) {
+        tabs[key].style.background = "#1F2937";
+        tabs[key].style.color = "#E5E7EB";
+      } else {
+        tabs[key].style.background = "#111827";
+        tabs[key].style.color = "#9CA3AF";
+      }
+    });
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    const form = forms.register;
+    const name = form.name.value.trim();
+    const phone = form.phone.value.trim();
+    const password = form.password.value;
+
+    if (!name || !phone || !password) {
+      alert("Заполните имя, телефон и пароль");
+      return;
+    }
+
+    try {
+      log("Регистрация...");
+      const data = await apiRequest(
+        "/register",
+        "POST",
+        { name, phone, password },
+        null
+      );
+      log(`Регистрация OK, userId=${data.userId || "?"}`);
+
+      currentUser = { name, phone, userId: data.userId || null };
+      currentToken = null;
+      saveUser(currentUser, currentToken);
+      renderUser();
+
+      alert("Регистрация прошла успешно");
+    } catch (err) {
+      console.error(err);
+      log("Ошибка регистрации: " + err.message);
+      alert(err.message || "Ошибка регистрации");
+    }
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const form = forms.login;
+    const phone = form.phone.value.trim();
+    const password = form.password.value;
+
+    if (!phone || !password) {
+      alert("Заполните телефон и пароль");
+      return;
+    }
+
+    try {
+      log("Логин...");
+      const data = await apiRequest(
+        "/login",
+        "POST",
+        { phone, password },
+        null
+      );
+      log("Логин OK: получен токен");
+
+      currentToken = data.token;
+      if (!currentUser) {
+        currentUser = { phone };
+      }
+      saveUser(currentUser, currentToken);
+      renderUser();
+
+      alert("Вход выполнен успешно");
+    } catch (err) {
+      console.error(err);
+      log("Ошибка логина: " + err.message);
+      alert(err.message || "Ошибка входа");
+    }
+  }
+
+  async function handleMe() {
+    if (!currentToken) {
+      alert("Нет токена. Сначала войдите.");
+      return;
+    }
+
+    try {
+      log("Запрос /me...");
+      const data = await apiRequest("/me", "GET", null, currentToken);
+      log("Ответ /me: " + JSON.stringify(data));
+      if (data.user) {
+        currentUser = { ...(currentUser || {}), ...data.user };
+        saveUser(currentUser, currentToken);
+        renderUser();
+      }
+    } catch (err) {
+      console.error(err);
+      log("Ошибка /me: " + err.message);
+      alert(err.message || "Ошибка /me");
+    }
+  }
+
+  function handleLogout() {
+    currentUser = null;
+    currentToken = null;
+    saveUser(null, null);
+    renderUser();
+    log("Логаут, данные очищены");
+    alert("Вы вышли из аккаунта");
+  }
+
+  function openPanel() {
+    root.style.display = "block";
+  }
+
+  function closePanel() {
+    root.style.display = "none";
+  }
+
+  // События
+  tabs.register.addEventListener("click", () => setActiveTab("register"));
+  tabs.login.addEventListener("click", () => setActiveTab("login"));
+
+  forms.register.addEventListener("submit", handleRegister);
+  forms.login.addEventListener("submit", handleLogin);
+
+  btnClose.addEventListener("click", closePanel);
+  btnMe.addEventListener("click", handleMe);
+  btnLogout.addEventListener("click", handleLogout);
+
+  toggleBtn.addEventListener("click", () => {
+    if (root.style.display === "none") {
+      openPanel();
+    } else {
+      closePanel();
+    }
+  });
+
+  // Глобальная функция для ссылки "Админ"
+  window.openAuthDebugPanel = function () {
+    openPanel();
+  };
+
+  renderUser();
+  setActiveTab("register");
+  log("Панель инициализирована");
+}
+
+// Ждём, пока загрузится DOM
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    initAuthPanel();
+  } catch (e) {
+    console.error("Ошибка инициализации auth-panel", e);
+  }
 });
