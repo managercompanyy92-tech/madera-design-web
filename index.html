@@ -830,5 +830,70 @@
     });
   });
         </script>
+    <script>
+// ================================================
+//   ПАРТНЁРСКАЯ ПРОГРАММА – ФРОНТЕНД
+//   Один цельный код, вставлять ПЕРЕД </body>
+// ================================================
+
+// Настройки
+const PARTNER_API_URL = "https://madera-api.onrender.com/api/partner/apply";
+
+// Функция отправки заявки
+async function sendPartnerRequest(form) {
+  const formData = new FormData(form);
+
+  const payload = {
+    name: formData.get("name")?.trim(),
+    phone: formData.get("phone")?.trim(),
+    profession: formData.get("profession") || "",
+    profileLink: formData.get("profileLink") || "",
+    audience: formData.get("audience") || ""
+  };
+
+  // Проверяем обязательные поля
+  if (!payload.name || !payload.phone) {
+    alert("Пожалуйста, заполните имя и телефон.");
+    return;
+  }
+
+  try {
+    const response = await fetch(PARTNER_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (data.ok) {
+      alert("Заявка отправлена успешно! Наш менеджер свяжется с вами.");
+      form.reset();
+    } else {
+      alert("Ошибка: " + (data.error || "Не удалось отправить заявку."));
+    }
+
+  } catch (err) {
+    console.error("Partner request error:", err);
+    alert("Сервер недоступен. Попробуйте позже.");
+  }
+}
+
+
+// ================================================
+//   ОТСЛЕЖИВАНИЕ НАЖАТИЯ НА ФОРМУ
+// ================================================
+
+document.addEventListener("submit", function(event) {
+  const form = event.target;
+
+  if (form.matches("[data-form='partner']")) {
+    event.preventDefault();
+    sendPartnerRequest(form);
+  }
+});
+    </script>
   </body>
 </html>
