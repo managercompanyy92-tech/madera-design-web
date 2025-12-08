@@ -2117,6 +2117,272 @@ function renderProfile() {
 </script>
 `;
 }
+// ===== ЛОКАЛЬНАЯ РЕГИСТРАЦИЯ / АВТОРИЗАЦИЯ ПРОФИЛЯ (ДЕМО) =====
+
+const MADERA_PROFILE_STORAGE_KEY = 'madera_profile_v1';
+
+// Загрузка профиля из localStorage
+function loadMaderaProfile() {
+  try {
+    const raw = localStorage.getItem(MADERA_PROFILE_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn('Не удалось прочитать профиль из localStorage', e);
+    return null;
+  }
+}
+
+// Сохранение профиля
+function saveMaderaProfile(profile) {
+  try {
+    localStorage.setItem(MADERA_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  } catch (e) {
+    console.warn('Не удалось сохранить профиль в localStorage', e);
+  }
+}
+
+// Очистка профиля (выход)
+function clearMaderaProfile() {
+  try {
+    localStorage.removeItem(MADERA_PROFILE_STORAGE_KEY);
+  } catch (e) {
+    console.warn('Не удалось удалить профиль из localStorage', e);
+  }
+}
+
+// Основная инициализация страницы "Профиль"
+function initProfilePage() {
+  const profileData = loadMaderaProfile();
+
+  const unauthBlock = document.getElementById('profile-unauth');
+  const authBlock = document.getElementById('profile-authenticated');
+
+  const authTabs = document.querySelectorAll('.profile-auth__tab');
+  const authPanels = document.querySelectorAll('.profile-auth__panel');
+  const errorBox = document.querySelector('.profile-auth__error');
+  const greetingNameSpan = document.querySelector('[data-profile-greeting-name]');
+  const logoutBtn = document.querySelector('.profile-logout');
+
+  const regForm = document.querySelector('form[data-auth-panel="register"]');
+  const loginForm = document.querySelector('form[data-auth-panel="login"]');
+
+  const profileForm = document.querySelector('[data-profile-form="client"]');
+  const partnerForm = document.querySelector('.partner-form');
+
+  // ----- Вспомогательные функции -----
+
+  function showError(message) {
+    if (!errorBox) return;
+    errorBox.textContent = message;
+    errorBox.style.display = 'block';
+  }
+
+  function clearError() {
+    if (!errorBox) return;
+    errorBox.textContent = '';
+    errorBox.style.display = 'none';
+  }
+
+  function switchAuthTab(targetTab) {
+    if (!unauthBlock) return;
+
+    // показываем блок авторизации, скрываем личный кабинет
+    unauthBlock.style.display = 'block';
+    if (authBlock) authBlock.style.display = 'none';
+
+    // переключаем табы
+    authTabs.forEach((tab) => {
+      const tabKey = tab.dataset.authTab;
+      tab.classList.toggle('is-active', tabKey === targetTab);
+    });
+
+    // переключаем панели
+    authPanels.forEach((panel) => {
+      const panelKey = panel.dataset.authPanel;
+      panel.classList.toggle('is-hidden', panelKey !== targetTab);
+    });
+
+    clearError();
+  }
+
+  function fillProfileForm(profile) {
+    if (!profileForm || !profile) return;
+
+    const map = {
+      'profile-name': 'name',
+      'profile-phone': 'phone',
+      'profile-style': 'style',
+      'profile-city': 'city',
+      'profile-address': 'address',
+      'profile-landmark': 'landmark',
+      'profile-email': 'email'
+    };
+
+    Object.keys(map).forEach((inputName) => {
+      const fieldKey = map[inputName];
+      const input = profileForm.elements[inputName];
+      if (input && profile[fieldKey]) {
+        input.value = profile[fieldKey];
+      }
+    });
+  }
+
+  function showDashboard(profile) {
+    if (unauthBlock) unauthBlock.style.display = 'none';
+    if (authBlock) authBlock.style.display = 'block';
+
+    clearError();
+
+    if (greetingNameSpan) {
+      greetingNameSpan.textContent = profile && profile.name
+        ? profile.name
+        : 'Клиент';
+    }
+
+    fillProfileForm(profile);
+  }
+
+  // ----- Стартовое состояние -----
+
+  if (profileData) {
+    // уже есть сохранённый профиль — сразу показываем личный кабинет
+    showDashboard(profileData);
+  } else {
+    // профиля нет — показываем регистрацию
+    switchAuthTab('register');
+  }
+
+  // ----- Обработчики табов Регистрация / Вход -----
+
+  authTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const targetTab = tab.dataset.authTab; // 'register' | 'login'
+      switchAuthTab(targetTab);
+    });
+  });
+
+  // ----- Регистрация -----
+
+  if (regForm) {
+    regForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearError();
+
+      const name = regForm.elements['reg-name']?.value.trim() || '';
+      const phone = regForm.elements['reg-phone']?.value.trim() || '';
+      const pass = regForm.elements['reg-pass']?.value.trim() || '';
+
+      if (!phone || !pass) {
+        showError('Укажите номер телефона и пароль.');
+        return;
+      }
+
+      const existing = loadMaderaProfile();
+      if (existing && existing.phone === phone) {
+        showError('Аккаунт с таким номером уже существует. Попробуйте войти.');
+        switchAuthTab('login');
+        return;
+      }
+
+      const newProfile = {
+        name,
+        phone,
+        pass, // ВАЖНО: в реальном проекте пароль так хранить нельзя, это только демо.
+        style: '',
+        city: '',
+        address: '',
+        landmark: '',
+        email: ''
+      };
+
+      saveMaderaProfile(newProfile);
+      showDashboard(newProfile);
+    });
+  }
+
+  // ----- Вход -----
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearError();
+
+      const phone = loginForm.elements['login-phone']?.value.trim() || '';
+      const pass = loginForm.elements['login-pass']?.value.trim() || '';
+
+      const stored = loadMaderaProfile();
+
+      if (!stored) {
+        showError('Аккаунт ещё не создан. Пожалуйста, зарегистрируйтесь.');
+        switchAuthTab('register');
+        return;
+      }
+
+      if (!phone || !pass) {
+        showError('Введите номер телефона и пароль.');
+        return;
+      }
+
+      if (stored.phone !== phone || stored.pass !== pass) {
+        showError('Неверный номер телефона или пароль.');
+        return;
+      }
+
+      showDashboard(stored);
+    });
+  }
+
+  // ----- Выход -----
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      clearMaderaProfile();
+      switchAuthTab('login');
+    });
+  }
+
+  // ----- Форма "Профиль клиента" (обновление данных) -----
+
+  if (profileForm) {
+    profileForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const stored = loadMaderaProfile() || {};
+
+      const updatedProfile = {
+        ...stored,
+        name: profileForm.elements['profile-name']?.value.trim() || stored.name || '',
+        phone: profileForm.elements['profile-phone']?.value.trim() || stored.phone || '',
+        style: profileForm.elements['profile-style']?.value.trim() || stored.style || '',
+        city: profileForm.elements['profile-city']?.value.trim() || stored.city || '',
+        address: profileForm.elements['profile-address']?.value.trim() || stored.address || '',
+        landmark: profileForm.elements['profile-landmark']?.value.trim() || stored.landmark || '',
+        email: profileForm.elements['profile-email']?.value.trim() || stored.email || '',
+      };
+
+      saveMaderaProfile(updatedProfile);
+      if (greetingNameSpan) {
+        greetingNameSpan.textContent = updatedProfile.name || 'Клиент';
+      }
+
+      alert('Профиль обновлён (демо-режим).');
+    });
+  }
+
+  // ----- Форма партнёрской программы -----
+
+  if (partnerForm) {
+    partnerForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      // В демо-версии просто показываем сообщение и очищаем форму
+      alert('Заявка на партнёрство отправлена (демо). Менеджер свяжется с вами по указанным контактам.');
+
+      partnerForm.reset();
+    });
+  }
+      }
 /* ------------------------- РАЗДЕЛ «ЕЩЁ» / ИНФО ------------------------- */
 
 function renderMore() {
