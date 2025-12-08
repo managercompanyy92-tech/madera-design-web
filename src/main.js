@@ -3890,4 +3890,18 @@ function openAiDesignerFromQuiz(desc) {
   // и небольшой таймер после старта
   setTimeout(applyNavSpacer, 1000);
 })();
-  
+// Автоинициализация страницы профиля
+const profileInitObserver = new MutationObserver(() => {
+  const profilePage = document.querySelector('.page--profile');
+  if (profilePage) {
+    if (typeof initProfilePage === 'function') {
+      initProfilePage();
+    }
+    profileInitObserver.disconnect();
+  }
+});
+
+profileInitObserver.observe(document.body, {
+  childList: true,
+  subtree: true
+});  
