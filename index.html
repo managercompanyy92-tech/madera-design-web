@@ -437,27 +437,31 @@
     </script>
     <script type="module" src="/src/auth-panel.js"></script>
     <script>
-// ================================================
+<script>
+// ===============================
 //   ПАРТНЁРСКАЯ ПРОГРАММА – ФРОНТЕНД
-//   Один цельный код, вставлять ПЕРЕД </body>
-// ================================================
+//   Вставлять ПЕРЕД </body>
+// ===============================
 
-// Настройки
-const PARTNER_API_URL = "https://madera-design-backend.vercel.app/api/partner";
+// URL обработчика на сервере.
+// Вариант 1: API в этом же проекте на Vercel.
+const PARTNER_API_URL = "/api/partner";
+
+// Если бекенд реально живет на отдельном домене,
+// сюда можно поставить полный URL, например:
+// const PARTNER_API_URL = "https://madera-design-backend.vercel.app/api/partner";
 
 // Функция отправки заявки
 async function sendPartnerRequest(form) {
-  // DEBUG: чтобы убедиться, что обработчик вообще срабатывает
-  alert("Отправляем заявку на партнёрство...");
-
   const formData = new FormData(form);
 
+  // Собираем данные из формы
   const payload = {
-    name: formData.get("partner-name")?.trim() || "",
-    phone: formData.get("partner-phone")?.trim() || "",
-    profession: formData.get("partner-role") || "",
-    profileLink: formData.get("partner-link")?.trim() || "",
-    audience: formData.get("partner-audience")?.trim() || "",
+    name: formData.get("partner-name")?.trim() ?? "",
+    phone: formData.get("partner-phone")?.trim() ?? "",
+    profession: formData.get("partner-role") ?? "",
+    profileLink: formData.get("partner-link")?.trim() ?? "",
+    audience: formData.get("partner-audience")?.trim() ?? "",
   };
 
   // Проверяем обязательные поля
@@ -471,53 +475,43 @@ async function sendPartnerRequest(form) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
       body: JSON.stringify(payload),
     });
 
-    // ЧИТАЕМ ответ как текст, чтобы видеть всё, что пришло
-    const rawText = await response.text();
-
     let data = null;
     try {
-      data = rawText ? JSON.parse(rawText) : null;
-    } catch (_) {
-      data = null;
+      data = await response.json();
+    } catch (e) {
+      // сервер мог вернуть пустой ответ или не-JSON — это не критично
     }
 
-    // Диагностика: показываем статус и «сырое» тело ответа
-    alert(
-      "Ответ сервера:\n" +
-      "status: " + response.status + "\n\n" +
-      "body: " + (data ? JSON.stringify(data) : rawText || "(пусто)")
-    );
-
-    // ЛОГИКА УСПЕХА
-    const okFlag = data && typeof data.ok !== "undefined" ? data.ok : response.ok;
-
-    if (okFlag) {
+    if (response.ok) {
       alert("Заявка отправлена успешно!");
       form.reset();
     } else {
-      alert("Ошибка при отправке заявки. Попробуйте ещё раз.");
+      const message =
+        (data && (data.error || data.message)) ||
+        `Сервер вернул код ${response.status}`;
+      alert("Ошибка при отправке заявки: " + message);
     }
-  } catch (err) {
-    console.error("Partner request error", err);
-    alert("Сервер недоступен. Попробуйте позже.");
+  } catch (error) {
+    console.error("Ошибка сети при отправке партнёрской заявки:", error);
+    alert("Не удалось связаться с сервером. Проверьте интернет или попробуйте позже.");
   }
 }
 
-// Отслеживание нажатия на форму партнёра
+// Один обработчик на весь документ: ловим отправку именно партнёрской формы
 document.addEventListener("submit", function (event) {
   const form = event.target;
-  if (!(form instanceof HTMLFormElement)) return;
 
   if (form.matches("[data-form='partner']")) {
     event.preventDefault();
     sendPartnerRequest(form);
   }
 });
-    </script>
+</script>
     <script>
 // ================================================
 //  ПАРТНЁРСКАЯ ФОРМА — ГОТОВЫЙ РАБОЧИЙ КОД
