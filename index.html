@@ -450,12 +450,12 @@ async function sendPartnerRequest(form) {
   const formData = new FormData(form);
 
   const payload = {
-    name: formData.get("name")?.trim(),
-    phone: formData.get("phone")?.trim(),
-    profession: formData.get("profession") || "",
-    profileLink: formData.get("profileLink") || "",
-    audience: formData.get("audience") || ""
-  };
+  name: formData.get("partner-name")?.trim(),
+  phone: formData.get("partner-phone")?.trim(),
+  profession: formData.get("partner-role") || "",
+  profileLink: formData.get("partner-link")?.trim() || "",
+  audience: formData.get("partner-audience")?.trim() || "",
+};
 
   // Проверяем обязательные поля
   if (!payload.name || !payload.phone) {
