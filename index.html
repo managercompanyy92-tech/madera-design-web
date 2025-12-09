@@ -475,15 +475,27 @@ async function sendPartnerRequest(form) {
       body: JSON.stringify(payload),
     });
 
-    let data = {};
+    // ЧИТАЕМ ответ как текст, чтобы видеть всё, что пришло
+    const rawText = await response.text();
+
+    let data = null;
     try {
-      data = await response.json();
+      data = rawText ? JSON.parse(rawText) : null;
     } catch (_) {
-      data = {};
+      data = null;
     }
 
-    // Если сервер вернул ok:true или вообще без поля ok, но без ошибки
-    if (response.ok && (data.ok === undefined || data.ok === true)) {
+    // Диагностика: показываем статус и «сырое» тело ответа
+    alert(
+      "Ответ сервера:\n" +
+      "status: " + response.status + "\n\n" +
+      "body: " + (data ? JSON.stringify(data) : rawText || "(пусто)")
+    );
+
+    // ЛОГИКА УСПЕХА
+    const okFlag = data && typeof data.ok !== "undefined" ? data.ok : response.ok;
+
+    if (okFlag) {
       alert("Заявка отправлена успешно!");
       form.reset();
     } else {
