@@ -239,6 +239,51 @@
       console.error('Ошибка удаления пользователя из localStorage', e);
     }
   }
+      // === API backend for partner form ===
+const PARTNER_API_URL = "https://madera-api.vercel.app/api/partner";
+
+// === UNIVERSAL SEND FUNCTION (IRON VERSION) ===
+async function sendPartnerRequest(form) {
+    const payload = {
+        name: form.querySelector("[name='name']").value,
+        phone: form.querySelector("[name='phone']").value,
+        profession: form.querySelector("[name='profession']").value,
+        profile: form.querySelector("[name='profile']").value,
+        audience: form.querySelector("[name='audience']").value
+    };
+
+    try {
+        const response = await fetch(PARTNER_API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert("Ошибка сервера: " + (data.error || "Неизвестная ошибка"));
+            return;
+        }
+
+        alert("Заявка отправлена успешно. Менеджер свяжется с вами.");
+        form.reset();
+    } catch (err) {
+        alert("Сервер недоступен. Попробуйте позже.");
+    }
+}
+
+// === FORM LISTENER (IRON VERSION) ===
+document.addEventListener("submit", function(event) {
+    const form = event.target;
+
+    if (form.matches("[data-form='partner']")) {
+        event.preventDefault();
+        sendPartnerRequest(form);
+    }
+});
 // === БАЗОВЫЙ АДРЕС BACKEND API ===
 const API_BASE = "https://madera-api.vercel.app/api";
   // ====== БАЗОВЫЙ ЗАПРОС К API ======
