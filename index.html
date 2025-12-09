@@ -562,7 +562,8 @@ async function sendPartnerRequest(form) {
     alert("Сервер недоступен. Попробуйте позже.");
   }
 }
-
+// Правильный адрес API партнёров
+const PARTNER_API_URL = "https://madera-api.vercel.app/api/partner";
 // Отслеживание отправки формы
 document.addEventListener("submit", function (event) {
   const form = event.target;
