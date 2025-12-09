@@ -518,5 +518,66 @@ document.addEventListener("submit", function (event) {
   }
 });
     </script>
+    <script>
+// ================================================
+//  ПАРТНЁРСКАЯ ФОРМА — ГОТОВЫЙ РАБОЧИЙ КОД
+//  Просто вставь перед </body> — и все заработает
+// ================================================
+
+// URL backend-а
+const PARTNER_API_URL = "/api/partner";
+
+// Функция отправки заявки
+async function sendPartnerRequest(form) {
+  alert("Отправляем заявку на партнёрство...");
+
+  const formData = new FormData(form);
+
+  const payload = {
+    name: formData.get("partner-name")?.trim() || "",
+    phone: formData.get("partner-phone")?.trim() || "",
+    profession: formData.get("partner-role") || "",
+    profileLink: formData.get("partner-link") || "",
+    audience: formData.get("partner-audience") || ""
+  };
+
+  // Проверяем обязательные поля
+  if (!payload.name || !payload.phone) {
+    alert("Пожалуйста, заполните имя и телефон.");
+    return;
+  }
+
+  try {
+    const response = await fetch(PARTNER_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Заявка отправлена успешно!");
+      form.reset();
+    } else {
+      alert("Ошибка: " + (data.error || "Не удалось отправить заявку."));
+    }
+  } catch (err) {
+    alert("Сервер недоступен. Попробуйте позже.");
+  }
+}
+
+// Отслеживание отправки формы
+document.addEventListener("submit", function (event) {
+  const form = event.target;
+
+  if (form.matches("[data-form='partner']")) {
+    event.preventDefault();
+    sendPartnerRequest(form);
+  }
+});
+    </script>
   </body>
 </html>
