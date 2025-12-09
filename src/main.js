@@ -1688,7 +1688,7 @@ function renderProfile() {
         Заполните короткую форму — менеджер активирует ваш промокод в течение 1 рабочего дня.
       </div>
 
-      <form class="partner-form" data-partner-form>
+      <form class="partner-form" data-form="partner">
         <div class="partner-form__row">
           <label class="partner-form__label">Имя</label>
           <input
