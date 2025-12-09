@@ -447,15 +447,18 @@ const PARTNER_API_URL = "https://madera-api.onrender.com/api/partner/apply";
 
 // Функция отправки заявки
 async function sendPartnerRequest(form) {
+  // DEBUG: чтобы убедиться, что обработчик вообще срабатывает
+  alert("Отправляем заявку на партнёрство...");
+
   const formData = new FormData(form);
 
   const payload = {
-  name: formData.get("partner-name")?.trim(),
-  phone: formData.get("partner-phone")?.trim(),
-  profession: formData.get("partner-role") || "",
-  profileLink: formData.get("partner-link")?.trim() || "",
-  audience: formData.get("partner-audience")?.trim() || "",
-};
+    name: formData.get("partner-name")?.trim() || "",
+    phone: formData.get("partner-phone")?.trim() || "",
+    profession: formData.get("partner-role") || "",
+    profileLink: formData.get("partner-link")?.trim() || "",
+    audience: formData.get("partner-audience")?.trim() || "",
+  };
 
   // Проверяем обязательные поля
   if (!payload.name || !payload.phone) {
@@ -467,33 +470,35 @@ async function sendPartnerRequest(form) {
     const response = await fetch(PARTNER_API_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
-
-    if (data.ok) {
-      alert("Заявка отправлена успешно! Наш менеджер свяжется с вами.");
-      form.reset();
-    } else {
-      alert("Ошибка: " + (data.error || "Не удалось отправить заявку."));
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (_) {
+      data = {};
     }
 
+    // Если сервер вернул ok:true или вообще без поля ok, но без ошибки
+    if (response.ok && (data.ok === undefined || data.ok === true)) {
+      alert("Заявка отправлена успешно!");
+      form.reset();
+    } else {
+      alert("Ошибка при отправке заявки. Попробуйте ещё раз.");
+    }
   } catch (err) {
-    console.error("Partner request error:", err);
+    console.error("Partner request error", err);
     alert("Сервер недоступен. Попробуйте позже.");
   }
 }
 
-
-// ================================================
-//   ОТСЛЕЖИВАНИЕ НАЖАТИЯ НА ФОРМУ
-// ================================================
-
-document.addEventListener("submit", function(event) {
+// Отслеживание нажатия на форму партнёра
+document.addEventListener("submit", function (event) {
   const form = event.target;
+  if (!(form instanceof HTMLFormElement)) return;
 
   if (form.matches("[data-form='partner']")) {
     event.preventDefault();
