@@ -831,69 +831,76 @@
   });
         </script>
     <script>
-// ================================================
-//   ПАРТНЁРСКАЯ ПРОГРАММА – ФРОНТЕНД
-//   Один цельный код, вставлять ПЕРЕД </body>
-// ================================================
+<!-- ================================
+     ПАРТНЁРСКАЯ ПРОГРАММА – ФРОНТЕНД
+     Один цельный код, вставить ПЕРЕД </body>
+================================ -->
+<script>
+  // Адрес API партнёров (у тебя backend уже работает на этом домене)
+  const PARTNER_API_URL = "https://madera-api.vercel.app/api/partner/submit";
 
-// Настройки
-const PARTNER_API_URL = "https://madera-api.onrender.com/api/partner/apply";
+  // Отправка заявки на партнёрство
+  async function sendPartnerRequest(form) {
+    try {
+      alert("Отправляем заявку на партнёрство...");
 
-// Функция отправки заявки
-async function sendPartnerRequest(form) {
-  const formData = new FormData(form);
+      // Берём поля строго по порядку в форме:
+      // 0 – Имя
+      // 1 – Телефон / WhatsApp
+      // 2 – Проф. деятельность (select)
+      // 3 – Ссылка на профиль
+      // 4 – Кратко об аудитории (textarea)
+      const fields = form.querySelectorAll("input, select, textarea");
 
-  const payload = {
-    name: formData.get("name")?.trim(),
-    phone: formData.get("phone")?.trim(),
-    profession: formData.get("profession") || "",
-    profileLink: formData.get("profileLink") || "",
-    audience: formData.get("audience") || ""
-  };
+      const payload = {
+        name: (fields[0]?.value || "").trim(),
+        phone: (fields[1]?.value || "").trim(),
+        activity: fields[2]?.value || "",
+        profileLink: (fields[3]?.value || "").trim(),
+        audience: (fields[4]?.value || "").trim(),
+      };
 
-  // Проверяем обязательные поля
-  if (!payload.name || !payload.phone) {
-    alert("Пожалуйста, заполните имя и телефон.");
-    return;
-  }
+      // Проверяем только телефон (имя почти всегда есть, но на бэке можно тоже проверять)
+      if (!payload.name || !payload.phone) {
+        alert("Пожалуйста, заполните имя и телефон.");
+        return;
+      }
 
-  try {
-    const response = await fetch(PARTNER_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
+      const response = await fetch(PARTNER_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-    const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-    if (data.ok) {
-      alert("Заявка отправлена успешно! Наш менеджер свяжется с вами.");
-      form.reset();
-    } else {
-      alert("Ошибка: " + (data.error || "Не удалось отправить заявку."));
+      if (response.ok && data.ok) {
+        alert("Заявка отправлена успешно!");
+        form.reset();
+      } else {
+        alert(
+          "Ошибка: " +
+            (data.message || data.error || "Не удалось отправить заявку.")
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Сервер недоступен. Попробуйте позже.");
     }
-
-  } catch (err) {
-    console.error("Partner request error:", err);
-    alert("Сервер недоступен. Попробуйте позже.");
   }
-}
 
+  // Глобальный обработчик отправки форм
+  document.addEventListener("submit", function (event) {
+    const form = event.target;
 
-// ================================================
-//   ОТСЛЕЖИВАНИЕ НАЖАТИЯ НА ФОРМУ
-// ================================================
-
-document.addEventListener("submit", function(event) {
-  const form = event.target;
-
-  if (form.matches("[data-form='partner']")) {
-    event.preventDefault();
-    sendPartnerRequest(form);
-  }
-});
-    </script>
+    // Обрабатываем только форму партнёра
+    if (form.matches('[data-form="partner"]')) {
+      event.preventDefault();
+      sendPartnerRequest(form);
+    }
+  });
+</script>
   </body>
 </html>
