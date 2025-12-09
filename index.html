@@ -239,7 +239,8 @@
       console.error('Ошибка удаления пользователя из localStorage', e);
     }
   }
-
+// === БАЗОВЫЙ АДРЕС BACKEND API ===
+const API_BASE = "https://madera-api.vercel.app/api";
   // ====== БАЗОВЫЙ ЗАПРОС К API ======
   async function apiRequest(path, method = 'GET', body) {
     const url = API_BASE + path;
