@@ -768,11 +768,11 @@ function renderOrder() {
               <div class="order-form__row">
         <label class="order-form__label">
           <textarea
-            name="order-form__textarea"
-            rows="3"
-            placeholder="Кратко опишите проект: размер, стиль, важные детали..."
-            data-order-comment
-          ></textarea>
+    name="description"
+    rows="3"
+    placeholder="Кратко опишите проект: размер, стиль, важные детали"
+    data-order-comment
+></textarea>
         </label>
       </div>
 
@@ -841,7 +841,11 @@ function renderOrder() {
       </div>
 
       <div class="order-form__footer">
-        <button class="order-form__submit" type="submit" data-measure-submit>
+        <button 
+    class="order-form__submit" 
+    type="submit"
+    data-measure-submit
+>
   Отправить заявку на расчёт
 </button>
       </div>
