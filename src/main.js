@@ -709,7 +709,10 @@ function renderOrder() {
   </div>
               <div class="order-form__row">
                 <label class="order-form__label">Предпочтительный способ связи</label>
-                <select name="order-form__select" data-order-contact-method>
+                <select class="order-form__select"
+  name="contactMethod"
+  data-order-contact-method
+>
                   <option value="whatsapp">WhatsApp</option>
                   <option value="telegram">Telegram</option>
                   <option value="call">Телефонный звонок</option>
@@ -718,7 +721,10 @@ function renderOrder() {
 
               <div class="order-form__row">
                 <label class="order-form__label">Категория мебели</label>
-                <select name="order-form__select" data-order-category>
+                <select class="order-form__select"
+  name="category"
+  data-order-category
+>
                   <option value="">Выберите категорию</option>
                   <option value="kitchens">Кухни</option>
                   <option value="bedrooms">Спальни</option>
