@@ -4578,34 +4578,3 @@ fd.set("phone", phone);
     hardcoreMeasureFix();
   }
 })();
-/* === ВОССТАНОВЛЕНИЕ КРАСИВОЙ КНОПКИ «Отправить заявку на расчёт» === */
-
-form button[type="submit"],
-button[data-measure-submit],
-button[data-order-submit] {
-  width: 100%;
-  background: linear-gradient(90deg, #c89b3c, #eac26b);
-  color: #000;
-  font-size: 18px;
-  font-weight: 600;
-  padding: 14px 20px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  text-align: center;
-  transition: 0.25s ease;
-}
-
-/* При нажатии */
-form button[type="submit"]:active,
-button[data-measure-submit]:active,
-button[data-order-submit]:active {
-  transform: scale(0.97);
-}
-
-/* При наведении */
-form button[type="submit"]:hover,
-button[data-measure-submit]:hover,
-button[data-order-submit]:hover {
-  opacity: 0.9;
-}
