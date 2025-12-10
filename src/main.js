@@ -4433,3 +4433,89 @@ profileInitObserver.observe(document.body, {
     initMeasureForm();
   }
 })();
+// === ЗАЯВКА НА ЗАМЕР (ТЕЛЕГРАМ) ===
+(function () {
+  // Адрес бэкенда для замера
+  const API_URL = "https://madera-api.vercel.app/api/measure";
+
+  function initMeasureForm() {
+    // 1. Ищем кнопку отправки заявки на замер
+    const submitBtn = document.querySelector(".order-form__footer .order-form__submit");
+    if (!submitBtn) return;
+
+    // Чтобы не повесить обработчик два раза
+    if (submitBtn.dataset.measureHandler === "1") return;
+    submitBtn.dataset.measureHandler = "1";
+
+    // 2. Приводим кнопку к нормальному виду и отключаем "настоящий submit"
+    submitBtn.type = "button";
+
+    // 3. Ищем "корень" формы замера
+    const formRoot = submitBtn.closest(".order-form");
+    if (!formRoot) return;
+
+    // 4. Чиним внешний вид textarea
+    const descriptionField = formRoot.querySelector("[data-order-comment]");
+    if (descriptionField) {
+      descriptionField.classList.add("order-form__input");
+    }
+
+    // 5. Вспомогательная функция для получения значения поля
+    const getVal = (selector) => {
+      const el = formRoot.querySelector(selector);
+      if (!el) return "";
+      return (el.value || "").trim();
+    };
+
+    // 6. Вешаем обработчик на кнопку
+    submitBtn.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      // Собираем данные из полей замера
+      const payload = {
+        name: getVal("[data-order-name]"),
+        phone: getVal("[data-order-phone]"),
+        address: getVal("[data-order-address]"),
+        landmark: getVal("[data-order-landmark]"),
+        contactMethod: getVal("[data-order-contact-method]"),
+        category: getVal("[data-order-category]"),
+        length: getVal("[data-order-length]"),
+        tariff: getVal("[data-order-tariff]"),
+        promo: getVal("[data-order-promo]"),
+        description: getVal("[data-order-comment]"),
+      };
+
+      // Простая проверка
+      if (!payload.name || !payload.phone) {
+        alert("Пожалуйста, заполните имя и телефон.");
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          console.error("Ошибка сервера при отправке замера:", response.status);
+          alert("Не удалось отправить заявку. Попробуйте ещё раз.");
+          return;
+        }
+
+        alert("Заявка на замер успешно отправлена. Менеджер свяжется с вами.");
+      } catch (error) {
+        console.error("Ошибка сети при отправке замера:", error);
+        alert("Не удалось отправить заявку. Проверьте интернет и попробуйте ещё раз.");
+      }
+    });
+  }
+
+  // 7. Инициализация после загрузки страницы
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMeasureForm);
+  } else {
+    initMeasureForm();
+  }
+})();
