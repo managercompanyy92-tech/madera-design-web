@@ -4804,3 +4804,111 @@ fd.set("phone", phone);
     initMeasureForm();
   }
 })();
+// --- UI-логика формы профиля (Вход / Регистрация) ---
+document.addEventListener("DOMContentLoaded", function () {
+  // приложение у тебя SPA, поэтому ждём, пока дорисуется страница профиля
+  var intervalId = setInterval(function () {
+    try {
+      // 1. Ищем заголовок блока личного кабинета
+      var title = Array.from(document.querySelectorAll("h1, h2, h3")).find(function (el) {
+        return el.textContent.includes("личный кабинет Madera Design");
+      });
+      if (!title) return; // ещё не дорисовалось — ждём следующую итерацию
+
+      // 2. Карточка и форма
+      var card = title.closest("section") || title.closest("div");
+      if (!card) return;
+
+      var form = card.querySelector("form");
+      if (!form) return;
+
+      // 3. Кнопки "Регистрация" и "Вход"
+      var buttons = Array.from(card.querySelectorAll("button"));
+      var regTab = buttons.find(function (b) {
+        return b.textContent.trim() === "Регистрация";
+      });
+      var loginTab = buttons.find(function (b) {
+        return b.textContent.trim() === "Вход";
+      });
+
+      if (!regTab || !loginTab) return;
+
+      // Всё нашли — дальше интервал не нужен
+      clearInterval(intervalId);
+
+      // 4. Исходные тексты
+      var description = title.nextElementSibling;
+      var originalTitle = title.textContent.trim();
+      var originalDescription = description ? description.textContent.trim() : "";
+
+      // 5. Контейнер больших вкладок "Регистрация / Вход" — спрячем
+      var tabsContainer = regTab.parentElement;
+      if (tabsContainer) {
+        while (tabsContainer && !tabsContainer.contains(loginTab)) {
+          tabsContainer = tabsContainer.parentElement;
+        }
+      }
+      if (tabsContainer) {
+        tabsContainer.style.display = "none";
+      }
+
+      // 6. Создаём маленький переключатель под формой
+      var switchWrapper = document.createElement("div");
+      switchWrapper.style.marginTop = "16px";
+      switchWrapper.style.fontSize = "12px";
+      switchWrapper.style.textAlign = "center";
+
+      var switchText = document.createElement("span");
+      var switchLink = document.createElement("button");
+      switchLink.type = "button";
+      switchLink.style.border = "none";
+      switchLink.style.background = "none";
+      switchLink.style.padding = "0";
+      switchLink.style.marginLeft = "4px";
+      switchLink.style.color = "#ffb347";
+      switchLink.style.fontSize = "12px";
+      switchLink.style.cursor = "pointer";
+
+      switchWrapper.appendChild(switchText);
+      switchWrapper.appendChild(switchLink);
+      form.parentNode.insertBefore(switchWrapper, form.nextSibling);
+
+      // 7. Функции режимов
+      function setLoginMode() {
+        // жмём старую кнопку "Вход", чтобы сработала родная логика формы
+        loginTab.click();
+
+        title.textContent = "Вход в личный кабинет Madera Design";
+        if (description) {
+          description.textContent =
+            "Введите номер телефона и пароль, чтобы войти в личный кабинет.";
+        }
+
+        switchText.textContent = "Нет аккаунта?";
+        switchLink.textContent = "Регистрация";
+        switchLink.onclick = setRegisterMode;
+      }
+
+      function setRegisterMode() {
+        // жмём старую кнопку "Регистрация"
+        regTab.click();
+
+        title.textContent = originalTitle;
+        if (description) {
+          description.textContent =
+            originalDescription ||
+            "Лёгкая регистрация по номеру WhatsApp. После входа вы увидите статусы заказов, промокоды и связь с менеджером.";
+        }
+
+        switchText.textContent = "Уже есть аккаунт?";
+        switchLink.textContent = "Войти";
+        switchLink.onclick = setLoginMode;
+      }
+
+      // 8. При первом открытии страницы включаем РЕЖИМ ВХОДА
+      setLoginMode();
+    } catch (e) {
+      console.error("Profile auth UI script error:", e);
+    }
+  }, 300); // проверяем каждые 300 мс
+});
