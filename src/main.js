@@ -4636,3 +4636,61 @@ fd.set("phone", phone);
   style.innerHTML = css;
   document.head.appendChild(style);
 })();
+// === ВОССТАНОВЛЕНИЕ ПРЕЖНЕГО СТИЛЯ КНОПКИ "ОТПРАВИТЬ ЗАЯВКУ НА РАСЧЁТ" ===
+(function restoreSubmitButtonStyle() {
+  const css = `
+    .order-form__footer .order-form__submit {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 14px 18px;
+      border-radius: 14px;
+
+      border: none;
+      outline: none;
+
+      background: linear-gradient(90deg, #ffb300 0%, #ff7a00 100%);
+      color: #000000;
+
+      font-size: 17px;
+      font-weight: 600;
+
+      cursor: pointer;
+
+      transition: 
+        background 0.25s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+    .order-form__footer .order-form__submit:hover:not(:disabled):not(.is-loading) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+    }
+
+    .order-form__footer .order-form__submit:active:not(:disabled):not(.is-loading) {
+      transform: translateY(1px);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    }
+
+    .order-form__footer .order-form__submit:disabled,
+    .order-form__footer .order-form__submit.is-loading {
+      opacity: 0.55;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Исправление лишней высоты */
+    .order-form__footer {
+      padding-top: 12px;
+    }
+  `;
+
+  const style = document.createElement("style");
+  style.innerHTML = css;
+  document.head.appendChild(style);
+})();
