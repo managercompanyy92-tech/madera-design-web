@@ -4150,3 +4150,69 @@ profileInitObserver.observe(document.body, {
   childList: true,
   subtree: true
 });  
+// === УНИВЕРСАЛЬНЫЙ ХЭНДЛЕР ДЛЯ ФОРМЫ ПАРТНЁРА ===
+(function () {
+  const API_URL = "https://madera-api.vercel.app/api/partner";
+
+  function initPartnerForm() {
+    const form = document.querySelector(".partner-form");
+    if (!form) {
+      // Формы нет на странице — просто выходим
+      return;
+    }
+
+    // Чтобы не повесить обработчик два раза
+    if (form.dataset.partnerHandler === "1") return;
+    form.dataset.partnerHandler = "1";
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const name = form.querySelector("[name='partner-name']")?.value.trim();
+      const phone = form.querySelector("[name='partner-phone']")?.value.trim();
+      const profession = form.querySelector("[name='partner-role']")?.value.trim();
+      const profile = form.querySelector("[name='partner-link']")?.value.trim();
+      const audience = form.querySelector("[name='partner-audience']")?.value.trim();
+
+      if (!name || !phone) {
+        alert("Пожалуйста, заполните имя и телефон.");
+        return;
+      }
+
+      const payload = { name, phone, profession, profile, audience };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        let data = {};
+        try {
+          data = await response.json();
+        } catch (e) {
+          // если сервер вернул пустой ответ – не падаем
+        }
+
+        if (!response.ok || data.ok === false) {
+          console.error("Ошибка сервера при отправке заявки:", data);
+          alert("Произошла ошибка сервера при отправке заявки. Попробуйте позже.");
+          return;
+        }
+
+        alert("Заявка на партнёрство отправлена. Менеджер свяжется с вами по указанным контактам.");
+        form.reset();
+      } catch (error) {
+        console.error("Ошибка сети при отправке заявки:", error);
+        alert("Не удалось отправить заявку. Проверьте интернет и попробуйте ещё раз.");
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPartnerForm);
+  } else {
+    initPartnerForm();
+  }
+})();
