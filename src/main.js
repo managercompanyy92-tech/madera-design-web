@@ -4527,3 +4527,54 @@ fd.set("phone", phone);
     hardFixMeasureForm();
   }
 })();
+// === ХАРД-ФИКС ФОРМЫ ЗАМЕРА (ИМЯ, ТЕЛЕФОН, ОПИСАНИЕ, ФАЙЛ, КНОПКА) ===
+(function () {
+  function hardcoreMeasureFix() {
+    // Поле "Ваше имя"
+    var nameInput = document.querySelector("[data-order-name]");
+    if (nameInput) {
+      nameInput.setAttribute("name", "name"); // чтобы FormData видел поле "name"
+      nameInput.classList.add("order-form__input");
+    }
+
+    // Поле "Телефон / WhatsApp"
+    var phoneInput = document.querySelector("[data-order-phone]");
+    if (phoneInput) {
+      phoneInput.setAttribute("name", "phone"); // чтобы FormData видел поле "phone"
+      phoneInput.classList.add("order-form__input");
+    }
+
+    // Поле "Кратко опишите проект" (textarea)
+    var descTextarea = document.querySelector("[data-order-comment]");
+    if (descTextarea) {
+      descTextarea.setAttribute("name", "description"); // имя, которое ждёт бэкенд
+      descTextarea.classList.add(
+        "order-form__input",
+        "order-form__input--textarea"
+      ); // вернуть нормальный вид
+    }
+
+    // Поле загрузки чека
+    var fileInput = document.querySelector("[data-order-payment-check]");
+    if (fileInput) {
+      fileInput.setAttribute("name", "paymentCheck"); // имя, которое ждёт бэкенд
+      fileInput.classList.add(
+        "order-form__input",
+        "order-form__input--file"
+      );
+    }
+
+    // Кнопка "Отправить заявку на расчёт"
+    var submitBtn = document.querySelector("[data-measure-submit]");
+    if (submitBtn) {
+      submitBtn.setAttribute("type", "submit"); // чтобы форма реально отправлялась
+      submitBtn.classList.add("order-form__submit"); // нормальный внешний вид
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", hardcoreMeasureFix);
+  } else {
+    hardcoreMeasureFix();
+  }
+})();
