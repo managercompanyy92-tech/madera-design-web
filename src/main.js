@@ -4912,3 +4912,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }, 300); // проверяем каждые 300 мс
 });
+setInterval(() => {
+  const authBtn = Array.from(document.querySelectorAll("*"))
+    .find(el => el.textContent.trim() === "Auth");
+
+  if (authBtn) {
+    authBtn.style.display = "none";
+  }
+}, 300);
