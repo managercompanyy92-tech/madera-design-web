@@ -4455,7 +4455,7 @@ profileInitObserver.observe(document.body, {
     if (!formRoot) return;
 
     // 4. Чиним внешний вид textarea
-    const descriptionField = formRoot.querySelector("[data-order-comment]");
+    const descriptionField = formRoot.querySelector("[data-order-comment], [name='description']");
     if (descriptionField) {
       descriptionField.classList.add("order-form__input");
     }
@@ -4473,16 +4473,17 @@ profileInitObserver.observe(document.body, {
 
       // Собираем данные из полей замера
       const payload = {
-        name: getVal("[data-order-name]"),
-        phone: getVal("[data-order-phone]"),
-        address: getVal("[data-order-address]"),
-        landmark: getVal("[data-order-landmark]"),
-        contactMethod: getVal("[data-order-contact-method]"),
-        category: getVal("[data-order-category]"),
-        length: getVal("[data-order-length]"),
-        tariff: getVal("[data-order-tariff]"),
-        promo: getVal("[data-order-promo]"),
-        description: getVal("[data-order-comment]"),
+        // ищем и по data-*, и по name="..."
+        name: getVal("[data-order-name], [name='name']"),
+        phone: getVal("[data-order-phone], [name='phone']"),
+        address: getVal("[data-order-address], [name='address']"),
+        landmark: getVal("[data-order-landmark], [name='landmark']"),
+        contactMethod: getVal("[data-order-contact-method], [name='contactMethod']"),
+        category: getVal("[data-order-category], [name='category']"),
+        length: getVal("[data-order-length], [name='length']"),
+        tariff: getVal("[data-order-tariff], [name='tariff']"),
+        promo: getVal("[data-order-promo], [name='promo']"),
+        description: getVal("[data-order-comment], [name='description']"),
       };
 
       // Простая проверка
