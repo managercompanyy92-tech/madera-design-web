@@ -666,5 +666,118 @@ document.addEventListener("submit", function (event) {
     form.reset();
   });
     </script>
+    <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    try {
+      // Ищем заголовок блока личного кабинета
+      var title = Array.from(document.querySelectorAll("h1, h2, h3")).find(function (el) {
+        return el.textContent.trim().includes("Создайте личный кабинет");
+      });
+
+      if (!title) return; // если блока нет – выходим, ничего не ломаем
+
+      // Контейнер карточки
+      var card = title.closest("section") || title.closest("div");
+      if (!card) return;
+
+      var form = card.querySelector("form");
+      if (!form) return;
+
+      // Поле имени
+      var nameInput = form.querySelector('input[placeholder*="Как к вам"]');
+      var nameRow = nameInput ? (nameInput.closest("div") || nameInput) : null;
+
+      // Телефон
+      var phoneInput =
+        form.querySelector('input[type="tel"]') ||
+        form.querySelector('input[placeholder*="+992"]');
+
+      // Пароль
+      var passwordInput = form.querySelector('input[type="password"]');
+
+      // Кнопка отправки
+      var submitBtn =
+        form.querySelector('button[type="submit"]') ||
+        form.querySelector("button");
+
+      if (!phoneInput || !passwordInput || !submitBtn) return;
+
+      // Блок с верхними большими переключателями "Регистрация / Вход" – спрячем его
+      var tabsContainer = Array.from(card.querySelectorAll("div")).find(function (div) {
+        var txt = div.textContent || "";
+        return txt.includes("Регистрация") && txt.includes("Вход");
+      });
+      if (tabsContainer) {
+        tabsContainer.style.display = "none";
+      }
+
+      // Тексты под заголовком (описание блока)
+      var description = title.nextElementSibling;
+
+      // Создаём снизу маленький переключатель (Регистрация / Вход)
+      var switchWrapper = document.createElement("div");
+      switchWrapper.style.marginTop = "16px";
+      switchWrapper.style.fontSize = "12px";
+      switchWrapper.style.textAlign = "center";
+
+      // Внутренний элемент текста
+      var switchText = document.createElement("span");
+      var switchLink = document.createElement("button");
+      switchLink.type = "button";
+      switchLink.style.border = "none";
+      switchLink.style.background = "none";
+      switchLink.style.padding = "0";
+      switchLink.style.marginLeft = "4px";
+      switchLink.style.color = "#ffb347";
+      switchLink.style.fontSize = "12px";
+      switchLink.style.cursor = "pointer";
+
+      switchWrapper.appendChild(switchText);
+      switchWrapper.appendChild(switchLink);
+
+      // Вставляем после формы
+      form.parentNode.insertBefore(switchWrapper, form.nextSibling);
+
+      // Сохранённые исходные тексты
+      var originalTitle = title.textContent.trim();
+      var originalDescription = description ? description.textContent.trim() : "";
+
+      // Состояния
+      function setLoginMode() {
+        if (nameRow) nameRow.style.display = "none"; // прячем имя
+        title.textContent = "Вход в личный кабинет Madera Design";
+        if (description) {
+          description.textContent =
+            "Введите номер телефона и пароль, чтобы войти в личный кабинет.";
+        }
+        submitBtn.textContent = "Войти";
+
+        switchText.textContent = "Нет аккаунта?";
+        switchLink.textContent = "Регистрация";
+        switchLink.onclick = setRegisterMode;
+      }
+
+      function setRegisterMode() {
+        if (nameRow) nameRow.style.display = ""; // показываем имя
+        title.textContent = originalTitle;
+        if (description) {
+          description.textContent =
+            originalDescription ||
+            "Лёгкая регистрация по номеру WhatsApp. После входа вы увидите статусы заказов, промокоды и связь с менеджером.";
+        }
+        submitBtn.textContent = "Создать аккаунт";
+
+        switchText.textContent = "Уже есть аккаунт?";
+        switchLink.textContent = "Войти";
+        switchLink.onclick = setLoginMode;
+      }
+
+      // При открытии страницы – режим ВХОД
+      setLoginMode();
+    } catch (e) {
+      console.error("Profile form script error:", e);
+    }
+  });
+    </script>
   </body>
 </html>
