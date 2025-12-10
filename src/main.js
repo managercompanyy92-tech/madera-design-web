@@ -688,7 +688,7 @@ function renderOrder() {
     <label class="order-form__label">
       Адрес объекта
       <input
-        type="text"
+        name="text"
         class="order-form__input"
         placeholder="Например, Душанбе, ул. Рудаки 15, кв. 23"
         data-order-address
@@ -700,7 +700,7 @@ function renderOrder() {
     <label class="order-form__label">
       Ориентир
       <input
-        type="text"
+        name="text"
         class="order-form__input"
         placeholder="Например, рядом с ТЦ &laquo;Садбарг&raquo;"
         data-order-landmark
@@ -709,7 +709,7 @@ function renderOrder() {
   </div>
               <div class="order-form__row">
                 <label class="order-form__label">Предпочтительный способ связи</label>
-                <select class="order-form__select" data-order-contact-method>
+                <select name="order-form__select" data-order-contact-method>
                   <option value="whatsapp">WhatsApp</option>
                   <option value="telegram">Telegram</option>
                   <option value="call">Телефонный звонок</option>
@@ -718,7 +718,7 @@ function renderOrder() {
 
               <div class="order-form__row">
                 <label class="order-form__label">Категория мебели</label>
-                <select class="order-form__select" data-order-category>
+                <select name="order-form__select" data-order-category>
                   <option value="">Выберите категорию</option>
                   <option value="kitchens">Кухни</option>
                   <option value="bedrooms">Спальни</option>
@@ -732,7 +732,7 @@ function renderOrder() {
               <div class="order-form__row">
                 <label class="order-form__label">Длина проекта, пог. метры (из калькулятора)</label>
                 <input
-                  type="text"
+                  name="text"
                   class="order-form__input"
                   placeholder="Например, 4.5"
                   data-order-length-output
@@ -742,7 +742,7 @@ function renderOrder() {
               <div class="order-form__row">
                 <label class="order-form__label">Выбранный тариф</label>
                 <input
-                  type="text"
+                  name="text"
                   class="order-form__input"
                   placeholder="Стандарт / Премиум"
                   data-order-tariff-output
@@ -752,7 +752,7 @@ function renderOrder() {
               <div class="order-form__row">
                 <label class="order-form__label">Промокод (если есть)</label>
                 <input
-                  type="text"
+                  name="text"
                   class="order-form__input"
                   placeholder="Введите промокод"
                   data-order-promo
@@ -762,7 +762,7 @@ function renderOrder() {
               <div class="order-form__row">
         <label class="order-form__label">
           <textarea
-            class="order-form__textarea"
+            name="order-form__textarea"
             rows="3"
             placeholder="Кратко опишите проект: размер, стиль, важные детали..."
             data-order-comment
