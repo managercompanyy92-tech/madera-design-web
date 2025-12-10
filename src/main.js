@@ -795,7 +795,7 @@ function renderOrder() {
               type="file"
               class="order-form__input order-form__input--file"
               accept="image/*,.pdf"
-              data-order-payment-check
+              name="paymentCheck"
               required
             />
             <span class="order-form__payment-upload-hint">
