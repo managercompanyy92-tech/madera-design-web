@@ -4804,3 +4804,37 @@ fd.set("phone", phone);
     initMeasureForm();
   }
 })();
+// ---------- ОТПРАВКА ФОРМЫ С ФАЙЛОМ (measure form) ----------
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector('[data-measure-form]');
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector("button[type=submit]");
+    submitBtn.disabled = true;
+
+    const formData = new FormData(form); // ВАЖНО! именно FormData
+
+    try {
+      const response = await fetch("/api/measure", {
+        method: "POST",
+        body: formData, // отправляем файл
+      });
+
+      const result = await response.json();
+
+      if (result.ok) {
+        alert("Заявка на замер успешно отправлена. Менеджер свяжется с вами.");
+        form.reset();
+      } else {
+        alert("Ошибка отправки: " + result.error);
+      }
+    } catch (error) {
+      alert("Не удалось отправить заявку. Проверьте интернет и попробуйте ещё раз.");
+    }
+
+    submitBtn.disabled = false;
+  });
+});
