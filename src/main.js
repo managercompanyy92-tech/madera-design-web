@@ -841,13 +841,13 @@ function renderOrder() {
       </div>
 
       <div class="order-form__footer">
-        <button 
-    class="order-form__submit" 
-    type="submit"
-    data-measure-submit
->
-  Отправить заявку на расчёт
-</button>
+        <button
+          class="order-form__submit"
+          type="submit"
+          data-measure-submit
+        >
+          Отправить заявку на расчёт
+        </button>
       </div>
 
       <div class="order-form__note">
