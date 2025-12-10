@@ -4322,13 +4322,21 @@ profileInitObserver.observe(document.body, {
           "paymentCheck" // файл
         ];
 
-        // Валидация обязательных полей (минимум — имя и телефон)
-        const name = fd.get("name")?.toString().trim();
-        const phone = fd.get("phone")?.toString().trim();
-        if (!name || !phone) {
-          alert("Пожалуйста, заполните имя и телефон.");
-          return;
-        }
+        // Валидация обязательных полей
+const nameInput = form.querySelector("[data-order-name]");
+const phoneInput = form.querySelector("[data-order-phone]");
+
+const name = nameInput ? nameInput.value.trim() : "";
+const phone = phoneInput ? phoneInput.value.trim() : "";
+
+if (!name || !phone) {
+  alert("Пожалуйста, заполните имя и телефон.");
+  return;
+}
+
+// Обновляем значения в FormData, чтобы на сервер ушли правильные поля
+fd.set("name", name);
+fd.set("phone", phone);
 
         // Отправляем без ручной установки Content-Type
         const res = await fetch(API_URL, {
