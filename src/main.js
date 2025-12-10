@@ -4264,3 +4264,75 @@ profileInitObserver.observe(document.body, {
 
   document.addEventListener("DOMContentLoaded", initMeasureForm);
 })();
+// === АВТО-ОБРАБОТЧИК ФОРМЫ ЗАЯВКИ НА ЗАМЕР ===
+(function () {
+    const API_URL = "https://madera-api.vercel.app/api/measure";
+
+    function initMeasureForm() {
+        // Форма на странице: ищем по атрибуту data-measure-form или по классу
+        const form = document.querySelector("[data-measure-form]") 
+                  || document.querySelector(".measure-form")         
+                  || document.getElementById("measure-form");
+
+        // Форма отсутствует → ничего не делаем
+        if (!form) return;
+
+        // Чтобы избежать двойного навешивания
+        if (form.dataset.handler === "1") return;
+        form.dataset.handler = "1";
+
+        // Ищем кнопку отправки
+        const submitBtn = form.querySelector("[data-measure-submit]");
+        if (!submitBtn) return;
+
+        // === ЛОГИКА ПРИ НАЖАТИИ КНОПКИ ===
+        submitBtn.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            const payload = {
+                name: formData.get("name"),
+                phone: formData.get("phone"),
+                address: formData.get("address"),
+                landmark: formData.get("landmark"),
+                contactMethod: formData.get("contactMethod"),
+                category: formData.get("category"),
+                length: formData.get("length"),
+                tariff: formData.get("tariff"),
+                promo: formData.get("promo"),
+                description: formData.get("description")
+            };
+
+            // Проверяем обязательные поля
+            if (!payload.name || !payload.phone) {
+                alert("Пожалуйста, заполните имя и телефон.");
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("Сервер вернул ошибку");
+
+                alert("Заявка на замер успешно отправлена!");
+                form.reset();
+
+            } catch (err) {
+                console.error("Ошибка отправки:", err);
+                alert("Не удалось отправить заявку. Попробуйте позже.");
+            }
+        });
+    }
+
+    // Инициализация после загрузки DOM
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initMeasureForm);
+    } else {
+        initMeasureForm();
+    }
+})();
