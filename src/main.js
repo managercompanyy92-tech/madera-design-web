@@ -4456,3 +4456,74 @@ fd.set("phone", phone);
     initMeasureForm();
   }
 })();
+// === ЖЁСТКИЙ ФИКС ФОРМЫ ЗАЯВКИ НА ЗАМЕР ===
+(function () {
+  function hardFixMeasureForm() {
+    // Пытаемся найти нужную форму
+    const form =
+      document.querySelector("form[data-measure-form]") ||
+      document.querySelector("[data-measure-form] form") ||
+      document.querySelector("form.measure-form");
+
+    if (!form) return;
+
+    // 1) ПОЛЕ "КРАТКО ОПИШИТЕ ПРОЕКТ" — ЧТОБЫ ВЫГЛЯДЕЛО КАК ОСТАЛЬНЫЕ
+    const descriptionTextarea =
+      form.querySelector("textarea[name='description']") ||
+      form.querySelector("textarea[data-order-comment]");
+
+    if (descriptionTextarea) {
+      // если вдруг нет name, выставляем как ожидает бэкенд
+      if (!descriptionTextarea.name) {
+        descriptionTextarea.name = "description";
+      }
+
+      // возвращаем стили как у остальных полей
+      descriptionTextarea.classList.add(
+        "order-form__input",
+        "order-form__input--textarea"
+      );
+    }
+
+    // 2) КНОПКА "ОТПРАВИТЬ ЗАЯВКУ НА РАСЧЁТ" — СТИЛИ И САМА ОТПРАВКА
+    const submitBtn =
+      form.querySelector("[data-measure-submit]") ||
+      form.querySelector(".order-form__submit") ||
+      form.querySelector("button[type='submit']");
+
+    if (submitBtn) {
+      // возвращаем нормальный внешний вид
+      submitBtn.classList.add("order-form__submit");
+    }
+
+    // 3) ПЕРЕД ЛЮБОЙ ОТПРАВКОЙ ФОРМЫ ГАРАНТИРУЕМ, ЧТО NAME/PHONE СУЩЕСТВУЮТ
+    //    (это нужно, чтобы существующий обработчик снизу файла нормально отработал)
+    form.addEventListener(
+      "submit",
+      function () {
+        const nameInput =
+          form.querySelector("input[name='name']") ||
+          form.querySelector("[data-order-name]");
+
+        const phoneInput =
+          form.querySelector("input[name='phone']") ||
+          form.querySelector("[data-order-phone]");
+
+        if (nameInput && !nameInput.name) {
+          nameInput.name = "name";
+        }
+        if (phoneInput && !phoneInput.name) {
+          phoneInput.name = "phone";
+        }
+      },
+      { capture: true } // срабатывает раньше других слушателей
+    );
+  }
+
+  // Инициализация после загрузки DOM
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", hardFixMeasureForm);
+  } else {
+    hardFixMeasureForm();
+  }
+})();
