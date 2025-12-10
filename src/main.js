@@ -736,24 +736,24 @@ function renderOrder() {
               </div>
 
               <div class="order-form__row">
-                <label class="order-form__label">Длина проекта, пог. метры (из калькулятора)</label>
-                <input
-                  name="text"
-                  class="order-form__input"
-                  placeholder="Например, 4.5"
-                  data-order-length-output
-                />
-              </div>
+  <label class="order-form__label">Длина проекта, пог. метры (из калькулятора)</label>
+  <input
+      name="length"
+      class="order-form__input"
+      placeholder="Например, 4.5"
+      data-order-length-output
+  />
+</div>
 
               <div class="order-form__row">
-                <label class="order-form__label">Выбранный тариф</label>
-                <input
-                  name="text"
-                  class="order-form__input"
-                  placeholder="Стандарт / Премиум"
-                  data-order-tariff-output
-                />
-              </div>
+  <label class="order-form__label">Выбранный тариф</label>
+  <input
+      name="tariff"
+      class="order-form__input"
+      placeholder="Стандарт / Премиум"
+      data-order-tariff-output
+  />
+</div>
 
               <div class="order-form__row">
                 <label class="order-form__label">Промокод (если есть)</label>
