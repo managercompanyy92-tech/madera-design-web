@@ -668,116 +668,117 @@ document.addEventListener("submit", function (event) {
     </script>
     <script>
   document.addEventListener("DOMContentLoaded", function () {
-    try {
-      // Ищем заголовок блока личного кабинета
-      var title = Array.from(document.querySelectorAll("h1, h2, h3")).find(function (el) {
-        return el.textContent.trim().includes("Создайте личный кабинет");
-      });
+    // ждём, пока SPA дорендерит страницу профиля
+    var intervalId = setInterval(function () {
+      try {
+        // 1. Ищем заголовок блока личного кабинета
+        var title = Array.from(document.querySelectorAll("h1, h2, h3")).find(
+          function (el) {
+            return el.textContent.includes("личный кабинет Madera Design");
+          }
+        );
+        if (!title) return; // ещё не дорисовалось
 
-      if (!title) return; // если блока нет – выходим, ничего не ломаем
+        // 2. Находим карточку и форму
+        var card = title.closest("section") || title.closest("div");
+        if (!card) return;
 
-      // Контейнер карточки
-      var card = title.closest("section") || title.closest("div");
-      if (!card) return;
+        var form = card.querySelector("form");
+        if (!form) return;
 
-      var form = card.querySelector("form");
-      if (!form) return;
+        // 3. Ищем кнопки "Регистрация" и "Вход"
+        var buttons = Array.from(card.querySelectorAll("button"));
+        var regTab = buttons.find(function (b) {
+          return b.textContent.trim() === "Регистрация";
+        });
+        var loginTab = buttons.find(function (b) {
+          return b.textContent.trim() === "Вход";
+        });
 
-      // Поле имени
-      var nameInput = form.querySelector('input[placeholder*="Как к вам"]');
-      var nameRow = nameInput ? (nameInput.closest("div") || nameInput) : null;
+        if (!regTab || !loginTab) return;
 
-      // Телефон
-      var phoneInput =
-        form.querySelector('input[type="tel"]') ||
-        form.querySelector('input[placeholder*="+992"]');
+        // Всё нашли – дальше интервал не нужен
+        clearInterval(intervalId);
 
-      // Пароль
-      var passwordInput = form.querySelector('input[type="password"]');
+        // 4. Запоминаем исходный текст заголовка и описания
+        var description = title.nextElementSibling;
+        var originalTitle = title.textContent.trim();
+        var originalDescription = description
+          ? description.textContent.trim()
+          : "";
 
-      // Кнопка отправки
-      var submitBtn =
-        form.querySelector('button[type="submit"]') ||
-        form.querySelector("button");
-
-      if (!phoneInput || !passwordInput || !submitBtn) return;
-
-      // Блок с верхними большими переключателями "Регистрация / Вход" – спрячем его
-      var tabsContainer = Array.from(card.querySelectorAll("div")).find(function (div) {
-        var txt = div.textContent || "";
-        return txt.includes("Регистрация") && txt.includes("Вход");
-      });
-      if (tabsContainer) {
-        tabsContainer.style.display = "none";
-      }
-
-      // Тексты под заголовком (описание блока)
-      var description = title.nextElementSibling;
-
-      // Создаём снизу маленький переключатель (Регистрация / Вход)
-      var switchWrapper = document.createElement("div");
-      switchWrapper.style.marginTop = "16px";
-      switchWrapper.style.fontSize = "12px";
-      switchWrapper.style.textAlign = "center";
-
-      // Внутренний элемент текста
-      var switchText = document.createElement("span");
-      var switchLink = document.createElement("button");
-      switchLink.type = "button";
-      switchLink.style.border = "none";
-      switchLink.style.background = "none";
-      switchLink.style.padding = "0";
-      switchLink.style.marginLeft = "4px";
-      switchLink.style.color = "#ffb347";
-      switchLink.style.fontSize = "12px";
-      switchLink.style.cursor = "pointer";
-
-      switchWrapper.appendChild(switchText);
-      switchWrapper.appendChild(switchLink);
-
-      // Вставляем после формы
-      form.parentNode.insertBefore(switchWrapper, form.nextSibling);
-
-      // Сохранённые исходные тексты
-      var originalTitle = title.textContent.trim();
-      var originalDescription = description ? description.textContent.trim() : "";
-
-      // Состояния
-      function setLoginMode() {
-        if (nameRow) nameRow.style.display = "none"; // прячем имя
-        title.textContent = "Вход в личный кабинет Madera Design";
-        if (description) {
-          description.textContent =
-            "Введите номер телефона и пароль, чтобы войти в личный кабинет.";
+        // 5. Контейнер больших вкладок – спрячем его
+        var tabsContainer = regTab.parentElement;
+        if (tabsContainer) {
+          // берём общего родителя, где лежат обе кнопки
+          while (tabsContainer && !tabsContainer.contains(loginTab)) {
+            tabsContainer = tabsContainer.parentElement;
+          }
         }
-        submitBtn.textContent = "Войти";
-
-        switchText.textContent = "Нет аккаунта?";
-        switchLink.textContent = "Регистрация";
-        switchLink.onclick = setRegisterMode;
-      }
-
-      function setRegisterMode() {
-        if (nameRow) nameRow.style.display = ""; // показываем имя
-        title.textContent = originalTitle;
-        if (description) {
-          description.textContent =
-            originalDescription ||
-            "Лёгкая регистрация по номеру WhatsApp. После входа вы увидите статусы заказов, промокоды и связь с менеджером.";
+        if (tabsContainer) {
+          tabsContainer.style.display = "none";
         }
-        submitBtn.textContent = "Создать аккаунт";
 
-        switchText.textContent = "Уже есть аккаунт?";
-        switchLink.textContent = "Войти";
-        switchLink.onclick = setLoginMode;
+        // 6. Создаём маленький переключатель под формой
+        var switchWrapper = document.createElement("div");
+        switchWrapper.style.marginTop = "16px";
+        switchWrapper.style.fontSize = "12px";
+        switchWrapper.style.textAlign = "center";
+
+        var switchText = document.createElement("span");
+        var switchLink = document.createElement("button");
+        switchLink.type = "button";
+        switchLink.style.border = "none";
+        switchLink.style.background = "none";
+        switchLink.style.padding = "0";
+        switchLink.style.marginLeft = "4px";
+        switchLink.style.color = "#ffb347";
+        switchLink.style.fontSize = "12px";
+        switchLink.style.cursor = "pointer";
+
+        switchWrapper.appendChild(switchText);
+        switchWrapper.appendChild(switchLink);
+        form.parentNode.insertBefore(switchWrapper, form.nextSibling);
+
+        // функции режимов
+        function setLoginMode() {
+          // жмём старую кнопку "Вход", чтобы сработала родная логика
+          loginTab.click();
+
+          title.textContent = "Вход в личный кабинет Madera Design";
+          if (description) {
+            description.textContent =
+              "Введите номер телефона и пароль, чтобы войти в личный кабинет.";
+          }
+
+          switchText.textContent = "Нет аккаунта?";
+          switchLink.textContent = "Регистрация";
+          switchLink.onclick = setRegisterMode;
+        }
+
+        function setRegisterMode() {
+          // жмём старую кнопку "Регистрация"
+          regTab.click();
+
+          title.textContent = originalTitle;
+          if (description) {
+            description.textContent =
+              originalDescription ||
+              "Лёгкая регистрация по номеру WhatsApp. После входа вы увидите статусы заказов, промокоды и связь с менеджером.";
+          }
+
+          switchText.textContent = "Уже есть аккаунт?";
+          switchLink.textContent = "Войти";
+          switchLink.onclick = setLoginMode;
+        }
+
+        // 7. При первом открытии страницы – сразу режим ВХОД
+        setLoginMode();
+      } catch (e) {
+        console.error("Profile auth UI script error:", e);
       }
-
-      // При открытии страницы – режим ВХОД
-      setLoginMode();
-    } catch (e) {
-      console.error("Profile form script error:", e);
-    }
+    }, 300); // проверяем каждые 300 мс
   });
-    </script>
+          </script>
   </body>
 </html>
