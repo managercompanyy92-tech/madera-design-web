@@ -4336,3 +4336,90 @@ profileInitObserver.observe(document.body, {
         initMeasureForm();
     }
 })();
+// === ОБРАБОТЧИК ЗАЯВКИ НА ЗАМЕР ===
+(function () {
+  const API_URL = "https://madera-api.vercel.app/api/measure";
+
+  function initMeasureForm() {
+    // Ищем форму по data-атрибуту или саму <form>
+    const form =
+      document.querySelector("form[data-measure-form]") ||
+      document.querySelector("[data-measure-form] form") ||
+      document.querySelector("[data-measure-form]");
+
+    if (!form) return;
+
+    // Чтобы не навесить обработчик дважды
+    if (form.dataset.measureHandler === "1") return;
+    form.dataset.measureHandler = "1";
+
+    const submitBtn = form.querySelector("[data-measure-submit]");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.classList.add("is-loading");
+        }
+
+        // Собираем FormData из формы (включая файл)
+        const fd = new FormData(form);
+
+        // Список полей, которые должен видеть бэкенд
+        // (если какое-то поле отсутствует на странице — ничего страшного,
+        // FormData просто не отправит его)
+        const expected = [
+          "name",
+          "phone",
+          "address",
+          "landmark",
+          "contactMethod",
+          "category",
+          "length",
+          "tariff",
+          "promo",
+          "description",
+          "paymentCheck" // файл
+        ];
+
+        // Валидация обязательных полей (минимум — имя и телефон)
+        const name = fd.get("name")?.toString().trim();
+        const phone = fd.get("phone")?.toString().trim();
+        if (!name || !phone) {
+          alert("Пожалуйста, заполните имя и телефон.");
+          return;
+        }
+
+        // Отправляем без ручной установки Content-Type
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: fd
+        });
+
+        if (!res.ok) {
+          const msg = await res.text().catch(() => "");
+          throw new Error(`Сервер ответил ${res.status}. ${msg}`);
+        }
+
+        alert("Заявка на замер успешно отправлена!");
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        alert("Не удалось отправить заявку. Проверьте подключение и попробуйте ещё раз.");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove("is-loading");
+        }
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMeasureForm);
+  } else {
+    initMeasureForm();
+  }
+})();
