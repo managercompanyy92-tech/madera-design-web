@@ -4694,3 +4694,113 @@ fd.set("phone", phone);
   style.innerHTML = css;
   document.head.appendChild(style);
 })();
+// === АВТО-ОБРАБОТЧИК ФОРМЫ "ЗАЯВКА НА ЗАМЕР" ===
+(function () {
+  const API_URL = "https://madera-api.vercel.app/api/measure";
+
+  function initMeasureForm() {
+    // ищем форму замера
+    const form =
+      document.querySelector("[data-measure-form]") ||
+      document.getElementById("measure-form") ||
+      document.querySelector('form[action*="measure"]');
+
+    if (!form) return;
+
+    // чтобы не навесить обработчик дважды
+    if (form.dataset.measureHandler === "1") return;
+    form.dataset.measureHandler = "1";
+
+    const submitBtn =
+      form.querySelector("[data-measure-submit]") ||
+      form.querySelector('button[type="submit"]');
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add("is-loading");
+      }
+
+      try {
+        const fd = new FormData(form);
+
+        // длина проекта: пробуем несколько возможных name
+        const lengthValue =
+          fd.get("length") ||
+          fd.get("projectLength") ||
+          fd.get("project-length") ||
+          "";
+
+        // тариф: тоже пробуем несколько возможных name
+        const tariffValue =
+          fd.get("tariff") ||
+          fd.get("tariffType") ||
+          fd.get("tariff-type") ||
+          "";
+
+        // чек об оплате (файл)
+        const paymentFile = fd.get("paymentCheck") || fd.get("payment-check");
+        const hasPaymentCheck =
+          paymentFile &&
+          typeof paymentFile === "object" &&
+          paymentFile.name &&
+          paymentFile.size > 0;
+
+        const payload = {
+          name: fd.get("name") || "",
+          phone: fd.get("phone") || "",
+          address: fd.get("address") || "",
+          landmark: fd.get("landmark") || "",
+          contactMethod:
+            fd.get("contactMethod") || fd.get("contact-method") || "",
+          category: fd.get("category") || "",
+          length: lengthValue || "",
+          tariff: tariffValue || "",
+          promo: fd.get("promo") || "",
+          description: fd.get("description") || "",
+          hasPaymentCheck,
+        };
+
+        if (!payload.name || !payload.phone) {
+          alert("Пожалуйста, заполните имя и телефон.");
+          return;
+        }
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          console.error("Measure error:", data);
+          alert("Не удалось отправить заявку. Попробуйте ещё раз.");
+          return;
+        }
+
+        alert("Заявка на замер успешно отправлена!");
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        alert(
+          "Не удалось отправить заявку. Проверьте интернет и попробуйте ещё раз."
+        );
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove("is-loading");
+        }
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMeasureForm);
+  } else {
+    initMeasureForm();
+  }
+})();
