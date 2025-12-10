@@ -4578,3 +4578,61 @@ fd.set("phone", phone);
     hardcoreMeasureFix();
   }
 })();
+// === ВОССТАНОВЛЕНИЕ КРАСИВОЙ КНОПКИ "ОТПРАВИТЬ ЗАЯВКУ НА РАСЧЁТ" ===
+(function () {
+  const css = `
+    .order-form__footer .order-form__submit {
+      box-sizing: border-box;
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 14px 24px;
+      border-radius: 999px;
+
+      border: none;
+      outline: none;
+
+      background: linear-gradient(90deg, #ffb300 0%, #ff7a00 100%);
+      color: #000000;
+
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.3;
+      text-align: center;
+
+      cursor: pointer;
+      text-decoration: none;
+
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+    .order-form__footer .order-form__submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+      opacity: 0.96;
+    }
+
+    .order-form__footer .order-form__submit:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 9px rgba(0, 0, 0, 0.6);
+      opacity: 0.9;
+    }
+
+    .order-form__footer .order-form__submit:disabled,
+    .order-form__footer .order-form__submit.is-loading {
+      cursor: default;
+      opacity: 0.6;
+      box-shadow: none;
+      transform: none;
+    }
+  `;
+
+  const style = document.createElement("style");
+  style.innerHTML = css;
+  document.head.appendChild(style);
+})();
