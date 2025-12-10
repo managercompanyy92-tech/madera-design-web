@@ -656,7 +656,7 @@ function renderOrder() {
           </div>
 
           <!-- Форма заявки, связанная с калькулятором -->
-          <div class="order-form order-form--accent">
+          <div class="order-form order-form--accent" data-measure-form>
             <div class="order-form__header">
               <div class="order-form__title">Заявка на замер и расчёт</div>
               <div class="order-form__subtitle">
@@ -668,21 +668,21 @@ function renderOrder() {
               <div class="order-form__row">
                 <label class="order-form__label">Ваше имя*</label>
                 <input
-                  type="text"
-                  class="order-form__input"
-                  placeholder="Как к вам обращаться?"
-                  data-order-name
-                />
+  type="text"
+  class="order-form__input"
+  placeholder="Как к вам обращаться?"
+  name="name"
+/>
               </div>
 
               <div class="order-form__row">
                 <label class="order-form__label">Телефон / WhatsApp*</label>
                 <input
-                  type="tel"
-                  class="order-form__input"
-                  placeholder="+992 ..."
-                  data-order-phone
-                />
+  type="tel"
+  class="order-form__input"
+  placeholder="+992 ..."
+  name="phone"
+/>
               </div>
 <div class="order-form__row order-form__row--full">
     <label class="order-form__label">
