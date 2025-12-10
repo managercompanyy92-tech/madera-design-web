@@ -620,5 +620,51 @@ document.addEventListener("submit", function (event) {
   }
 });
     </script>
+    <script>
+  // ДАННЫЕ ТВОЕГО БОТА
+  const TELEGRAM_BOT_TOKEN = "ТОКЕН_ТВОЕГО_БОТА";
+  const TELEGRAM_CHAT_ID = "ЧАТ_АЙДИ_КУДА_ПРИХОДЯТ_ЗАЯВКИ";
+
+  const form = document.getElementById("order-form");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const fd = new FormData(form);
+
+    // Проверяем, прикреплён ли чек
+    const checkFile = fd.get("paymentCheck");
+    const hasCheck = checkFile && checkFile.size > 0;
+
+    // === 1. Отправляем текст на твой существующий backend ===
+    const plainData = Object.fromEntries(fd.entries());
+    plainData.hasPaymentCheck = hasCheck ? "прикреплён" : "не прикреплён";
+
+    await fetch("/api/measure", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(plainData)
+    });
+
+    // === 2. Если чек прикреплён — отправляем его НАПРЯМУЮ в Telegram ===
+    if (hasCheck) {
+      const docFD = new FormData();
+      docFD.append("chat_id", TELEGRAM_CHAT_ID);
+      docFD.append(
+        "caption",
+        `Чек об оплате\nИмя: ${plainData.name}\nТелефон: ${plainData.phone}`
+      );
+      docFD.append("document", checkFile);
+
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, {
+        method: "POST",
+        body: docFD
+      });
+    }
+
+    alert("Заявка отправлена!");
+    form.reset();
+  });
+    </script>
   </body>
 </html>
