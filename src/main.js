@@ -4216,3 +4216,51 @@ profileInitObserver.observe(document.body, {
     initPartnerForm();
   }
 })();
+(function () {
+  const API_URL = "https://madera-api.vercel.app/api/measure";
+
+  function initMeasureForm() {
+    const form = document.querySelector(".measure-form");
+
+    if (!form) return;
+
+    if (form.dataset.handler === "1") return;
+    form.dataset.handler = "1";
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+
+      const payload = {
+        name: formData.get("name"),
+        phone: formData.get("phone"),
+        address: formData.get("address"),
+        landmark: formData.get("landmark"),
+        contactMethod: formData.get("contactMethod"),
+        category: formData.get("category"),
+        length: formData.get("length"),
+        tariff: formData.get("tariff"),
+        promo: formData.get("promo"),
+        description: formData.get("description"),
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error("Ошибка отправки");
+
+        alert("Заявка на замер успешно отправлена!");
+        form.reset();
+      } catch (err) {
+        alert("Не удалось отправить заявку. Проверьте интернет.");
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", initMeasureForm);
+})();
