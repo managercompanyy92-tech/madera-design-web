@@ -2,6 +2,9 @@
   "name": "madera-design-web",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+  "sitemap": "node scripts/generate-sitemap.js"
+},
   "dependencies": {
     "multiparty": "^4.2.3",
     "openai": "^4.52.0"
