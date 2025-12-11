@@ -451,9 +451,12 @@ function renderCatalog() {
 data-route="order"> 
                 Получить быстрый расчет и идеи.
               </button>
-              <button class="btn btn--outline" data-action="open-chat">
-                Обсудить с AI-дизайнером мою ситуацию.
-              </button>
+             <button
+    id="ai-designer-open"
+    class="btn btn-outline btn-ai-designer"
+>
+    Обсудить с AI-дизайнером мою ситуацию.
+</button> 
             </div>
           </div>
         </div>
