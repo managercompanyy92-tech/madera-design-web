@@ -1,10 +1,4 @@
-# robots.txt для сайта Madera Design (madera-dushanbe.vercel.app)
-
 User-agent: *
 Allow: /
 
-# Карта сайта (создадим позже или уже есть)
 Sitemap: https://madera-dushanbe.vercel.app/sitemap.xml
-
-# Для Яндекс и некоторых других поисковиков
-Host: madera-dushanbe.vercel.app
