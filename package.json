@@ -6,6 +6,7 @@
   "sitemap": "node scripts/generate-sitemap.js"
 },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
     "multiparty": "^4.2.3",
     "openai": "^4.52.0"
   }
