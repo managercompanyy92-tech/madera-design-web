@@ -5411,3 +5411,239 @@ setInterval(() => {
 
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
+/* ===========================
+   AUTH STABILITY PATCH:
+   1) Имя клиента всегда сохраняется и отображается стабильно
+   2) "Выйти из аккаунта" работает с 1 клика и не логинит обратно после refresh
+   =========================== */
+(function () {
+  const KEY = "madera_auth_session_v1";
+  const LOGOUT_KEY = "madera_auth_logout_v1";
+  const PROFILE_HASH = "#profile";
+
+  function now() { return Date.now(); }
+  function isProfile() {
+    return (location.hash || "").toLowerCase().startsWith(PROFILE_HASH);
+  }
+  function norm(s) {
+    return (s || "").replace(/\s+/g, " ").trim();
+  }
+  function safeJsonParse(raw) {
+    try { return raw ? JSON.parse(raw) : null; } catch (_) { return null; }
+  }
+  function getSession() {
+    return safeJsonParse(localStorage.getItem(KEY));
+  }
+  function setSession(patch) {
+    const cur = getSession() || {};
+    const next = { ...cur, ...patch, updatedAt: now() };
+    try { localStorage.setItem(KEY, JSON.stringify(next)); } catch (_) {}
+  }
+  function hardLogoutMark() {
+    try { localStorage.setItem(LOGOUT_KEY, String(now())); } catch (_) {}
+  }
+  function clearLogoutMark() {
+    try { localStorage.removeItem(LOGOUT_KEY); } catch (_) {}
+  }
+  function hasLogoutMark() {
+    const v = localStorage.getItem(LOGOUT_KEY);
+    return !!v; // если есть — считаем, что пользователь вышел и автологин запрещён
+  }
+
+  function q(sel, root = document) { return root.querySelector(sel); }
+  function qa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
+
+  function showUnauth() {
+    const unauth = q("#profile-unauth");
+    const auth = q("#profile-authenticated");
+    if (auth) auth.style.display = "none";
+    if (unauth) unauth.style.display = "block";
+  }
+
+  function showAuth() {
+    const unauth = q("#profile-unauth");
+    const auth = q("#profile-authenticated");
+    if (auth) auth.style.display = "block";
+    if (unauth) unauth.style.display = "none";
+  }
+
+  function getNameFromInputs() {
+    // Берём имя из поля регистрации, если оно есть
+    const unauth = q("#profile-unauth") || document;
+    const inputs = qa("input", unauth);
+
+    // чаще всего это поле "Имя"
+    const byPlaceholder = inputs.find(i => (i.placeholder || "").toLowerCase().includes("как к вам"));
+    if (byPlaceholder && norm(byPlaceholder.value)) return norm(byPlaceholder.value);
+
+    // запасной вариант — первый текстовый input с label "Имя" рядом (если верстка такая)
+    const byType = inputs.find(i => (i.type || "").toLowerCase() === "text" && norm(i.value));
+    if (byType) return norm(byType.value);
+
+    return "";
+  }
+
+  function getNameFromGreeting() {
+    const auth = q("#profile-authenticated") || document;
+    const title = q(".profile-greeting__title", auth);
+    if (!title) return "";
+
+    const t = norm(title.textContent);
+    // Примеры: "Привет, Маруф." / "Привет, клиент."
+    const m = t.match(/привет,\s*([^.!]+)\.?/i);
+    if (m && m[1]) return norm(m[1]);
+    return "";
+  }
+
+  function enforceGreetingName() {
+    // Если приветствие показывает "клиент", но у нас есть имя — заменяем
+    const session = getSession() || {};
+    const storedName = norm(session.name || "");
+    if (!storedName) return;
+
+    const auth = q("#profile-authenticated");
+    if (!auth || auth.style.display === "none") return;
+
+    const title = q(".profile-greeting__title", auth);
+    if (!title) return;
+
+    const t = norm(title.textContent).toLowerCase();
+    if (t.includes("привет") && t.includes("клиент")) {
+      title.textContent = `Привет, ${storedName}.`;
+    }
+  }
+
+  function persistNameIfPossible() {
+    // Сохраняем имя либо из greeting, либо из input при регистрации
+    const nameFromGreeting = getNameFromGreeting();
+    if (nameFromGreeting && nameFromGreeting.toLowerCase() !== "клиент") {
+      setSession({ name: nameFromGreeting });
+      return;
+    }
+
+    const nameFromInputs = getNameFromInputs();
+    if (nameFromInputs) {
+      setSession({ name: nameFromInputs });
+    }
+  }
+
+  function persistAuthIfVisible() {
+    // Если реально показан auth — фиксируем authenticated=true
+    const auth = q("#profile-authenticated");
+    const unauth = q("#profile-unauth");
+    if (!auth || !unauth) return;
+
+    const authVisible = auth.style.display !== "none";
+    const unauthHidden = unauth.style.display === "none";
+
+    if (authVisible && unauthHidden) {
+      // если пользователь только что вошёл — снимаем отметку logout
+      clearLogoutMark();
+      setSession({ authenticated: true });
+      persistNameIfPossible();
+      enforceGreetingName();
+    }
+  }
+
+  function restoreOnProfile() {
+    if (!isProfile()) return;
+
+    // Если пользователь выходил — автологин запрещён, пока он снова не войдёт
+    if (hasLogoutMark()) {
+      setSession({ authenticated: false });
+      showUnauth();
+      return;
+    }
+
+    const session = getSession();
+    if (session && session.authenticated) {
+      showAuth();
+      enforceGreetingName();
+    } else {
+      showUnauth();
+    }
+  }
+
+  function hardLogout() {
+    // 1) Ставим отметку выхода (запрет автологина после refresh)
+    hardLogoutMark();
+
+    // 2) Обнуляем сессию
+    setSession({ authenticated: false });
+
+    // 3) Мгновенно показываем вход
+    showUnauth();
+  }
+
+  function bindHardLogoutClick() {
+    if (document.__maderaHardLogoutBound) return;
+    document.__maderaHardLogoutBound = true;
+
+    document.addEventListener("click", (e) => {
+      const el = e.target && e.target.closest ? e.target.closest("a,button") : null;
+      if (!el) return;
+
+      const text = (el.textContent || "").toLowerCase();
+
+      // Твой линк выглядит как "Выйти из аккаунта"
+      if (text.includes("выйти из аккаунта") || text === "выйти" || el.classList.contains("profile-logout")) {
+        // Перехватываем на CAPTURE, чтобы не мешали другие обработчики
+        e.preventDefault();
+        e.stopPropagation();
+        hardLogout();
+      }
+    }, true);
+  }
+
+  // Отлавливаем нажатия "Войти" / "Создать аккаунт" — чтобы гарантированно сохранить имя/сессию
+  function bindAuthButtonsCapture() {
+    if (document.__maderaAuthButtonsBound) return;
+    document.__maderaAuthButtonsBound = true;
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest ? e.target.closest("button") : null;
+      if (!btn) return;
+
+      const t = (btn.textContent || "").toLowerCase().trim();
+
+      if (t === "войти" || t === "создать аккаунт") {
+        // Сохраняем имя из inputs ДО отправки
+        const nm = getNameFromInputs();
+        if (nm) setSession({ name: nm });
+
+        // После результата (DOM обновится) — зафиксируем auth и имя
+        setTimeout(() => {
+          persistAuthIfVisible();
+          enforceGreetingName();
+        }, 250);
+      }
+    }, true);
+  }
+
+  // Следим за DOM: когда UI перерисовывается, мы стабилизируем имя и состояние
+  const mo = new MutationObserver(() => {
+    if (isProfile()) restoreOnProfile();
+    persistAuthIfVisible();
+    enforceGreetingName();
+  });
+
+  // INIT
+  document.addEventListener("DOMContentLoaded", () => {
+    bindHardLogoutClick();
+    bindAuthButtonsCapture();
+    setTimeout(() => {
+      restoreOnProfile();
+      persistAuthIfVisible();
+      enforceGreetingName();
+    }, 200);
+
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  });
+
+  window.addEventListener("hashchange", () => {
+    setTimeout(() => {
+      restoreOnProfile();
+      enforceGreetingName();
+    }, 80);
+  });
+})();
