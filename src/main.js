@@ -5266,3 +5266,148 @@ setInterval(() => {
   const mo = new MutationObserver(() => applyProfileAuthUX());
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
+/* ===========================
+   PERSIST AUTH SESSION (localStorage)
+   Сохраняет вход и не выбрасывает при переходах по вкладкам
+   =========================== */
+(function () {
+  const KEY = "madera_auth_session_v1";
+  const PROFILE_HASH = "#profile";
+
+  function now() { return Date.now(); }
+
+  function getSession() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function setSession(data) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(data));
+    } catch (_) {}
+  }
+
+  function clearSession() {
+    try { localStorage.removeItem(KEY); } catch (_) {}
+  }
+
+  function isProfile() {
+    return (location.hash || "").toLowerCase().startsWith(PROFILE_HASH);
+  }
+
+  function q(sel, root = document) {
+    return root.querySelector(sel);
+  }
+
+  function showAuthenticated() {
+    const unauth = q("#profile-unauth");
+    const auth = q("#profile-authenticated");
+
+    if (auth) auth.style.display = "block";
+    if (unauth) unauth.style.display = "none";
+  }
+
+  function showUnauth() {
+    const unauth = q("#profile-unauth");
+    const auth = q("#profile-authenticated");
+
+    if (auth) auth.style.display = "none";
+    if (unauth) unauth.style.display = "block";
+  }
+
+  function pickUserNameFromUI() {
+    // Пытаемся вытащить имя из приветствия/поля/заголовка (если есть)
+    const root = q("#profile-authenticated") || document;
+    const t1 = q(".profile-greeting__title", root);
+    if (t1 && t1.textContent.trim()) return t1.textContent.trim();
+
+    const t2 = q("[data-user-name]", root);
+    if (t2 && t2.textContent.trim()) return t2.textContent.trim();
+
+    return "";
+  }
+
+  function persistIfLoggedIn() {
+    const auth = q("#profile-authenticated");
+    const unauth = q("#profile-unauth");
+
+    if (!auth || !unauth) return;
+
+    // Считаем “вошёл”, если authenticated видим, а unauth скрыт
+    const authVisible = auth.style.display !== "none";
+    const unauthHidden = unauth.style.display === "none";
+
+    if (authVisible && unauthHidden) {
+      const name = pickUserNameFromUI();
+      const prev = getSession() || {};
+      setSession({
+        ...prev,
+        authenticated: true,
+        name: name || prev.name || "",
+        updatedAt: now()
+      });
+    }
+  }
+
+  function restoreOnProfileOpen() {
+    if (!isProfile()) return;
+
+    const session = getSession();
+    if (session && session.authenticated) {
+      // Если сессия есть — показываем аккаунт сразу
+      showAuthenticated();
+    } else {
+      // Если нет — показываем экран входа
+      showUnauth();
+    }
+  }
+
+  function bindLogoutClear() {
+    // Ловим любой “выход” и чистим localStorage
+    document.addEventListener("click", (e) => {
+      const el = e.target && e.target.closest ? e.target.closest("button,a") : null;
+      if (!el) return;
+
+      const text = (el.textContent || "").toLowerCase().trim();
+
+      // Подстройка под разные варианты текста
+      if (text === "выйти" || text.includes("выйти") || el.classList.contains("profile-logout")) {
+        clearSession();
+        // после выхода — показываем вход
+        setTimeout(() => {
+          showUnauth();
+        }, 50);
+      }
+    }, true);
+  }
+
+  // 1) При загрузке
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      restoreOnProfileOpen();
+      bindLogoutClear();
+    }, 150);
+  });
+
+  // 2) При переходе по вкладкам (hash)
+  window.addEventListener("hashchange", () => {
+    setTimeout(() => {
+      restoreOnProfileOpen();
+    }, 80);
+  });
+
+  // 3) Когда DOM меняется (после логина/регистрации/рендера)
+  const mo = new MutationObserver(() => {
+    // если пользователь уже вошёл — сохраним это
+    persistIfLoggedIn();
+
+    // если пользователь открыл профиль — восстановим вид
+    if (isProfile()) restoreOnProfileOpen();
+  });
+
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+})();
