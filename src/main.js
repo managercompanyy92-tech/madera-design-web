@@ -5056,3 +5056,52 @@ setInterval(() => {
   const mo = new MutationObserver(() => forceLoginTab());
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
+let isRegistering = false; // по умолчанию показываем окно входа
+
+// Эта функция будет переключать режимы
+function toggleRegister() {
+  isRegistering = !isRegistering;
+  renderProfile();
+}
+
+// Функция рендера профиля
+function renderProfile() {
+  return `
+    <div class="profile-auth__tabs">
+      <button class="profile-auth__tab ${!isRegistering ? 'is-active' : ''}" onclick="toggleRegister()">Вход</button>
+      <button class="profile-auth__tab ${isRegistering ? 'is-active' : ''}" onclick="toggleRegister()">Регистрация</button>
+    </div>
+
+    <div id="profile-auth__forms">
+      ${isRegistering ? renderRegistrationForm() : renderLoginForm()}
+    </div>
+  `;
+}
+
+// Функция рендеринга формы входа
+function renderLoginForm() {
+  return `
+    <div id="profile-login">
+      <!-- Форма входа -->
+      <input type="text" placeholder="Логин">
+      <input type="password" placeholder="Пароль">
+      <button type="submit">Войти</button>
+    </div>
+  `;
+}
+
+// Функция рендеринга формы регистрации
+function renderRegistrationForm() {
+  return `
+    <div id="profile-register">
+      <!-- Форма регистрации -->
+      <input type="text" placeholder="Имя">
+      <input type="text" placeholder="Телефон / WhatsApp">
+      <input type="password" placeholder="Пароль">
+      <button type="submit">Зарегистрироваться</button>
+    </div>
+  `;
+}
+
+// Изначально рендерим страницу
+document.body.innerHTML = renderProfile();
