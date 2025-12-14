@@ -4923,3 +4923,52 @@ setInterval(() => {
     authBtn.style.display = "none";
   }
 }, 300);
+/* ===========================
+   PROFILE AUTH LOGIC FIX
+   По умолчанию — ВХОД, а не РЕГИСТРАЦИЯ
+   =========================== */
+
+(function () {
+  function isProfilePage() {
+    return location.hash === '#profile';
+  }
+
+  function normalize(text) {
+    return (text || '').toLowerCase().trim();
+  }
+
+  function activateLoginTab() {
+    if (!isProfilePage()) return;
+
+    const buttons = Array.from(document.querySelectorAll('button'));
+
+    const loginBtn = buttons.find(btn =>
+      normalize(btn.textContent) === 'вход'
+    );
+
+    if (loginBtn) {
+      // если вкладка входа есть — принудительно активируем
+      loginBtn.click();
+    }
+  }
+
+  // 1. При первой загрузке
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(activateLoginTab, 200);
+  });
+
+  // 2. При переходе по меню (SPA)
+  window.addEventListener('hashchange', () => {
+    setTimeout(activateLoginTab, 200);
+  });
+
+  // 3. Если интерфейс дорисовывается позже
+  const observer = new MutationObserver(() => {
+    activateLoginTab();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+})();
