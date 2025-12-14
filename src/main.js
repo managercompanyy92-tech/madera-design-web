@@ -5102,3 +5102,167 @@ setInterval(() => {
   const mo = new MutationObserver(() => forceLoginUI());
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
+/* ===========================
+   PROFILE AUTH UX FIX:
+   1) по умолчанию показываем ТОЛЬКО "Вход"
+   2) вкладку "Регистрация" сверху скрываем
+   3) регистрация открывается по ссылке снизу
+   4) клик по регистрации работает всегда (делаем через классы, без "клика")
+   =========================== */
+(function () {
+  const PROFILE_HASH = "#profile";
+
+  function isProfile() {
+    return (location.hash || "").toLowerCase().startsWith(PROFILE_HASH);
+  }
+
+  function norm(s) {
+    return (s || "").replace(/\s+/g, " ").trim().toLowerCase();
+  }
+
+  function getProfileRoot() {
+    return document.querySelector("#profile-unauth") || document;
+  }
+
+  function setMode(mode) {
+    // mode: "login" | "register"
+    const root = getProfileRoot();
+    const tabs = root.querySelectorAll(".profile-auth__tab");
+    const panels = root.querySelectorAll(".profile-auth__panel");
+
+    if (tabs.length < 2 || panels.length < 2) return false;
+
+    const regTab = tabs[0];
+    const loginTab = tabs[1];
+    const regPanel = panels[0];
+    const loginPanel = panels[1];
+
+    if (mode === "login") {
+      regTab.classList.remove("is-active");
+      loginTab.classList.add("is-active");
+      regPanel.classList.add("is-hidden");
+      loginPanel.classList.remove("is-hidden");
+      return true;
+    }
+
+    if (mode === "register") {
+      loginTab.classList.remove("is-active");
+      regTab.classList.add("is-active");
+      loginPanel.classList.add("is-hidden");
+      regPanel.classList.remove("is-hidden");
+      return true;
+    }
+
+    return false;
+  }
+
+  function ensureBottomLink() {
+    const root = getProfileRoot();
+    const loginPanel = root.querySelectorAll(".profile-auth__panel")[1];
+    if (!loginPanel) return;
+
+    // Не добавляем повторно
+    if (root.querySelector("[data-open-register]")) return;
+
+    const hint = loginPanel.querySelector(".profile-auth__hint") || loginPanel;
+    const link = document.createElement("button");
+    link.type = "button";
+    link.setAttribute("data-open-register", "1");
+    link.style.border = "none";
+    link.style.background = "transparent";
+    link.style.padding = "0";
+    link.style.marginTop = "6px";
+    link.style.cursor = "pointer";
+    link.style.textDecoration = "underline";
+    link.style.textDecorationStyle = "dotted";
+    link.style.color = "rgba(255,255,255,0.8)";
+    link.style.fontSize = "12px";
+    link.textContent = "Нет аккаунта? Зарегистрироваться";
+
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setMode("register");
+    });
+
+    // Вставляем сразу после текущего текста подсказки, если он есть
+    if (hint.classList && hint.classList.contains("profile-auth__hint")) {
+      hint.insertAdjacentElement("afterend", link);
+    } else {
+      loginPanel.appendChild(link);
+    }
+  }
+
+  function hideRegisterTab() {
+    const root = getProfileRoot();
+    const tabs = root.querySelectorAll(".profile-auth__tab");
+    if (tabs.length >= 2) {
+      // скрываем кнопку "Регистрация" сверху полностью
+      tabs[0].style.display = "none";
+    }
+  }
+
+  function fixRegisterTabClickReliability() {
+    // Перехват клика по вкладкам внутри профиля
+    // и переключение через классы (не через встроенные обработчики),
+    // чтобы срабатывало всегда.
+    const root = getProfileRoot();
+
+    if (root.__profileAuthBound) return;
+    root.__profileAuthBound = true;
+
+    root.addEventListener("click", (e) => {
+      if (!isProfile()) return;
+
+      const tab = e.target && e.target.closest && e.target.closest(".profile-auth__tab");
+      if (!tab) return;
+
+      const text = norm(tab.textContent);
+
+      // Мы запрещаем пользовательский клик по "Регистрация" сверху (она скрыта),
+      // но если всё же кликают — отрабатываем надёжно.
+      if (text === "регистрация") {
+        e.preventDefault();
+        e.stopPropagation();
+        setMode("register");
+        return;
+      }
+      if (text === "вход") {
+        e.preventDefault();
+        e.stopPropagation();
+        setMode("login");
+        return;
+      }
+    }, true);
+  }
+
+  function applyProfileAuthUX() {
+    if (!isProfile()) return;
+
+    // 1) всегда начинаем со входа
+    setMode("login");
+
+    // 2) прячем верхнюю вкладку регистрации
+    hideRegisterTab();
+
+    // 3) добавляем нормальную ссылку снизу на регистрацию
+    ensureBottomLink();
+
+    // 4) фикс клика по вкладкам (если остаются/появляются)
+    fixRegisterTabClickReliability();
+  }
+
+  // При загрузке
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(applyProfileAuthUX, 200);
+  });
+
+  // При переходе по хэшу
+  window.addEventListener("hashchange", () => {
+    setTimeout(applyProfileAuthUX, 80);
+  });
+
+  // SPA дорисовывает DOM
+  const mo = new MutationObserver(() => applyProfileAuthUX());
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+})();
