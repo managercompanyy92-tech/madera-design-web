@@ -4972,3 +4972,87 @@ setInterval(() => {
     subtree: true
   });
 })();
+/* ===========================
+   FORCE PROFILE DEFAULT TAB = LOGIN
+   При переходе на #profile принудительно включает "Вход"
+   =========================== */
+(function () {
+  const PROFILE_HASH = '#profile';
+  const MAX_TRIES = 40;       // 40 * 100ms = 4 секунды принуждения
+  const TRY_DELAY = 100;
+
+  function norm(s) {
+    return (s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  function isProfile() {
+    return (location.hash || '').toLowerCase().startsWith(PROFILE_HASH);
+  }
+
+  function findTabButton(label) {
+    const want = norm(label);
+    const nodes = Array.from(document.querySelectorAll('button, a, [role="tab"]'));
+    return nodes.find(el => norm(el.textContent) === want) || null;
+  }
+
+  function isRegistrationVisible() {
+    // Основной маркер регистрации на твоём UI — кнопка "Создать аккаунт"
+    const buttons = Array.from(document.querySelectorAll('button'));
+    return buttons.some(b => norm(b.textContent) === 'создать аккаунт');
+  }
+
+  function clickHard(el) {
+    if (!el) return false;
+    try {
+      el.scrollIntoView({ block: 'center', inline: 'center' });
+    } catch (_) {}
+    // Несколько видов событий — чтобы гарантированно сработали обработчики
+    el.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return true;
+  }
+
+  function forceLoginTab() {
+    if (!isProfile()) return;
+
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+
+      // Если регистрация уже не видна — всё, оставляем в покое
+      if (!isRegistrationVisible()) {
+        clearInterval(timer);
+        return;
+      }
+
+      // Ищем таб "Вход" и жмём его, пока реально не уйдём со страницы регистрации
+      const loginTab = findTabButton('Вход');
+      if (loginTab) clickHard(loginTab);
+
+      // Страховка: если табы почему-то в другом контейнере/формате,
+      // пробуем найти вторую кнопку в сегменте рядом с "Регистрация"
+      if (!loginTab) {
+        const regTab = findTabButton('Регистрация');
+        if (regTab && regTab.parentElement) {
+          const siblings = Array.from(regTab.parentElement.querySelectorAll('button, a, [role="tab"]'));
+          const candidate = siblings.find(x => x !== regTab);
+          if (candidate) clickHard(candidate);
+        }
+      }
+
+      if (tries >= MAX_TRIES) clearInterval(timer);
+    }, TRY_DELAY);
+  }
+
+  // 1) На загрузке
+  document.addEventListener('DOMContentLoaded', () => setTimeout(forceLoginTab, 200));
+
+  // 2) На смене хэша
+  window.addEventListener('hashchange', () => setTimeout(forceLoginTab, 50));
+
+  // 3) Когда SPA дорисовывает DOM
+  const mo = new MutationObserver(() => forceLoginTab());
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+})();
