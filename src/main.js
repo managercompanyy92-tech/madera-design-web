@@ -2,6 +2,7 @@
 
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
+import "./madera-auth-all-in-one.js";
 
 // Тарифы за погонный метр (сомони)
 const BASE_RATES = {
