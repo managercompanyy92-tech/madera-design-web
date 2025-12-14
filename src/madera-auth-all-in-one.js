@@ -5,45 +5,75 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-// === РЕГИСТРАЦИЯ ===
-window.maderaRegister = async function (phone, name, password) {
-  const password_hash = btoa(password); // временно, позже заменим на bcrypt
+// ===== HELPERS =====
+function hashPassword(password) {
+  return btoa(password); // временно, НЕ для продакшена
+}
 
-  const { error } = await supabase
+function normalizePhone(phone) {
+  return phone.replace(/\s+/g, "").trim();
+}
+
+// ===== REGISTER =====
+window.maderaRegister = async function (phone, name, password) {
+  phone = normalizePhone(phone);
+  const password_hash = hashPassword(password);
+
+  // проверка существования
+  const { data: existing } = await supabase
     .from("app_users")
-    .insert([{ phone, name, password_hash }]);
+    .select("id")
+    .eq("phone", phone)
+    .maybeSingle();
+
+  if (existing) {
+    alert("Этот номер уже зарегистрирован");
+    return false;
+  }
+
+  const { error } = await supabase.from("app_users").insert({
+    phone,
+    name,
+    password_hash,
+  });
 
   if (error) {
     alert("Ошибка регистрации: " + error.message);
     return false;
   }
 
-  alert("Аккаунт создан");
+  localStorage.setItem("madera_user_phone", phone);
   return true;
 };
 
-// === ВХОД ===
+// ===== LOGIN =====
 window.maderaLogin = async function (phone, password) {
-  const password_hash = btoa(password);
+  phone = normalizePhone(phone);
+  const password_hash = hashPassword(password);
 
   const { data, error } = await supabase
     .from("app_users")
     .select("*")
     .eq("phone", phone)
     .eq("password_hash", password_hash)
-    .single();
+    .maybeSingle();
 
-  if (error || !data) {
-    alert("Аккаунт не найден");
+  if (!data || error) {
+    alert("Неверный телефон или пароль");
     return false;
   }
 
-  localStorage.setItem("madera_user", JSON.stringify(data));
+  localStorage.setItem("madera_user_phone", phone);
   return true;
 };
 
-// === ВЫХОД ===
+// ===== LOGOUT =====
 window.maderaLogout = function () {
-  localStorage.removeItem("madera_user");
+  localStorage.removeItem("madera_user_phone");
   location.reload();
+};
+
+// ===== CHECK AUTH =====
+window.maderaIsAuthed = function () {
+  return !!localStorage.getItem("madera_user_phone");
 };
