@@ -2,7 +2,15 @@
 
 import { catalogCategories } from "./utils/catalogCategories.js";
 import { catalogItems } from "./utils/catalogItems.js";
-import "./madera-auth-all-in-one.js";
+// Safe-load auth module (so site won't crash if module has runtime error)
+(async () => {
+  try {
+    await import("./madera-auth-all-in-one.js");
+    console.log("[auth] module loaded");
+  } catch (e) {
+    console.error("[auth] module failed to load:", e);
+  }
+})();
 
 // Тарифы за погонный метр (сомони)
 const BASE_RATES = {
