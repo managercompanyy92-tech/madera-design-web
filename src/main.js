@@ -5056,52 +5056,49 @@ setInterval(() => {
   const mo = new MutationObserver(() => forceLoginTab());
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
-let isRegistering = false; // по умолчанию показываем окно входа
+/* ===========================
+   FORCE PROFILE DEFAULT = LOGIN (NO CLICKS)
+   Делает "Вход" вкладкой по умолчанию на #profile
+   =========================== */
+(function () {
+  let alreadyForcedForThisVisit = false;
 
-// Эта функция будет переключать режимы
-function toggleRegister() {
-  isRegistering = !isRegistering;
-  renderProfile();
-}
+  function isProfile() {
+    return (location.hash || "").toLowerCase().startsWith("#profile");
+  }
 
-// Функция рендера профиля
-function renderProfile() {
-  return `
-    <div class="profile-auth__tabs">
-      <button class="profile-auth__tab ${!isRegistering ? 'is-active' : ''}" onclick="toggleRegister()">Вход</button>
-      <button class="profile-auth__tab ${isRegistering ? 'is-active' : ''}" onclick="toggleRegister()">Регистрация</button>
-    </div>
+  function forceLoginUI() {
+    if (!isProfile() || alreadyForcedForThisVisit) return;
 
-    <div id="profile-auth__forms">
-      ${isRegistering ? renderRegistrationForm() : renderLoginForm()}
-    </div>
-  `;
-}
+    const root = document.querySelector("#profile-unauth") || document;
+    const tabs = root.querySelectorAll(".profile-auth__tab");
+    const panels = root.querySelectorAll(".profile-auth__panel");
 
-// Функция рендеринга формы входа
-function renderLoginForm() {
-  return `
-    <div id="profile-login">
-      <!-- Форма входа -->
-      <input type="text" placeholder="Логин">
-      <input type="password" placeholder="Пароль">
-      <button type="submit">Войти</button>
-    </div>
-  `;
-}
+    // Нужны 2 вкладки и 2 панели: [0]=Регистрация, [1]=Вход
+    if (tabs.length >= 2 && panels.length >= 2) {
+      // Вкладки
+      tabs[0].classList.remove("is-active"); // Регистрация
+      tabs[1].classList.add("is-active");    // Вход
 
-// Функция рендеринга формы регистрации
-function renderRegistrationForm() {
-  return `
-    <div id="profile-register">
-      <!-- Форма регистрации -->
-      <input type="text" placeholder="Имя">
-      <input type="text" placeholder="Телефон / WhatsApp">
-      <input type="password" placeholder="Пароль">
-      <button type="submit">Зарегистрироваться</button>
-    </div>
-  `;
-}
+      // Панели
+      panels[0].classList.add("is-hidden");      // скрыть регистрацию
+      panels[1].classList.remove("is-hidden");   // показать вход
 
-// Изначально рендерим страницу
-document.body.innerHTML = renderProfile();
+      alreadyForcedForThisVisit = true;
+    }
+  }
+
+  // При входе на #profile — разрешаем сделать форс заново
+  window.addEventListener("hashchange", () => {
+    alreadyForcedForThisVisit = false;
+    setTimeout(forceLoginUI, 50);
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(forceLoginUI, 200);
+  });
+
+  // SPA дорисовывает DOM — ловим момент появления вкладок/панелей
+  const mo = new MutationObserver(() => forceLoginUI());
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+})();
