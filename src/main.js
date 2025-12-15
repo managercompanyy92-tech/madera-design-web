@@ -5656,3 +5656,342 @@ setInterval(() => {
     }, 80);
   });
 })();
+/* =========================================================
+   MADERA AUTH — ONE FILE, DROP-IN FIX (Supabase)
+   Вставь ЭТО в самый низ src/main.js
+   ========================================================= */
+
+(function () {
+  // ---------- SAFE LOGGING ----------
+  const TAG = "[MADERA-AUTH]";
+  const log = (...a) => console.log(TAG, ...a);
+  const warn = (...a) => console.warn(TAG, ...a);
+  const err = (...a) => console.error(TAG, ...a);
+
+  // ---------- HELPERS ----------
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // аккуратно достаем текст из инпута
+  const val = (el) => (el && typeof el.value === "string" ? el.value.trim() : "");
+
+  // простая нормализация телефона
+  const normalizePhone = (p) => {
+    if (!p) return "";
+    let s = String(p).trim();
+    // оставим + и цифры
+    s = s.replace(/[^\d+]/g, "");
+    // если пользователь ввел 992... без плюса
+    if (s.startsWith("992") && !s.startsWith("+")) s = "+" + s;
+    return s;
+  };
+
+  const b64 = (s) => {
+    // btoa падает на unicode — подстрахуемся
+    try {
+      return btoa(s);
+    } catch {
+      return btoa(unescape(encodeURIComponent(s)));
+    }
+  };
+
+  const showToast = (message) => {
+    // максимально совместимый мини-тост без зависимостей
+    const id = "madera-auth-toast";
+    let box = document.getElementById(id);
+    if (!box) {
+      box = document.createElement("div");
+      box.id = id;
+      box.style.position = "fixed";
+      box.style.left = "50%";
+      box.style.bottom = "18px";
+      box.style.transform = "translateX(-50%)";
+      box.style.zIndex = "999999";
+      box.style.maxWidth = "92vw";
+      box.style.padding = "10px 14px";
+      box.style.borderRadius = "12px";
+      box.style.background = "rgba(0,0,0,0.85)";
+      box.style.color = "#fff";
+      box.style.fontSize = "14px";
+      box.style.lineHeight = "1.35";
+      box.style.boxShadow = "0 8px 30px rgba(0,0,0,0.35)";
+      box.style.opacity = "0";
+      box.style.transition = "opacity .2s ease";
+      document.body.appendChild(box);
+    }
+    box.textContent = message;
+    box.style.opacity = "1";
+    clearTimeout(box._t);
+    box._t = setTimeout(() => (box.style.opacity = "0"), 2600);
+  };
+
+  const setLoading = (btn, isLoading) => {
+    if (!btn) return;
+    if (isLoading) {
+      btn.dataset._oldText = btn.textContent;
+      btn.textContent = "Подождите...";
+      btn.disabled = true;
+      btn.style.opacity = "0.75";
+    } else {
+      btn.textContent = btn.dataset._oldText || btn.textContent;
+      btn.disabled = false;
+      btn.style.opacity = "";
+    }
+  };
+
+  // ---------- SUPABASE CLIENT LOADER ----------
+  async function getSupabase() {
+    // 1) если ты уже импортировал supabase в других местах — попробуем взять готовое
+    if (window.supabase && typeof window.supabase.from === "function") {
+      log("Using existing window.supabase client");
+      return window.supabase;
+    }
+
+    // 2) если установлен global createClient где-то (редко, но бывает)
+    if (window.createClient && typeof window.createClient === "function") {
+      const url = import.meta?.env?.VITE_SUPABASE_URL;
+      const key = import.meta?.env?.VITE_SUPABASE_ANON_KEY;
+      if (!url || !key) throw new Error("Нет VITE_SUPABASE_URL или VITE_SUPABASE_ANON_KEY");
+      const sb = window.createClient(url, key);
+      window.supabase = sb;
+      log("Created supabase via window.createClient");
+      return sb;
+    }
+
+    // 3) нормальный путь: динамически импортируем библиотеку
+    const url = import.meta?.env?.VITE_SUPABASE_URL;
+    const key = import.meta?.env?.VITE_SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error("ENV missing: VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY. Проверь Vercel Variables и Redeploy.");
+    }
+
+    // В Vite можно импортировать так:
+    const mod = await import("@supabase/supabase-js");
+    const sb = mod.createClient(url, key);
+    window.supabase = sb;
+    log("Supabase client initialized");
+    return sb;
+  }
+
+  // ---------- DOM FINDERS (под твой UI) ----------
+  function findProfileAuthUI() {
+    // Мы намеренно не привязываемся к конкретным id.
+    // Ищем по placeholder/label/name/type и близости.
+    const inputs = Array.from(document.querySelectorAll("input"));
+
+    // phone: placeholder содержит Телефон/WhatsApp или name="phone"
+    const phoneInput =
+      inputs.find((i) => /phone/i.test(i.name)) ||
+      inputs.find((i) => /телефон|whatsapp/i.test(i.placeholder || "")) ||
+      inputs.find((i) => i.type === "tel");
+
+    // name: placeholder содержит Имя или name="name"
+    const nameInput =
+      inputs.find((i) => /name/i.test(i.name)) ||
+      inputs.find((i) => /имя/i.test(i.placeholder || ""));
+
+    // password
+    const passInput =
+      inputs.find((i) => i.type === "password") ||
+      inputs.find((i) => /password/i.test(i.name));
+
+    // кнопки: ищем по тексту (Войти/Вход/Зарегистрироваться/Регистрация)
+    const buttons = Array.from(document.querySelectorAll("button, a"));
+
+    const loginBtn =
+      buttons.find((b) => /войти/i.test((b.textContent || "").trim())) ||
+      buttons.find((b) => /вход/i.test((b.textContent || "").trim()));
+
+    const registerBtn =
+      buttons.find((b) => /зарегистр/i.test((b.textContent || "").trim())) ||
+      buttons.find((b) => /регистрац/i.test((b.textContent || "").trim()));
+
+    return { phoneInput, nameInput, passInput, loginBtn, registerBtn };
+  }
+
+  // ---------- AUTH LOGIC ----------
+  async function registerUser({ phone, name, password }) {
+    const sb = await getSupabase();
+
+    const phoneN = normalizePhone(phone);
+    const nameN = (name || "").trim();
+    const passN = String(password || "");
+
+    if (!phoneN) throw new Error("Введите телефон (WhatsApp).");
+    if (!passN || passN.length < 4) throw new Error("Пароль должен быть минимум 4 символа.");
+
+    const password_hash = b64(passN);
+
+    // 1) Проверим, не существует ли уже пользователь
+    const { data: existing, error: selErr } = await sb
+      .from("app_users")
+      .select("id, phone")
+      .eq("phone", phoneN)
+      .limit(1);
+
+    if (selErr) throw selErr;
+    if (existing && existing.length) {
+      throw new Error("Аккаунт с этим телефоном уже существует. Нажмите «Войти».");
+    }
+
+    // 2) Вставим
+    const { data, error } = await sb
+      .from("app_users")
+      .insert([{ phone: phoneN, name: nameN || null, password_hash }])
+      .select("id, phone, name, created_at")
+      .single();
+
+    if (error) throw error;
+
+    // сохраним “сессию” локально (для удобства на этом браузере)
+    localStorage.setItem(
+      "madera_user",
+      JSON.stringify({ id: data.id, phone: data.phone, name: data.name, created_at: data.created_at })
+    );
+
+    return data;
+  }
+
+  async function loginUser({ phone, password }) {
+    const sb = await getSupabase();
+
+    const phoneN = normalizePhone(phone);
+    const passN = String(password || "");
+
+    if (!phoneN) throw new Error("Введите телефон (WhatsApp).");
+    if (!passN) throw new Error("Введите пароль.");
+
+    const password_hash = b64(passN);
+
+    const { data, error } = await sb
+      .from("app_users")
+      .select("id, phone, name, created_at, password_hash")
+      .eq("phone", phoneN)
+      .limit(1);
+
+    if (error) throw error;
+    if (!data || !data.length) throw new Error("Аккаунт не найден. Сначала зарегистрируйтесь.");
+
+    const user = data[0];
+    if (user.password_hash !== password_hash) {
+      throw new Error("Неверный пароль.");
+    }
+
+    localStorage.setItem(
+      "madera_user",
+      JSON.stringify({ id: user.id, phone: user.phone, name: user.name, created_at: user.created_at })
+    );
+
+    return user;
+  }
+
+  // ---------- AUTO BIND (главное) ----------
+  async function bindAuth() {
+    const ui = findProfileAuthUI();
+
+    log("UI found:", {
+      phone: !!ui.phoneInput,
+      name: !!ui.nameInput,
+      pass: !!ui.passInput,
+      loginBtn: !!ui.loginBtn,
+      registerBtn: !!ui.registerBtn,
+    });
+
+    // Если мы не на странице профиля/авторизации — молча выходим
+    if (!ui.phoneInput || !ui.passInput || (!ui.loginBtn && !ui.registerBtn)) {
+      return;
+    }
+
+    // Подготовим Supabase заранее, чтобы сразу поймать проблему env/ключей
+    try {
+      await getSupabase();
+      log("Supabase ready");
+    } catch (e) {
+      err("Supabase init error:", e);
+      showToast("Ошибка подключения (Supabase). Проверь переменные Vercel и перезапусти деплой.");
+      return;
+    }
+
+    // Вспомогательная функция: взять значения из формы
+    const readForm = () => ({
+      phone: val(ui.phoneInput),
+      name: ui.nameInput ? val(ui.nameInput) : "",
+      password: val(ui.passInput),
+    });
+
+    // Навешиваем обработчики (важно: через addEventListener, без onclick)
+    if (ui.registerBtn) {
+      ui.registerBtn.addEventListener("click", async (ev) => {
+        ev.preventDefault();
+        setLoading(ui.registerBtn, true);
+        try {
+          const form = readForm();
+          log("REGISTER attempt:", { phone: form.phone, name: form.name, password_len: (form.password || "").length });
+
+          const data = await registerUser(form);
+          log("REGISTER success:", data);
+
+          showToast("Аккаунт создан. Теперь вы вошли.");
+          // здесь можно вызвать твой рендер профиля/кабинета, если он есть
+          window.dispatchEvent(new CustomEvent("madera:auth", { detail: { type: "register", user: data } }));
+        } catch (e) {
+          err("REGISTER error:", e);
+          showToast(e?.message || "Ошибка регистрации");
+        } finally {
+          setLoading(ui.registerBtn, false);
+        }
+      });
+    }
+
+    if (ui.loginBtn) {
+      ui.loginBtn.addEventListener("click", async (ev) => {
+        ev.preventDefault();
+        setLoading(ui.loginBtn, true);
+        try {
+          const form = readForm();
+          log("LOGIN attempt:", { phone: form.phone, password_len: (form.password || "").length });
+
+          const data = await loginUser(form);
+          log("LOGIN success:", data);
+
+          showToast("Вход выполнен.");
+          window.dispatchEvent(new CustomEvent("madera:auth", { detail: { type: "login", user: data } }));
+        } catch (e) {
+          err("LOGIN error:", e);
+          showToast(e?.message || "Ошибка входа");
+        } finally {
+          setLoading(ui.loginBtn, false);
+        }
+      });
+    }
+
+    // Автозаполнение телефона из localStorage (если есть)
+    try {
+      const saved = JSON.parse(localStorage.getItem("madera_user") || "null");
+      if (saved?.phone && ui.phoneInput && !ui.phoneInput.value) {
+        ui.phoneInput.value = saved.phone;
+      }
+    } catch {}
+
+    log("AUTH bind complete");
+  }
+
+  // ---------- BOOT ----------
+  // Иногда SPA грузит экран позже, поэтому делаем несколько попыток
+  async function boot() {
+    for (let i = 0; i < 12; i++) {
+      try {
+        await bindAuth();
+      } catch (e) {
+        err("bindAuth fatal:", e);
+      }
+      // если привязалось — bindAuth просто вернётся, но повтор не мешает
+      await sleep(600);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
