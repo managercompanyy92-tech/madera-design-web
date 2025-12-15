@@ -5995,3 +5995,358 @@ setInterval(() => {
     boot();
   }
 })();
+/* ========================================================================
+   MADERA SUPER-AUTH ENGINE (DIAGNOSTIC + AUTO-RECOVER + DB-TRUTH LOGIN)
+   Paste to the VERY BOTTOM of src/main.js
+======================================================================== */
+
+(async function MADERA_MAGIC_AUTH_BOOTSTRAP() {
+  const STATE = {
+    startedAt: Date.now(),
+    supabase: null,
+    cfg: { url: "", key: "" },
+    env: {
+      viteUrl: (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || "",
+      viteKey: (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) || "",
+    },
+    lastError: null,
+    logs: [],
+    ready: false,
+  };
+
+  /* --------------------------
+     UI DEBUG PANEL (on-page)
+  -------------------------- */
+  const panel = document.createElement("div");
+  panel.style.cssText = `
+    position: fixed; z-index: 999999;
+    left: 12px; bottom: 12px;
+    width: min(560px, calc(100vw - 24px));
+    max-height: 44vh; overflow: auto;
+    background: rgba(10,10,10,0.88);
+    border: 1px solid rgba(255,170,60,0.55);
+    border-radius: 14px;
+    padding: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: #f3f3f3;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+  `;
+  panel.innerHTML = `
+    <div style="display:flex; gap:10px; align-items:center; justify-content:space-between;">
+      <div style="font-weight:800; letter-spacing:0.5px;">MADERA AUTH DEBUG</div>
+      <button data-close style="background:#ff9a2f;border:none;border-radius:10px;padding:6px 10px;font-weight:800;cursor:pointer;">X</button>
+    </div>
+
+    <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+      <button data-reload style="background:#2b2b2b;color:#fff;border:1px solid rgba(255,170,60,0.4);border-radius:10px;padding:10px;cursor:pointer;font-weight:800;">RETRY CONNECT</button>
+      <button data-config style="background:#2b2b2b;color:#fff;border:1px solid rgba(255,170,60,0.4);border-radius:10px;padding:10px;cursor:pointer;font-weight:800;">SHOW CONFIG</button>
+      <button data-test style="background:#ff9a2f;color:#1b1b1b;border:none;border-radius:10px;padding:10px;cursor:pointer;font-weight:900;">TEST INSERT</button>
+      <button data-testread style="background:#ff9a2f;color:#1b1b1b;border:none;border-radius:10px;padding:10px;cursor:pointer;font-weight:900;">TEST READ</button>
+    </div>
+
+    <div style="margin-top:10px; padding:10px; background:rgba(255,255,255,0.06); border-radius:12px; border:1px solid rgba(255,170,60,0.25);">
+      <div><b>Status:</b> <span data-status>booting…</span></div>
+      <div style="margin-top:6px;"><b>VITE URL present:</b> <span data-vu>?</span></div>
+      <div><b>VITE KEY present:</b> <span data-vk>?</span></div>
+      <div style="margin-top:6px;"><b>API config:</b> <span data-api>not checked</span></div>
+    </div>
+
+    <div style="margin-top:10px; font-weight:800;">Logs</div>
+    <pre data-logs style="white-space:pre-wrap; background:rgba(0,0,0,0.35); border:1px solid rgba(255,170,60,0.2); border-radius:12px; padding:10px; margin-top:6px;"></pre>
+  `;
+  document.body.appendChild(panel);
+
+  const $ = (sel) => panel.querySelector(sel);
+  const elStatus = $("[data-status]");
+  const elLogs = $("[data-logs]");
+  const elVu = $("[data-vu]");
+  const elVk = $("[data-vk]");
+  const elApi = $("[data-api]");
+
+  function log(...args) {
+    const line =
+      `[${new Date().toISOString().slice(11, 19)}] ` +
+      args.map((a) => (typeof a === "string" ? a : JSON.stringify(a))).join(" ");
+    STATE.logs.push(line);
+    if (STATE.logs.length > 200) STATE.logs.shift();
+    elLogs.textContent = STATE.logs.join("\n");
+    console.log("[MADERA-AUTH]", ...args);
+  }
+
+  function setStatus(s) {
+    elStatus.textContent = s;
+  }
+
+  function mask(str) {
+    if (!str) return "";
+    if (str.length <= 10) return "***";
+    return str.slice(0, 6) + "…" + str.slice(-4);
+  }
+
+  elVu.textContent = STATE.env.viteUrl ? "YES" : "NO";
+  elVk.textContent = STATE.env.viteKey ? "YES" : "NO";
+
+  panel.addEventListener("click", async (e) => {
+    const t = e.target;
+    if (t && t.dataset && t.dataset.close !== undefined) {
+      panel.remove();
+      return;
+    }
+    if (t && t.dataset && t.dataset.reload !== undefined) {
+      await initSupabase(true);
+      return;
+    }
+    if (t && t.dataset && t.dataset.config !== undefined) {
+      alert(
+        [
+          "VITE_SUPABASE_URL: " + (STATE.cfg.url ? STATE.cfg.url : "(empty)"),
+          "VITE_SUPABASE_ANON_KEY: " + (STATE.cfg.key ? mask(STATE.cfg.key) : "(empty)"),
+          "viteUrlPresent: " + Boolean(STATE.env.viteUrl),
+          "viteKeyPresent: " + Boolean(STATE.env.viteKey),
+          "ready: " + STATE.ready,
+        ].join("\n")
+      );
+      return;
+    }
+    if (t && t.dataset && t.dataset.test !== undefined) {
+      await testInsert();
+      return;
+    }
+    if (t && t.dataset && t.dataset.testread !== undefined) {
+      await testRead();
+      return;
+    }
+  });
+
+  /* --------------------------
+     LOAD CONFIG STRATEGY
+     1) try Vite env
+     2) if missing => try /api/madera-config
+  -------------------------- */
+  async function loadConfig(forceApi = false) {
+    const hasVite = STATE.env.viteUrl && STATE.env.viteKey;
+    if (hasVite && !forceApi) {
+      STATE.cfg.url = STATE.env.viteUrl;
+      STATE.cfg.key = STATE.env.viteKey;
+      elApi.textContent = "not needed";
+      log("Config from VITE env OK");
+      return true;
+    }
+
+    // fallback to API
+    try {
+      setStatus("loading config from /api/madera-config …");
+      const r = await fetch("/api/madera-config", { cache: "no-store" });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error("API config HTTP " + r.status);
+      elApi.textContent = j && j.ok ? "OK" : "FAIL";
+      if (j && j.supabaseUrl && j.supabaseAnonKey) {
+        STATE.cfg.url = j.supabaseUrl;
+        STATE.cfg.key = j.supabaseAnonKey;
+        log("Config from API OK", { ok: j.ok });
+        return true;
+      }
+      throw new Error("API config missing url/key");
+    } catch (err) {
+      STATE.lastError = err;
+      elApi.textContent = "ERROR";
+      log("Config from API FAILED", String(err && err.message ? err.message : err));
+      return false;
+    }
+  }
+
+  /* --------------------------
+     INIT SUPABASE (dynamic import)
+  -------------------------- */
+  async function initSupabase(force = false) {
+    STATE.ready = false;
+    setStatus("initializing…");
+    log("Init requested", { force });
+
+    const okCfg = await loadConfig(false);
+    if (!okCfg) {
+      setStatus("NO CONFIG (check Vercel env + redeploy)");
+      return false;
+    }
+
+    try {
+      setStatus("loading supabase-js…");
+      const mod = await import("@supabase/supabase-js");
+      const createClient = mod.createClient;
+
+      if (!createClient) throw new Error("createClient not found");
+
+      setStatus("creating client…");
+      STATE.supabase = createClient(STATE.cfg.url, STATE.cfg.key);
+
+      // quick ping: read 1 row (will error if table missing / no perms / bad URL)
+      setStatus("pinging database…");
+      const { error } = await STATE.supabase.from("app_users").select("id").limit(1);
+
+      if (error) {
+        // even if table empty, select should work; error means perms/url/key/table
+        throw new Error("DB ping error: " + error.message);
+      }
+
+      STATE.ready = true;
+      setStatus("READY ✅ (Supabase connected)");
+      log("Supabase connected OK");
+      window.maderaSupabase = STATE.supabase;
+      window.maderaSupabaseReady = true;
+
+      // expose strong auth API
+      attachAuthAPI();
+
+      return true;
+    } catch (err) {
+      STATE.lastError = err;
+      window.maderaSupabaseReady = false;
+      setStatus("FAILED ❌ (" + (err.message || "unknown") + ")");
+      log("Supabase init FAILED", String(err && err.message ? err.message : err));
+      return false;
+    }
+  }
+
+  /* --------------------------
+     AUTH API (DB truth only)
+  -------------------------- */
+  function attachAuthAPI() {
+    // hash helper (simple; for production лучше делать на сервере)
+    const hash = (plain) => btoa(unescape(encodeURIComponent(plain)));
+
+    window.maderaAuth = {
+      register: async ({ phone, name, password }) => {
+        if (!STATE.supabase) throw new Error("Supabase not ready");
+        if (!phone || !password) throw new Error("phone/password required");
+
+        const payload = {
+          phone: String(phone).trim(),
+          name: String(name || "").trim(),
+          password_hash: hash(String(password)),
+        };
+
+        // prevent duplicates (check existing)
+        const { data: exist, error: e1 } = await STATE.supabase
+          .from("app_users")
+          .select("id, phone")
+          .eq("phone", payload.phone)
+          .limit(1);
+
+        if (e1) throw new Error("check existing error: " + e1.message);
+        if (exist && exist.length) {
+          return { ok: false, code: "ALREADY_EXISTS", message: "Пользователь уже существует" };
+        }
+
+        const { error } = await STATE.supabase.from("app_users").insert([payload]);
+        if (error) throw new Error("insert error: " + error.message);
+
+        return { ok: true };
+      },
+
+      login: async ({ phone, password }) => {
+        if (!STATE.supabase) throw new Error("Supabase not ready");
+        const p = String(phone || "").trim();
+        const ph = hash(String(password || ""));
+
+        const { data, error } = await STATE.supabase
+          .from("app_users")
+          .select("id, phone, name, created_at")
+          .eq("phone", p)
+          .eq("password_hash", ph)
+          .limit(1);
+
+        if (error) throw new Error("login select error: " + error.message);
+        if (!data || !data.length) return { ok: false, message: "Неверный телефон или пароль" };
+
+        localStorage.setItem("madera_user", JSON.stringify(data[0]));
+        return { ok: true, user: data[0] };
+      },
+
+      logout: () => {
+        localStorage.removeItem("madera_user");
+      },
+
+      whoami: () => {
+        try {
+          return JSON.parse(localStorage.getItem("madera_user") || "null");
+        } catch {
+          return null;
+        }
+      },
+    };
+
+    log("Auth API attached: window.maderaAuth");
+  }
+
+  /* --------------------------
+     TEST TOOLS (for YOU)
+  -------------------------- */
+  async function testInsert() {
+    try {
+      if (!STATE.supabase) {
+        alert("Supabase not ready. Click RETRY CONNECT first.");
+        return;
+      }
+      const phone = "+992" + Math.floor(Math.random() * 900000000 + 100000000);
+      const name = "TestUser";
+      const password_hash = btoa("123456");
+
+      const { error } = await STATE.supabase.from("app_users").insert([
+        { phone, name, password_hash },
+      ]);
+
+      if (error) throw new Error(error.message);
+
+      alert("INSERT OK. phone=" + phone + "\nТеперь открой Supabase -> app_users и обнови Data.");
+      log("TEST INSERT OK", { phone });
+    } catch (e) {
+      alert("TEST INSERT FAILED: " + (e.message || e));
+      log("TEST INSERT FAILED", String(e.message || e));
+    }
+  }
+
+  async function testRead() {
+    try {
+      if (!STATE.supabase) {
+        alert("Supabase not ready. Click RETRY CONNECT first.");
+        return;
+      }
+      const { data, error } = await STATE.supabase
+        .from("app_users")
+        .select("id, phone, name, created_at")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (error) throw new Error(error.message);
+
+      alert("READ OK. Rows: " + (data ? data.length : 0));
+      log("TEST READ OK", data || []);
+    } catch (e) {
+      alert("TEST READ FAILED: " + (e.message || e));
+      log("TEST READ FAILED", String(e.message || e));
+    }
+  }
+
+  /* --------------------------
+     BOOT
+  -------------------------- */
+  log("Booting…");
+  await initSupabase(false);
+
+  // if failed, auto-retry 2 times with delay
+  if (!STATE.ready) {
+    for (let i = 1; i <= 2; i++) {
+      log("Auto-retry #" + i);
+      await new Promise((r) => setTimeout(r, 1500 * i));
+      await initSupabase(false);
+      if (STATE.ready) break;
+    }
+  }
+
+  if (!STATE.ready) {
+    setStatus("FAILED ❌. Fix env/deploy or API config.");
+    log("Final state: FAILED");
+  } else {
+    log("Final state: READY ✅");
+  }
+})();
