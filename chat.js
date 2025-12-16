@@ -2405,6 +2405,14 @@ JSON-блок ВСЕГДА:
 
     const bubble = document.createElement("div");
     bubble.classList.add("madera-chat__bubble");
+    if (role === "assistant" && typeof text === "string") {
+  text = text.replace(
+    /([^\n])\s*(\{[\s\S]*"lead_quality"[\s\S]*?\})$/m,
+    "$1\n\n$2"
+  );
+}
+
+bubble.textContent = text;
     bubble.textContent = text;
 
     wrapper.appendChild(bubble);
