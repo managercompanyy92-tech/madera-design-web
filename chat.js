@@ -2869,3 +2869,214 @@ JSON — это служебные данные для CRM.
 
   console.log("LeadCollector attached (V2).");
 })();
+/* ===========================
+   Madera Lead Collector (ALL-IN-ONE)
+   Решает шаг 1/2/3/4:
+   - скрывает LEAD JSON в UI
+   - отправляет лид в /api/lead
+   - убирает дубли
+   - логирует проверку
+   ВСТАВИТЬ В САМЫЙ НИЗ chat.js
+   =========================== */
+(function MaderaLeadCollectorAllInOne() {
+  if (window.__MADERA_LEAD_COLLECTOR_ALL_IN_ONE__) return;
+  window.__MADERA_LEAD_COLLECTOR_ALL_IN_ONE__ = true;
+
+  // ---- настройки ----
+  const ENDPOINT = "/api/lead";
+  const DEBUG = true;
+
+  // Защита от дублей
+  const sentHashes = new Set();
+
+  function log(...args) {
+    if (DEBUG) console.log("[MADERA_LEAD]", ...args);
+  }
+  function warn(...args) {
+    console.warn("[MADERA_LEAD]", ...args);
+  }
+  function err(...args) {
+    console.error("[MADERA_LEAD]", ...args);
+  }
+
+  // 1) Разделяем текст и JSON (JSON должен быть В КОНЦЕ ответа)
+  function splitLeadJsonFromText(text) {
+    if (!text || typeof text !== "string") return { cleanText: text, leadJson: null };
+
+    // Ищем JSON ближе к концу (самый частый кейс — JSON appended)
+    const start = text.lastIndexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start === -1 || end === -1 || end <= start) {
+      return { cleanText: text, leadJson: null };
+    }
+
+    const candidate = text.slice(start, end + 1).trim();
+    const before = text.slice(0, start).trim();
+
+    // Пробуем распарсить как JSON
+    try {
+      const obj = JSON.parse(candidate);
+
+      // Минимальная валидация (как у вас в extractLeadJson)
+      const hasServices = Array.isArray(obj.services) && obj.services.length > 0;
+      const hasObjectType = typeof obj.object_type === "string" && obj.object_type.length > 0;
+
+      if (!hasServices || !hasObjectType) {
+        return { cleanText: text, leadJson: null };
+      }
+
+      return { cleanText: before, leadJson: obj };
+    } catch {
+      return { cleanText: text, leadJson: null };
+    }
+  }
+
+  // 2) Отправка лида
+  async function sendLeadToApi(leadData) {
+    try {
+      const r = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(leadData),
+      });
+
+      let data = null;
+      try {
+        data = await r.json();
+      } catch {
+        data = { success: r.ok };
+      }
+
+      return data;
+    } catch (e) {
+      err("sendLeadToApi error:", e);
+      return { success: false, error: e?.message || "network error" };
+    }
+  }
+
+  // 3) Обработка ассистентского текста: вырезать JSON, отправить лид
+  async function handleAssistantText(originalText) {
+    const { cleanText, leadJson } = splitLeadJsonFromText(originalText);
+
+    if (!leadJson) return { cleanText, leadSent: false };
+
+    // защита от дублей
+    const hash = JSON.stringify(leadJson);
+    if (sentHashes.has(hash)) {
+      log("Duplicate lead ignored");
+      return { cleanText, leadSent: false };
+    }
+    sentHashes.add(hash);
+
+    // метаданные
+    leadJson._source = "ai_seller";
+    leadJson._ts = new Date().toISOString();
+
+    const apiRes = await sendLeadToApi(leadJson);
+    log("Lead sent to /api/lead:", apiRes);
+
+    return { cleanText, leadSent: true };
+  }
+
+  // 4) Прикрепление перехватчиков
+  function attach() {
+    const hasAppend = typeof window.appendMessage === "function";
+    const hasHistory = typeof window.addToHistory === "function";
+
+    if (!hasAppend && !hasHistory) {
+      return false;
+    }
+
+    // Перехват appendMessage — скрываем JSON в UI
+    if (hasAppend && !window.__MADERA_APPEND_WRAPPED__) {
+      window.__MADERA_APPEND_WRAPPED__ = true;
+
+      const originalAppend = window.appendMessage;
+
+      window.appendMessage = function (role, text, ...rest) {
+        try {
+          const roleStr = String(role || "").toLowerCase();
+          const isAssistant = roleStr.includes("assistant") || roleStr.includes("bot") || roleStr.includes("ai");
+
+          if (isAssistant && typeof text === "string") {
+            const { cleanText, leadJson } = splitLeadJsonFromText(text);
+
+            // 1) показываем только cleanText
+            const res = originalAppend.call(this, role, cleanText, ...rest);
+
+            // 2) отправляем лид асинхронно (не блокируем UI)
+            if (leadJson) {
+              handleAssistantText(text).catch((e) => err("handleAssistantText error:", e));
+            }
+
+            return res;
+          }
+
+          return originalAppend.call(this, role, text, ...rest);
+        } catch (e) {
+          err("appendMessage wrapper error:", e);
+          return originalAppend.call(this, role, text, ...rest);
+        }
+      };
+
+      log("appendMessage wrapped (JSON hidden in UI)");
+    }
+
+    // Перехват addToHistory — чтобы в историю не попадал JSON
+    if (hasHistory && !window.__MADERA_HISTORY_WRAPPED__) {
+      window.__MADERA_HISTORY_WRAPPED__ = true;
+
+      const originalHistory = window.addToHistory;
+
+      window.addToHistory = function (role, text, ...rest) {
+        try {
+          const roleStr = String(role || "").toLowerCase();
+          const isAssistant = roleStr.includes("assistant") || roleStr.includes("bot") || roleStr.includes("ai");
+
+          if (isAssistant && typeof text === "string") {
+            const { cleanText } = splitLeadJsonFromText(text);
+            return originalHistory.call(this, role, cleanText, ...rest);
+          }
+
+          return originalHistory.call(this, role, text, ...rest);
+        } catch (e) {
+          err("addToHistory wrapper error:", e);
+          return originalHistory.call(this, role, text, ...rest);
+        }
+      };
+
+      log("addToHistory wrapped (JSON removed from history)");
+    }
+
+    // Дополнительно: если есть processAiRequest — логируем факт (не обязательно)
+    if (typeof window.processAiRequest === "function") {
+      log("processAiRequest detected (OK)");
+    } else {
+      warn("processAiRequest not detected. Это не критично: мы перехватываем вывод через appendMessage/addToHistory.");
+    }
+
+    // Тест-подсказка
+    log("READY. Для проверки: напишите в чате 'Хочу дизайн квартиры 85 м²' и откройте DevTools → Network → POST /api/lead");
+    return true;
+  }
+
+  // Пытаемся прикрепиться сразу + повторяем несколько раз (если функции появятся позже)
+  const maxAttempts = 60; // ~30 секунд
+  let attempts = 0;
+
+  const timer = setInterval(() => {
+    attempts += 1;
+
+    const ok = attach();
+    if (ok) {
+      clearInterval(timer);
+      return;
+    }
+
+    if (attempts >= maxAttempts) {
+      clearInterval(timer);
+      warn("Не удалось прикрепить lead collector: window.appendMessage / window.addToHistory не найдены.");
+      warn("Если хотите — я дам 3 строки, которые надо добавить внутри chat.js, чтобы экспортировать функции в window.");
+    }
+  }, 500);
+})();
