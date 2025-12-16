@@ -3080,3 +3080,173 @@ JSON — это служебные данные для CRM.
     }
   }, 500);
 })();
+/* ==========================================================
+   LEAD JSON: скрыть JSON от пользователя + отправить в /api/lead
+   ВСТАВИТЬ В САМЫЙ НИЗ chat.js
+   ========================================================== */
+(function leadJsonHideAndSend() {
+  if (window.__LEAD_HIDE_SEND_INSTALLED__) return;
+  window.__LEAD_HIDE_SEND_INSTALLED__ = true;
+
+  // --- util: отправка лида ---
+  async function sendLeadToApi(leadData) {
+    try {
+      const r = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(leadData),
+      });
+      return await r.json();
+    } catch (e) {
+      console.error("sendLeadToApi error:", e);
+      return { success: false, error: e?.message || "network error" };
+    }
+  }
+
+  // --- util: вытащить JSON, если он в конце текста ---
+  function extractLeadJsonFromText(text) {
+    try {
+      if (!text || typeof text !== "string") return null;
+
+      // ищем последний JSON-объект в конце ответа
+      const start = text.lastIndexOf("{");
+      const end = text.lastIndexOf("}");
+      if (start === -1 || end === -1 || end <= start) return null;
+
+      const jsonStr = text.slice(start, end + 1).trim();
+      const obj = JSON.parse(jsonStr);
+
+      // минимальная проверка что это наш LEAD
+      const hasObjectType =
+        typeof obj.object_type === "string" && obj.object_type.trim().length > 0;
+      const hasServices =
+        Array.isArray(obj.services) && obj.services.length > 0;
+
+      if (!hasObjectType || !hasServices) return null;
+
+      return { obj, start, end };
+    } catch {
+      return null;
+    }
+  }
+
+  // --- util: удалить lead-json из текста (чтобы пользователь не видел) ---
+  function stripLeadJson(text) {
+    const found = extractLeadJsonFromText(text);
+    if (!found) return { cleanText: text, lead: null };
+
+    const { obj, start } = found;
+    const cleanText = text.slice(0, start).trim(); // всё до "{"
+    return { cleanText, lead: obj };
+  }
+
+  // --- защита от дублей ---
+  const sentHashes = new Set();
+  function hashLead(lead) {
+    try {
+      // нормализуем: без метаданных, чтобы не ломать хеш
+      const clone = JSON.parse(JSON.stringify(lead));
+      delete clone._ts;
+      delete clone._source;
+      return JSON.stringify(clone);
+    } catch {
+      return null;
+    }
+  }
+
+  // --- 1) Перехватываем appendMessage ---
+  // ВАЖНО: в вашем chat.js appendMessage объявлен внутри IIFE,
+  // но если вы ранее делали "export" в window, этот перехват сработает.
+  if (typeof window.appendMessage === "function") {
+    const originalAppendMessage = window.appendMessage;
+
+    window.appendMessage = function (role, text, ...rest) {
+      try {
+        const roleStr = String(role || "").toLowerCase();
+
+        // фильтруем только сообщения ассистента/бота
+        if (roleStr.includes("assistant") || roleStr.includes("bot") || roleStr.includes("ai")) {
+          const { cleanText, lead } = stripLeadJson(String(text ?? ""));
+
+          // если нашли лид — отправляем, но пользователю показываем cleanText
+          if (lead) {
+            (async () => {
+              try {
+                const h = hashLead(lead);
+                if (h && sentHashes.has(h)) return;
+                if (h) sentHashes.add(h);
+
+                lead._source = "ai_seller";
+                lead._ts = new Date().toISOString();
+
+                const res = await sendLeadToApi(lead);
+                console.log("Lead sent to /api/lead:", res);
+              } catch (e) {
+                console.error("Lead send error:", e);
+              }
+            })();
+          }
+
+          return originalAppendMessage.call(this, role, cleanText, ...rest);
+        }
+      } catch (e) {
+        console.error("appendMessage wrapper error:", e);
+      }
+
+      return originalAppendMessage.call(this, role, text, ...rest);
+    };
+
+    console.log("LeadJsonHide: appendMessage wrapped");
+  } else {
+    console.warn("LeadJsonHide: window.appendMessage не найден. Нужен export функций в window (скажу как).");
+  }
+
+  // --- 2) Дополнительно перехватываем addToHistory (если экспортирован) ---
+  if (typeof window.addToHistory === "function") {
+    const originalAddToHistory = window.addToHistory;
+
+    window.addToHistory = function (role, text, ...rest) {
+      try {
+        const roleStr = String(role || "").toLowerCase();
+        if (roleStr.includes("assistant") || roleStr.includes("bot") || roleStr.includes("ai")) {
+          const { cleanText } = stripLeadJson(String(text ?? ""));
+          return originalAddToHistory.call(this, role, cleanText, ...rest);
+        }
+      } catch (e) {
+        console.error("addToHistory wrapper error:", e);
+      }
+      return originalAddToHistory.call(this, role, text, ...rest);
+    };
+
+    console.log("LeadJsonHide: addToHistory wrapped");
+  }
+
+  // --- 3) На всякий случай: перехват processAiRequest (если экспортирован) ---
+  if (typeof window.processAiRequest === "function") {
+    const originalProcessAiRequest = window.processAiRequest;
+
+    window.processAiRequest = async function (text, ...rest) {
+      const result = await originalProcessAiRequest.call(this, text, ...rest);
+
+      // если вдруг processAiRequest вернул строку — тоже чистим/шлём
+      if (typeof result === "string") {
+        const { lead } = stripLeadJson(result);
+        if (lead) {
+          const h = hashLead(lead);
+          if (!h || !sentHashes.has(h)) {
+            if (h) sentHashes.add(h);
+            lead._source = "ai_seller";
+            lead._ts = new Date().toISOString();
+            sendLeadToApi(lead).then((res) => console.log("Lead sent:", res));
+          }
+        }
+      }
+
+      return result;
+    };
+
+    console.log("LeadJsonHide: processAiRequest wrapped");
+  }
+
+  console.log("LeadJsonHide installed успешно.");
+})();
