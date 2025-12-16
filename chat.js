@@ -3250,3 +3250,175 @@ JSON — это служебные данные для CRM.
 
   console.log("LeadJsonHide installed успешно.");
 })();
+/* ===========================
+   MADERA Lead Collector (v3)
+   ВСТАВИТЬ В САМЫЙ НИЗ chat.js
+   Требует, чтобы ранее были экспортированы:
+   window.appendMessage, window.addToHistory, window.processAiRequest
+   =========================== */
+
+(function maderaLeadCollectorV3() {
+  if (window.__MADERA_LEAD_COLLECTOR_V3__) return;
+  window.__MADERA_LEAD_COLLECTOR_V3__ = true;
+
+  // --- Настройки ---
+  const ENDPOINT = "/api/lead";
+  const DEDUPE_LIMIT = 200; // сколько последних лидов помним (защита от дублей)
+
+  // --- Память дублей ---
+  const sentSet = new Set();
+  const sentQueue = [];
+
+  function rememberHash(hash) {
+    if (sentSet.has(hash)) return false;
+    sentSet.add(hash);
+    sentQueue.push(hash);
+    if (sentQueue.length > DEDUPE_LIMIT) {
+      const oldest = sentQueue.shift();
+      sentSet.delete(oldest);
+    }
+    return true;
+  }
+
+  function safeJsonParse(str) {
+    try {
+      return JSON.parse(str);
+    } catch {
+      return null;
+    }
+  }
+
+  // 1) Достаём JSON строго из КОНЦА ответа:
+  // - берём последний "{" и последнюю "}" (JSON должен быть последним блоком)
+  // - всё что после "}" должно быть пусто (или пробелы/переносы)
+  function extractLeadJsonFromEnd(text) {
+    if (!text || typeof text !== "string") return null;
+
+    const trimmed = text.trim();
+    const lastOpen = trimmed.lastIndexOf("{");
+    const lastClose = trimmed.lastIndexOf("}");
+
+    if (lastOpen === -1 || lastClose === -1 || lastClose <= lastOpen) return null;
+
+    const candidate = trimmed.slice(lastOpen, lastClose + 1);
+    const tail = trimmed.slice(lastClose + 1).trim();
+
+    // Важно: после JSON не должно быть текста
+    if (tail.length > 0) return null;
+
+    const obj = safeJsonParse(candidate);
+    if (!obj || typeof obj !== "object") return null;
+
+    // Минимальная валидация лида
+    const hasObjectType = typeof obj.object_type === "string" && obj.object_type.trim().length > 0;
+    const hasServices = Array.isArray(obj.services) && obj.services.length > 0;
+
+    if (!hasObjectType || !hasServices) return null;
+
+    return obj;
+  }
+
+  // 2) Отправка лида
+  async function sendLead(lead) {
+    try {
+      const payload = {
+        ...lead,
+        _source: "ai_chat",
+        _ts: new Date().toISOString(),
+        _ua: navigator.userAgent || null,
+      };
+
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = { success: res.ok };
+      }
+
+      console.log("[LeadCollector] sent:", data);
+      return data;
+    } catch (e) {
+      console.error("[LeadCollector] send error:", e);
+      return { success: false, error: e?.message || "network error" };
+    }
+  }
+
+  // 3) Обработка текста ассистента
+  async function handleAssistantText(text) {
+    const lead = extractLeadJsonFromEnd(text);
+    if (!lead) return;
+
+    // дедуп (чтобы одно и то же не слалось 10 раз)
+    const hash = JSON.stringify(lead);
+    if (!rememberHash(hash)) return;
+
+    await sendLead(lead);
+  }
+
+  // 4) Перехватываем appendMessage / addToHistory
+  function wrapFunction(name) {
+    const fn = window[name];
+    if (typeof fn !== "function") {
+      console.warn(`[LeadCollector] window.${name} not found (skip)`);
+      return;
+    }
+
+    // защита от повторного оборачивания
+    if (fn.__MADERA_WRAPPED__) return;
+
+    const wrapped = function (...args) {
+      const result = fn.apply(this, args);
+
+      // appendMessage(role, text)
+      // addToHistory(role, text)
+      const role = (args[0] ?? "").toString().toLowerCase();
+      const text = args[1];
+
+      if (role.includes("assistant") || role.includes("bot") || role.includes("ai")) {
+        handleAssistantText(text);
+      }
+
+      return result;
+    };
+
+    wrapped.__MADERA_WRAPPED__ = true;
+    window[name] = wrapped;
+    console.log(`[LeadCollector] wrapped window.${name}`);
+  }
+
+  wrapFunction("appendMessage");
+  wrapFunction("addToHistory");
+
+  // Дополнительно: если кто-то напрямую вызывает processAiRequest и он что-то возвращает
+  if (typeof window.processAiRequest === "function" && !window.processAiRequest.__MADERA_WRAPPED__) {
+    const orig = window.processAiRequest;
+    const wrapped = async function (...args) {
+      const result = await orig.apply(this, args);
+
+      // если вдруг вернул строку — тоже обработаем
+      if (typeof result === "string") {
+        await handleAssistantText(result);
+      } else if (result && typeof result === "object") {
+        const t =
+          (typeof result.text === "string" && result.text) ||
+          (typeof result.reply === "string" && result.reply) ||
+          (typeof result.content === "string" && result.content) ||
+          null;
+        if (t) await handleAssistantText(t);
+      }
+
+      return result;
+    };
+    wrapped.__MADERA_WRAPPED__ = true;
+    window.processAiRequest = wrapped;
+    console.log("[LeadCollector] wrapped window.processAiRequest");
+  }
+
+  console.log("[LeadCollector] MADERA Lead Collector v3 attached.");
+})();
