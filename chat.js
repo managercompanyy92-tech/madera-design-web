@@ -3449,3 +3449,19 @@ JSON-блок ВСЕГДА:
 
   console.log("[LeadCollector] MADERA Lead Collector v3 attached.");
 })();
+// ================== LEAD JSON NORMALIZER ==================
+(function () {
+  const originalAppendMessage = window.appendMessage;
+
+  window.appendMessage = function (role, content) {
+    if (role === "assistant" && typeof content === "string") {
+      // Если JSON прилепился к тексту — переносим на новую строку
+      content = content.replace(
+        /([^\n])\s*(\{[\s\S]*"lead_quality"[\s\S]*?\})$/m,
+        "$1\n\n$2"
+      );
+    }
+
+    return originalAppendMessage(role, content);
+  };
+})();
