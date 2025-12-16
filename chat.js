@@ -2730,3 +2730,106 @@ AI должен:
 
   document.addEventListener("DOMContentLoaded", initChat);
 })();
+/* ===========================
+   AI-Продавец: отправка lead JSON в /api/lead
+   ВСТАВИТЬ В САМЫЙ НИЗ chat.js
+   =========================== */
+
+/** 3.1 — отправка лида на сервер */
+async function sendLeadToApi(leadData) {
+  try {
+    const r = await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(leadData),
+    });
+    return await r.json();
+  } catch (e) {
+    console.error("sendLeadToApi error:", e);
+    return { success: false, error: e?.message || "network error" };
+  }
+}
+
+/** 3.3 — вытаскиваем JSON из текста ответа ИИ */
+function extractLeadJson(text) {
+  try {
+    if (!text || typeof text !== "string") return null;
+
+    // Быстрый поиск JSON-объекта в ответе (между { ... })
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start === -1 || end === -1 || end <= start) return null;
+
+    const jsonStr = text.slice(start, end + 1).trim();
+    const obj = JSON.parse(jsonStr);
+
+    // Минимальная валидация "это точно лид"
+    const hasServices = Array.isArray(obj.services) && obj.services.length > 0;
+    const hasObjectType = typeof obj.object_type === "string" && obj.object_type.length > 0;
+
+    if (!hasServices || !hasObjectType) return null;
+
+    return obj;
+  } catch {
+    return null;
+  }
+}
+
+/** Вспомогательное: достать текст из результата processAiRequest */
+function pickAssistantTextFromResult(result) {
+  if (!result) return null;
+  if (typeof result === "string") return result;
+
+  // Если processAiRequest возвращает объект — пробуем популярные поля
+  if (typeof result === "object") {
+    if (typeof result.text === "string") return result.text;
+    if (typeof result.content === "string") return result.content;
+    if (typeof result.reply === "string") return result.reply;
+    if (typeof result.message === "string") return result.message;
+  }
+  return null;
+}
+
+/** 3.2 — обёртка над processAiRequest: после ответа ищем JSON и отправляем */
+(function attachLeadCollector() {
+  // защита от повторного оборачивания
+  if (window.__LEAD_COLLECTOR_ATTACHED__) return;
+  window.__LEAD_COLLECTOR_ATTACHED__ = true;
+
+  // processAiRequest должен существовать в твоём файле
+  if (typeof processAiRequest !== "function") {
+    console.warn("processAiRequest не найден. Вставь этот блок ниже места, где объявлен processAiRequest.");
+    return;
+  }
+
+  const originalProcessAiRequest = processAiRequest;
+
+  // заменяем функцию на "обёрнутую"
+  processAiRequest = async function (text) {
+    const result = await originalProcessAiRequest(text);
+
+    try {
+      // Пытаемся получить текст ответа ассистента из результата
+      const assistantText = pickAssistantTextFromResult(result);
+
+      // Если result не содержит текст — просто не отправляем (ничего не ломаем)
+      if (!assistantText) return result;
+
+      const leadData = extractLeadJson(assistantText);
+      if (leadData) {
+        // можно добавить метаданные
+        leadData._source = "ai_seller";
+        leadData._ts = new Date().toISOString();
+
+        const apiRes = await sendLeadToApi(leadData);
+        console.log("Lead sent to /api/lead:", apiRes);
+      }
+    } catch (e) {
+      console.error("Lead collector error:", e);
+    }
+
+    return result;
+  };
+
+  console.log("Lead collector attached: processAiRequest wrapped successfully.");
+})();
