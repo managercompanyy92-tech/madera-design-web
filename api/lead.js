@@ -1,13 +1,14 @@
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+  if (req.method !== "POST") {
+    return res.status(405).json({ success: false, error: "Method Not Allowed" });
+  }
+
+  try {
     const lead = req.body;
 
-    // здесь дальше:
-    // 1. сохранить
-    // 2. отправить в CRM
-    // 3. отправить в Google Sheets
-    // 4. передать следующему AI-агенту
-
-    res.status(200).json({ success: true });
+    // TODO: сохранить / отправить в CRM / Google Sheets и т.д.
+    return res.status(200).json({ success: true, received: lead });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: e?.message || "Server error" });
   }
 }
