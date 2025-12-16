@@ -2727,190 +2727,82 @@ AI должен:
       "Готова помочь. Напишите вопрос о дизайне мебели или интерьера."
     );
   }
-
+// --- EXPORT для внешних модулей (lead collector) ---
+  window.appendMessage = appendMessage;
+  window.addToHistory = addToHistory;
+  window.processAiRequest = processAiRequest;
   document.addEventListener("DOMContentLoaded", initChat);
-})();
-/* ===========================
-   AI-Продавец: отправка lead JSON в /api/lead
-   ВСТАВИТЬ В САМЫЙ НИЗ chat.js
+})();/* ===========================
+   Lead Collector (V2)
+   ВСТАВИТЬ В САМЫЙ НИЗ chat.js (ПОСЛЕ IIFE)
    =========================== */
-
-/** 3.1 — отправка лида на сервер */
-async function sendLeadToApi(leadData) {
-  try {
-    const r = await fetch("/api/lead", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(leadData),
-    });
-    return await r.json();
-  } catch (e) {
-    console.error("sendLeadToApi error:", e);
-    return { success: false, error: e?.message || "network error" };
-  }
-}
-
-/** 3.3 — вытаскиваем JSON из текста ответа ИИ */
-function extractLeadJson(text) {
-  try {
-    if (!text || typeof text !== "string") return null;
-
-    // Быстрый поиск JSON-объекта в ответе (между { ... })
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (start === -1 || end === -1 || end <= start) return null;
-
-    const jsonStr = text.slice(start, end + 1).trim();
-    const obj = JSON.parse(jsonStr);
-
-    // Минимальная валидация "это точно лид"
-    const hasServices = Array.isArray(obj.services) && obj.services.length > 0;
-    const hasObjectType = typeof obj.object_type === "string" && obj.object_type.length > 0;
-
-    if (!hasServices || !hasObjectType) return null;
-
-    return obj;
-  } catch {
-    return null;
-  }
-}
-
-/** Вспомогательное: достать текст из результата processAiRequest */
-function pickAssistantTextFromResult(result) {
-  if (!result) return null;
-  if (typeof result === "string") return result;
-
-  // Если processAiRequest возвращает объект — пробуем популярные поля
-  if (typeof result === "object") {
-    if (typeof result.text === "string") return result.text;
-    if (typeof result.content === "string") return result.content;
-    if (typeof result.reply === "string") return result.reply;
-    if (typeof result.message === "string") return result.message;
-  }
-  return null;
-}
-
-/** 3.2 — обёртка над processAiRequest: после ответа ищем JSON и отправляем */
-(function attachLeadCollector() {
-  // защита от повторного оборачивания
-  if (window.__LEAD_COLLECTOR_ATTACHED__) return;
-  window.__LEAD_COLLECTOR_ATTACHED__ = true;
-
-  // processAiRequest должен существовать в твоём файле
-  if (typeof processAiRequest !== "function") {
-    console.warn("processAiRequest не найден. Вставь этот блок ниже места, где объявлен processAiRequest.");
-    return;
-  }
-
-  const originalProcessAiRequest = processAiRequest;
-
-  // заменяем функцию на "обёрнутую"
-  processAiRequest = async function (text) {
-    const result = await originalProcessAiRequest(text);
-
-    try {
-      // Пытаемся получить текст ответа ассистента из результата
-      const assistantText = pickAssistantTextFromResult(result);
-
-      // Если result не содержит текст — просто не отправляем (ничего не ломаем)
-      if (!assistantText) return result;
-
-      const leadData = extractLeadJson(assistantText);
-      if (leadData) {
-        // можно добавить метаданные
-        leadData._source = "ai_seller";
-        leadData._ts = new Date().toISOString();
-
-        const apiRes = await sendLeadToApi(leadData);
-        console.log("Lead sent to /api/lead:", apiRes);
-      }
-    } catch (e) {
-      console.error("Lead collector error:", e);
-    }
-
-    return result;
-  };
-
-  console.log("Lead collector attached: processAiRequest wrapped successfully.");
-})();
-/* ===========================
-   AI-Продавец: сбор lead JSON и отправка в /api/lead
-   ВСТАВИТЬ В САМЫЙ НИЗ chat.js
-   Работает даже если processAiRequest ничего не возвращает
-   =========================== */
-
-async function sendLeadToApi(leadData) {
-  try {
-    const r = await fetch("/api/lead", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(leadData),
-    });
-    return await r.json();
-  } catch (e) {
-    console.error("sendLeadToApi error:", e);
-    return { success: false, error: e?.message || "network error" };
-  }
-}
-
-function extractLeadJson(text) {
-  try {
-    if (!text || typeof text !== "string") return null;
-
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (start === -1 || end === -1 || end <= start) return null;
-
-    const jsonStr = text.slice(start, end + 1).trim();
-    const obj = JSON.parse(jsonStr);
-
-    const hasServices = Array.isArray(obj.services) && obj.services.length > 0;
-    const hasObjectType = typeof obj.object_type === "string" && obj.object_type.length > 0;
-
-    if (!hasServices || !hasObjectType) return null;
-    return obj;
-  } catch {
-    return null;
-  }
-}
 
 (function leadCollectorAttach() {
   if (window.__LEAD_COLLECTOR_V2__) return;
   window.__LEAD_COLLECTOR_V2__ = true;
 
-  // Чтобы не слать один и тот же лид много раз
-  window.__LEAD_SENT_HASHES__ = new Set();
-
-  async function handleAssistantText(maybeText) {
+  async function sendLeadToApi(leadData) {
     try {
-      const leadData = extractLeadJson(maybeText);
-      if (!leadData) return;
-
-      // простая защита от дублей
-      const hash = JSON.stringify(leadData);
-      if (window.__LEAD_SENT_HASHES__.has(hash)) return;
-      window.__LEAD_SENT_HASHES__.add(hash);
-
-      // метаданные
-      leadData._source = "ai_seller";
-      leadData._ts = new Date().toISOString();
-
-      const apiRes = await sendLeadToApi(leadData);
-      console.log("Lead sent to /api/lead:", apiRes);
+      const r = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(leadData),
+      });
+      return await r.json();
     } catch (e) {
-      console.error("handleAssistantText error:", e);
+      console.error("sendLeadToApi error:", e);
+      return { success: false, error: e?.message || "network error" };
     }
   }
 
-  // 1) Перехват appendMessage(role, text)
-  if (typeof window.appendMessage === "function") {
-    const originalAppendMessage = window.appendMessage;
-    window.appendMessage = function(role, text, ...rest) {
-      const res = originalAppendMessage.call(this, role, text, ...rest);
+  function extractLeadJson(text) {
+    try {
+      if (!text || typeof text !== "string") return null;
 
-      // Важно: у тебя роли могут называться "assistant" или "bot" и т.д.
-      const roleStr = String(role || "").toLowerCase();
-      if (roleStr.includes("assistant") || roleStr.includes("bot") || roleStr.includes("ai")) {
+      const start = text.indexOf("{");
+      const end = text.lastIndexOf("}");
+      if (start === -1 || end === -1 || end <= start) return null;
+
+      const jsonStr = text.slice(start, end + 1).trim();
+      const obj = JSON.parse(jsonStr);
+
+      const hasServices = Array.isArray(obj.services) && obj.services.length > 0;
+      const hasObjectType =
+        typeof obj.object_type === "string" && obj.object_type.length > 0;
+
+      if (!hasServices || !hasObjectType) return null;
+      return obj;
+    } catch {
+      return null;
+    }
+  }
+
+  const sent = new Set();
+
+  async function handleAssistantText(text) {
+    const leadData = extractLeadJson(text);
+    if (!leadData) return;
+
+    const key = JSON.stringify(leadData);
+    if (sent.has(key)) return;
+    sent.add(key);
+
+    leadData._source = "ai_seller";
+    leadData._ts = new Date().toISOString();
+
+    const apiRes = await sendLeadToApi(leadData);
+    console.log("Lead sent:", apiRes);
+  }
+
+  // Перехват appendMessage
+  if (typeof window.appendMessage === "function") {
+    const original = window.appendMessage;
+    window.appendMessage = function (role, text, ...rest) {
+      const res = original.call(this, role, text, ...rest);
+
+      const r = String(role || "").toLowerCase();
+      // у вас ассистент приходит как "assistant"
+      if (r.includes("assistant") || r.includes("bot") || r.includes("ai")) {
         handleAssistantText(text);
       }
 
@@ -2918,17 +2810,17 @@ function extractLeadJson(text) {
     };
     console.log("LeadCollector: appendMessage wrapped");
   } else {
-    console.warn("LeadCollector: appendMessage не найден");
+    console.warn("LeadCollector: window.appendMessage not found");
   }
 
-  // 2) Перехват addToHistory(role, text)
+  // Перехват addToHistory
   if (typeof window.addToHistory === "function") {
-    const originalAddToHistory = window.addToHistory;
-    window.addToHistory = function(role, text, ...rest) {
-      const res = originalAddToHistory.call(this, role, text, ...rest);
+    const original = window.addToHistory;
+    window.addToHistory = function (role, text, ...rest) {
+      const res = original.call(this, role, text, ...rest);
 
-      const roleStr = String(role || "").toLowerCase();
-      if (roleStr.includes("assistant") || roleStr.includes("bot") || roleStr.includes("ai")) {
+      const r = String(role || "").toLowerCase();
+      if (r.includes("assistant") || r.includes("bot") || r.includes("ai")) {
         handleAssistantText(text);
       }
 
@@ -2936,33 +2828,8 @@ function extractLeadJson(text) {
     };
     console.log("LeadCollector: addToHistory wrapped");
   } else {
-    console.warn("LeadCollector: addToHistory не найден");
+    console.warn("LeadCollector: window.addToHistory not found");
   }
 
-  // 3) На всякий случай: оборачиваем processAiRequest, если существует
-  if (typeof window.processAiRequest === "function") {
-    const originalProcessAiRequest = window.processAiRequest;
-    window.processAiRequest = async function(text, ...rest) {
-      const result = await originalProcessAiRequest.call(this, text, ...rest);
-
-      // если вдруг возвращает строку — тоже обработаем
-      if (typeof result === "string") {
-        await handleAssistantText(result);
-      } else if (result && typeof result === "object") {
-        const candidate =
-          (typeof result.text === "string" && result.text) ||
-          (typeof result.content === "string" && result.content) ||
-          (typeof result.reply === "string" && result.reply) ||
-          null;
-        if (candidate) await handleAssistantText(candidate);
-      }
-
-      return result;
-    };
-    console.log("LeadCollector: processAiRequest wrapped");
-  } else {
-    console.warn("LeadCollector: processAiRequest не найден");
-  }
-
-  console.log("LeadCollector attached successfully (V2).");
+  console.log("LeadCollector attached (V2).");
 })();
