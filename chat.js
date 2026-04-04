@@ -2537,14 +2537,103 @@ AI должен:
   // ------------------ ГОЛОСОВОЙ ВВОД (ПОКА ДЕМО) -------------------
 
   function setupVoicePlaceholder() {
-    const voiceBtn = qs("[data-madera-chat-voice]");
-    if (!voiceBtn) return;
+  const voiceBtn = qs("[data-madera-chat-voice]");
+  const input = qs("[data-madera-chat-input]");
+  const form = qs("[data-madera-chat-form]");
+  const statusEl = qs("[data-madera-chat-status]");
 
-    voiceBtn.addEventListener("click", () => {
-      alert(
-        "Голосовой ввод пока в демо-режиме. Позже здесь появится полноценная запись и распознавание речи."
-      );
-    });
+  if (!voiceBtn || !input) return;
+
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    voiceBtn.style.display = "none";
+    return;
+  }
+
+  let recognition = null;
+  let isListening = false;
+
+  function setStatus(text) {
+    if (statusEl) statusEl.textContent = text;
+  }
+
+  function setListening(state) {
+    isListening = state;
+    voiceBtn.classList.toggle("is-listening", state);
+  }
+
+  function createRecognition() {
+    const rec = new SpeechRecognition();
+    rec.lang = "ru-RU";
+    rec.interimResults = true;
+
+    let finalText = "";
+
+    rec.onstart = () => {
+      setListening(true);
+      setStatus("Слушаю...");
+    };
+
+    rec.onresult = (event) => {
+      let interim = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const text = event.results[i][0].transcript;
+
+        if (event.results[i].isFinal) {
+          finalText += text;
+        } else {
+          interim += text;
+        }
+      }
+
+      input.value = (finalText + interim).trim();
+    };
+
+    rec.onerror = (e) => {
+      console.error(e);
+      setStatus("Ошибка голоса");
+      setListening(false);
+    };
+
+    rec.onend = () => {
+      setListening(false);
+
+      if (input.value.trim()) {
+        setStatus("Готово");
+
+        // авто отправка
+        if (form) {
+          form.dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+          );
+        }
+      } else {
+        setStatus("");
+      }
+
+      setTimeout(() => setStatus(""), 1000);
+    };
+
+    return rec;
+  }
+
+  voiceBtn.addEventListener("click", () => {
+    try {
+      if (isListening && recognition) {
+        recognition.stop();
+        return;
+      }
+
+      recognition = createRecognition();
+      recognition.start();
+    } catch (e) {
+      console.error(e);
+      setStatus("Не удалось запустить микрофон");
+    }
+  });
   }
 
   // ---------------- QUICK STYLE BUTTONS + SMART HINTS --------------
