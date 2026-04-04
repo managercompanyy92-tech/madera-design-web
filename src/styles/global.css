@@ -3129,3 +3129,15 @@ body {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+#madera-auth-panel,
+[data-auth-open],
+[data-auth-toggle],
+[data-auth-action],
+.auth-fab,
+.auth-trigger,
+.auth-button {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
