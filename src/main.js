@@ -4804,3 +4804,8 @@ fd.set("phone", phone);
     initMeasureForm();
   }
 })();
+document.querySelectorAll('button, div, a').forEach((el) => {
+  if (el.textContent && el.textContent.trim() === 'Auth') {
+    el.style.display = 'none';
+  }
+});
