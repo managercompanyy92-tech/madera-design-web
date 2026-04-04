@@ -3119,3 +3119,13 @@ body.madera-chat-open {
 body {
   padding-bottom: 96px; /* навигация + запас под аватарку */
 }
+#madera-auth-panel,
+[data-auth-open],
+[data-auth-toggle],
+.auth-button,
+.auth-trigger {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
