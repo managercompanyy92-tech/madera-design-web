@@ -70,6 +70,7 @@ async function apiRequest(path, method = "GET", body = null, token = null) {
 // ====== РЕНДЕР ПАНЕЛИ ======
 
 function createPanelRoot() {
+  return; // ❌ отключили полностью
   const root = document.createElement("div");
   root.id = "madera-auth-panel";
   root.style.position = "fixed";
