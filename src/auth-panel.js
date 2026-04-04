@@ -1,3 +1,7 @@
+// 🚫 ОТКЛЮЧАЕМ AUTH ПОЛНОСТЬЮ
+export function createAuthPanel() {
+  return;
+}
 // src/auth-panel.js
 // Панель регистрации/логина для backend https://madera-api.onrender.com
 
